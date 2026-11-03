@@ -11,7 +11,7 @@ Durée totale estimée pour les étapes 1 à 5 : environ 30 à 45 minutes. Tout 
 
 ## Étape 1 — Base de données (👤 5 min)
 1. Aller sur **neon.tech**, cliquer « Sign up », choisir **Continue with GitHub**.
-2. Créer un projet `baobab`, région **Europe (Frankfurt)**, la plus proche de Dakar parmi les offres gratuites.
+2. Créer un projet `baobab`, région **AWS Europe Central 1 (Frankfurt)**. Les fonctions Vercel sont réglées sur Frankfurt (`vercel.json` : `fra1`), au même endroit que la base, pour des pages rapides.
 3. Copier la **Connection string** (commence par `postgresql://…`). C'est votre `DATABASE_URL`.
    Prenez la connexion **directe** : désactivez l'option « Connection pooling » avant de copier, car les mises à jour de la base (migrations) en ont besoin. Gardez `?sslmode=require` à la fin.
 
