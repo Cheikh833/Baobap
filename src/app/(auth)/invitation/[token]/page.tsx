@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getSessionUser } from "@/server/auth/session";
-import { getInvitationByToken } from "@/server/services/members";
+import { getInvitationByToken, wasAcceptedBy } from "@/server/services/members";
 import { ButtonLink } from "@/components/ui/button";
 import { AcceptInvitationForm } from "./accept-form";
 
@@ -9,6 +10,9 @@ export const metadata = { title: "Invitation" };
 export default async function InvitationPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const inv = await getInvitationByToken(token);
+  const current = await getSessionUser();
+  // Invitation que cet utilisateur vient d'accepter : direction l'espace de travail.
+  if (!inv && current && (await wasAcceptedBy(token, current.email))) redirect("/dashboard");
   if (!inv) {
     return (
       <>
@@ -18,7 +22,7 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
       </>
     );
   }
-  const user = await getSessionUser();
+  const user = current;
   const next = `/invitation/${token}`;
   return (
     <>

@@ -89,6 +89,12 @@ export async function revokeInvitation(ctx: TenantContext, id: string) {
   });
 }
 
+/** Invitation déjà acceptée par cet email (pour rediriger proprement après acceptation). */
+export async function wasAcceptedBy(token: string, email: string) {
+  const inv = await db.invitation.findUnique({ where: { tokenHash: hashToken(token) }, select: { status: true, email: true } });
+  return inv?.status === "ACCEPTED" && inv.email === email.toLowerCase();
+}
+
 export async function getInvitationByToken(token: string) {
   const inv = await db.invitation.findUnique({
     where: { tokenHash: hashToken(token) },

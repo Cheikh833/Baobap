@@ -3,7 +3,7 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "./cn";
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <section className={cn("rounded-xl border border-line bg-white p-5 shadow-sm", className)}>{children}</section>;
+  return <section className={cn("min-w-0 rounded-xl border border-line bg-white p-5 shadow-sm", className)}>{children}</section>;
 }
 
 export function PageHeader({ title, description, actions, breadcrumb }: { title: string; description?: ReactNode; actions?: ReactNode; breadcrumb?: ReactNode }) {

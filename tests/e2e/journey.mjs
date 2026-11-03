@@ -158,7 +158,7 @@ try {
   await waitUrl(/\/invitation\//);
   await page.click("button:has-text(\"Accepter l'invitation\")");
   await waitUrl("**/dashboard");
-  check("Invité : rejoint l'organisation", await vis(page.getByText(`Organisation E2E ${stamp}`).first()));
+  check("Invité : rejoint l'organisation", await vis(page.locator("main").getByText(`Organisation E2E ${stamp}`)));
   await go(BASE + "/organization/members");
   check("Membre d'équipe : pas d'accès à la gestion des membres", await vis(page.getByText("Accès non autorisé")) || await hidden(page.getByText("Inviter un membre")));
   await go(BASE + "/projects/new");
@@ -171,12 +171,14 @@ try {
   await page.fill("[name=password]", "demo-baobab-2026");
   await page.click("button[type=submit]");
   await waitUrl("**/dashboard");
-  check("Démo bailleur : connexion", await vis(page.getByText("[DÉMO] ONG Fictive Sahel Avenir").first()));
+  check("Démo bailleur : connexion", await vis(page.locator("main").getByText("[DÉMO] ONG Fictive Sahel Avenir")));
   await go(BASE + "/organization/audit");
   check("Bailleur : journal d'audit interdit", await vis(page.getByText("Accès non autorisé")));
   await go(BASE + "/projects");
   check("Bailleur : ne voit pas les projets d'une autre organisation", await hidden(page.getByText("Projet E2E")));
+  const before404 = consoleErrors.length;
   const pr = await go(BASE + "/projects/cdoesnotexist000000000000");
+  consoleErrors.splice(before404); // le 404 attendu est journalisé par le navigateur
   check("Projet inexistant → 404", pr.status() === 404);
 
   // Responsive

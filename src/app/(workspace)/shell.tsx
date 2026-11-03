@@ -38,7 +38,7 @@ export function Shell({ user, org, orgs, allowed, children }: Props) {
           >
             {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
           </select>
-          <noscript><button className="text-xs text-brand">Changer</button></noscript>
+          <button className="sr-only focus:not-sr-only focus:text-xs focus:text-brand">Changer d&apos;organisation</button>
         </form>
         <p className="mt-1 text-xs text-slate-500">Rôle : {org.roleName}</p>
         <Link href="/onboarding" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"><Plus className="h-3 w-3" />Nouvelle organisation</Link>

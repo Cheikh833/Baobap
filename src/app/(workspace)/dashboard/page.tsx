@@ -97,15 +97,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             ) : (
               <ul className="mt-3 divide-y divide-line text-sm">
                 {d.projects.overdue.map((p) => (
-                  <li key={p.id} className="flex items-center justify-between gap-3 py-2">
-                    <Link className="truncate font-medium hover:underline" href={`/projects/${p.id}`}>{p.code} · {p.name}</Link>
-                    <span className="shrink-0 text-xs font-medium text-danger">En retard depuis le {formatDate(p.endDate)}</span>
+                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 py-2">
+                    <Link className="min-w-0 break-words font-medium hover:underline" href={`/projects/${p.id}`}>{p.code} · {p.name}</Link>
+                    <span className="text-xs font-medium text-danger">En retard depuis le {formatDate(p.endDate)}</span>
                   </li>
                 ))}
                 {d.projects.upcoming.map((p) => (
-                  <li key={p.id} className="flex items-center justify-between gap-3 py-2">
-                    <Link className="truncate font-medium hover:underline" href={`/projects/${p.id}`}>{p.code} · {p.name}</Link>
-                    <span className="flex shrink-0 items-center gap-1 text-xs text-amber-700"><CalendarClock className="h-3.5 w-3.5" aria-hidden />Fin le {formatDate(p.endDate)}</span>
+                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 py-2">
+                    <Link className="min-w-0 break-words font-medium hover:underline" href={`/projects/${p.id}`}>{p.code} · {p.name}</Link>
+                    <span className="flex items-center gap-1 text-xs text-amber-700"><CalendarClock className="h-3.5 w-3.5" aria-hidden />Fin le {formatDate(p.endDate)}</span>
                   </li>
                 ))}
               </ul>

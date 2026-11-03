@@ -26,7 +26,7 @@ describe("authentification", () => {
     await registerUser({ name: "B", email: "b@test.sn", password: "motdepasse123" });
     for (let i = 0; i < 8; i++) await authenticate({ email: "b@test.sn", password: "x" }, "rl").catch(() => {});
     await expectCode(authenticate({ email: "b@test.sn", password: "motdepasse123" }, "rl"), "RATE_LIMITED");
-  });
+  }, 30_000);
   it("ne stocke jamais le mot de passe en clair", async () => {
     const u = await registerUser({ name: "C", email: "c@test.sn", password: "motdepasse123" });
     expect(u.passwordHash).not.toContain("motdepasse123");
@@ -111,5 +111,5 @@ describe("limitation des tentatives", () => {
     await registerUser({ name: "D", email: "d@test.sn", password: "motdepasse123" });
     for (let i = 0; i < 12; i++) await authenticate({ email: "d@test.sn", password: "motdepasse123" }, "ok-client");
     expect((await authenticate({ email: "d@test.sn", password: "motdepasse123" }, "ok-client")).email).toBe("d@test.sn");
-  });
+  }, 30_000); // 13 vérifications bcrypt (coût 12)
 });
