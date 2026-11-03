@@ -8,6 +8,7 @@ import { changeMemberRole, inviteMember, revokeInvitation, setMemberStatus, setM
 import { createRole, deleteRole, updateRole } from "@/server/services/roles";
 import { requestPlan } from "@/server/services/billing";
 import { startOnlinePayment } from "@/server/services/payments";
+import { declareMobilePayment } from "@/server/services/mobile-payments";
 import { baseUrl } from "@/server/base-url";
 import { navigateTo } from "@/server/action";
 import { layout, sendMail } from "@/server/mail/mailer";
@@ -90,4 +91,10 @@ export async function startPaymentAction(_: ActionState, fd: FormData) {
     const { paymentUrl } = await startOnlinePayment(ctx, input(fd), { baseUrl: await baseUrl(), lang: locale === "en" ? "en" : "fr" });
     return navigateTo(paymentUrl);
   });
+}
+
+export async function declareMobilePaymentAction(_: ActionState, fd: FormData) {
+  const ctx = await requireTenant();
+  const { m } = await getMessages();
+  return runAction(() => declareMobilePayment(ctx, input(fd)).then(() => {}), m.billing.mobileSent);
 }

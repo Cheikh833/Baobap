@@ -15,11 +15,12 @@ type Props = {
   org: { id: string; name: string; roleName: string };
   orgs: { id: string; name: string }[];
   allowed: string[];
+  platformAdmin?: boolean;
   subscription: { phase: "trial" | "active" | "grace" | "expired"; daysLeft: number | null; canManage: boolean };
   children: React.ReactNode;
 };
 
-export function Shell({ user, org, orgs, allowed, subscription, children }: Props) {
+export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, children }: Props) {
   const { m } = useI18n();
   const N = m.nav;
   const [open, setOpen] = useState(false);
@@ -89,6 +90,7 @@ export function Shell({ user, org, orgs, allowed, subscription, children }: Prop
         })}
       </nav>
       <div className="border-t border-line p-4">
+        {platformAdmin && <Link href="/admin" className="mb-3 block text-xs font-semibold text-brand hover:underline">{m.admin.navLink}</Link>}
         <LanguageSwitcher className="mb-3" />
         <p className="truncate text-sm font-medium">{user.name}</p>
         <p className="truncate text-xs text-slate-500">{user.email}</p>

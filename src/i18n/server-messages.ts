@@ -68,6 +68,14 @@ const EXACT_EN: Record<string, string> = {
   "Vous ne pouvez pas modifier votre propre statut.": "You cannot change your own status.",
   "Lien de réinitialisation invalide ou expiré.": "Invalid or expired reset link.",
   "Vous devez accepter les conditions d'utilisation.": "You must accept the terms of use.",
+  "Le paiement par Mobile Money n'est pas configuré sur cette installation.": "Mobile Money payment is not configured on this installation.",
+  "Opérateur non pris en charge.": "Unsupported operator.",
+  "Un paiement déclaré est déjà en attente de vérification pour cette organisation.": "A declared payment is already awaiting verification for this organization.",
+  "L'identifiant de la transaction est obligatoire.": "The transaction ID is required.",
+  "Le numéro ayant effectué le paiement est obligatoire.": "The number that made the payment is required.",
+  "Ce paiement a déjà été traité.": "This payment has already been processed.",
+  "Paiement introuvable.": "Payment not found.",
+  "Demande introuvable ou déjà traitée.": "Request not found or already processed.",
   // Messages de succès
   "Invitation révoquée.": "Invitation revoked.",
   "Membre suspendu.": "Member suspended.",
@@ -86,6 +94,9 @@ const EXACT_EN: Record<string, string> = {
   "Structure modifiée.": "Unit updated.",
   "Structure supprimée.": "Unit deleted.",
   "Invitation créée.": "Invitation created.",
+  "Abonnement activé.": "Subscription activated.",
+  "Paiement rejeté.": "Payment rejected.",
+  "Paiement déclaré. Vous serez activé dès la confirmation de réception.": "Payment declared. You will be activated as soon as receipt is confirmed.",
   "Invitation créée et envoyée par email.": "Invitation created and sent by email.",
 };
 

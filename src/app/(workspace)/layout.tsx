@@ -5,6 +5,7 @@ import { can } from "@/server/permissions/check";
 import { Shell } from "./shell";
 import { getMessages } from "@/i18n/server";
 import { roleLabel } from "@/i18n/roles";
+import { isPlatformAdmin } from "@/server/services/mobile-payments";
 
 export default async function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
@@ -17,6 +18,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
       org={{ id: ctx.organizationId, name: ctx.organizationName, roleName: roleLabel({ key: ctx.roleKey, name: ctx.roleName }, m) }}
       orgs={memberships.map((m) => ({ id: m.organization.id, name: m.organization.name }))}
       allowed={ALL_PERMISSIONS.filter((p) => can(ctx, p))}
+      platformAdmin={isPlatformAdmin(user.email)}
       subscription={{ ...ctx.subscription, canManage: can({ ...ctx, readOnly: false }, "billing:manage") }}
     >
       {children}

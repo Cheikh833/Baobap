@@ -9,7 +9,9 @@ import { formatDate } from "@/lib/metrics";
 import { getMessages } from "@/i18n/server";
 import { fill } from "@/i18n/translate";
 import { Forbidden } from "../../forbidden";
-import { requestPlanAction, startPaymentAction } from "../actions";
+import { declareMobilePaymentAction, requestPlanAction, startPaymentAction } from "../actions";
+import { expectedAmount, mobilePaymentConfig, transferReference } from "@/server/services/mobile-payments";
+import { db } from "@/server/db";
 import { confirmPayment, getOwnPayment, listPayments, onlinePaymentEnabled } from "@/server/services/payments";
 
 export const metadata = { title: "Abonnement" };
@@ -27,6 +29,8 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   }
   const payments = await listPayments(ctx);
   const online = onlinePaymentEnabled();
+  const mobile = mobilePaymentConfig();
+  const orgCode = (await db.organization.findUniqueOrThrow({ where: { id: ctx.organizationId }, select: { code: true } })).code;
   const [{ org, plan, state, usage, requests }, { m, locale }] = await Promise.all([getBillingOverview({ ...ctx, readOnly: false }), getMessages()]);
   const B = m.billing;
   const manage = can({ ...ctx, readOnly: false }, "billing:manage");
@@ -87,6 +91,40 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
         </Card>
       )}
 
+      {mobile && manage && (
+        <Card className="border-brand/40">
+          <h2 className="font-semibold">{B.mobileTitle}</h2>
+          <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-slate-700">
+            {B.mobileSteps.map((st) => <li key={st}>{fill(st, { ref: transferReference(orgCode) })}</li>)}
+          </ol>
+          <div className="mt-4 grid gap-4 rounded-lg bg-canvas p-4 text-sm sm:grid-cols-3">
+            <div><p className="text-xs uppercase tracking-wide text-slate-500">{B.mobileNumber}</p><p className="text-lg font-semibold">{mobile.number}</p><p className="text-xs text-slate-500">{mobile.operators.join(" · ")}</p></div>
+            {mobile.name && <div><p className="text-xs uppercase tracking-wide text-slate-500">{B.mobileHolder}</p><p className="font-medium">{mobile.name}</p></div>}
+            <div>
+              <p className="text-xs uppercase tracking-wide text-slate-500">{B.mobileAmounts}</p>
+              <ul className="mt-1 space-y-0.5">
+                {PLANS.filter((p) => p.monthlyXof !== null).map((p) => (
+                  <li key={p.code}>{m.plans[p.code].name} : {new Intl.NumberFormat("fr-FR").format(expectedAmount(p.code, "MONTHLY", false))} {m.common.perMonth} · {new Intl.NumberFormat("fr-FR").format(expectedAmount(p.code, "YEARLY", false))} {m.common.perYear}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="mt-4">
+            <ActionForm action={declareMobilePaymentAction} submitLabel={B.mobileSubmit} resetOnSuccess>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <SelectField name="plan" label={B.plan} options={PLANS.filter((p) => p.monthlyXof !== null).map((p) => [p.code, m.plans[p.code].name] as const)} defaultValue={plan.code === "ENTREPRISE" ? "INSTITUTION" : plan.code} />
+                <SelectField name="cycle" label={B.cycle} options={[["YEARLY", m.pricing.yearly], ["MONTHLY", m.pricing.monthly]]} defaultValue="YEARLY" />
+                <SelectField name="operator" label={B.mobileOperator} options={mobile.operators.map((o) => [o, o] as const)} />
+                <TextField name="reference" label={B.mobileRef} required />
+                <TextField name="senderPhone" label={B.mobileSender} type="tel" required />
+              </div>
+              <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="solidarity" className="mt-0.5 h-4 w-4 rounded border-line text-brand" />{B.mobileSolidarity}</label>
+            </ActionForm>
+          </div>
+          {!online && <p className="mt-3 text-xs text-slate-500">{B.cardNote}</p>}
+        </Card>
+      )}
+
       <Card>
         <h2 className="font-semibold">{online ? B.manualTitle : B.requestTitle}</h2>
         {!online && <p className="mb-4 mt-1 text-sm text-slate-600">{B.requestText}</p>}
@@ -113,7 +151,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
               <tr key={p.id}>
                 <Td className="whitespace-nowrap">{formatDate(p.createdAt)}</Td>
                 <Td>{m.plans[p.plan].name} · {p.cycle === "YEARLY" ? m.pricing.yearly : m.pricing.monthly}</Td>
-                <Td className="whitespace-nowrap">{new Intl.NumberFormat("fr-FR").format(p.amountXof)} FCFA{p.paymentMethod && <span className="text-xs text-slate-500"> · {p.paymentMethod}</span>}</Td>
+                <Td className="whitespace-nowrap">{new Intl.NumberFormat("fr-FR").format(p.amountXof)} FCFA{p.paymentMethod && <span className="text-xs text-slate-500"> · {p.paymentMethod}{p.externalReference && ` · ${p.externalReference}`}</span>}</Td>
                 <Td><Badge tone={p.status === "ACCEPTED" ? "success" : p.status === "PENDING" ? "warning" : "danger"}>{B.paymentStatus[p.status]}</Badge></Td>
               </tr>
             ))}

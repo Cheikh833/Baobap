@@ -429,6 +429,9 @@ model Payment {
   status         PaymentStatus @default(PENDING)
   paymentUrl     String?
   paymentMethod  String? // ex. WAVECI, OMSN, cartes…
+  externalReference String? // paiement manuel : identifiant de la transaction Wave / Orange Money
+  senderPhone    String? // paiement manuel : numéro ayant envoyé l'argent
+  reviewedById   String? // administrateur plateforme ayant confirmé ou rejeté
   providerData   Json?
   requestedById  String
   createdAt      DateTime      @default(now())
@@ -438,6 +441,7 @@ model Payment {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, createdAt])
+  @@index([provider, status])
 }
 
 // Réinitialisation du mot de passe : jeton à usage unique, haché, valable 1 heure.
