@@ -126,8 +126,8 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
       )}
 
       <Card>
-        <h2 className="font-semibold">{online ? B.manualTitle : B.requestTitle}</h2>
-        {!online && <p className="mb-4 mt-1 text-sm text-slate-600">{B.requestText}</p>}
+        <h2 className="font-semibold">{online || mobile ? B.manualTitle : B.requestTitle}</h2>
+        {!online && !mobile ? <p className="mb-4 mt-1 text-sm text-slate-600">{B.requestText}</p> : <div className="mb-4" />}
         {manage ? (
           <ActionForm action={requestPlanAction} submitLabel={B.submit} resetOnSuccess>
             <div className="grid gap-4 sm:grid-cols-2">
