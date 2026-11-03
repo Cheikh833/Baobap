@@ -7,6 +7,7 @@ export const RESOURCES = [
   "members",
   "roles",
   "audit",
+  "billing",
   "portfolio",
   "program",
   "project",
@@ -25,6 +26,7 @@ export const RESOURCE_ACTIONS: Record<Resource, readonly Action[]> = {
   members: ["view", "manage"],
   roles: ["view", "manage"],
   audit: ["view"], // « export » sera ajouté avec la fonction d'export (phase 9)
+  billing: ["view", "manage"],
   portfolio: ["view", "create", "edit", "delete"],
   program: ["view", "create", "edit", "delete"],
   project: ["view", "create", "edit", "delete", "approve"],
@@ -38,7 +40,7 @@ export function isPermission(value: string): value is Permission {
   return (ALL_PERMISSIONS as string[]).includes(value);
 }
 
-const VIEW_ALL: Permission[] = RESOURCES.filter((r) => r !== "audit").map((r) => `${r}:view` as Permission);
+const VIEW_ALL: Permission[] = RESOURCES.filter((r) => r !== "audit" && r !== "billing").map((r) => `${r}:view` as Permission);
 
 type SystemRole = { key: string; name: string; description: string; permissions: Permission[] };
 
@@ -55,7 +57,7 @@ export const SYSTEM_ROLES: SystemRole[] = [
     key: "EXECUTIVE_DIRECTOR",
     name: "Directeur exécutif",
     description: "Vision globale, validation des projets, consultation de l'audit.",
-    permissions: [...VIEW_ALL, "audit:view", "project:approve", "portfolio:edit", "program:edit"],
+    permissions: [...VIEW_ALL, "audit:view", "billing:view", "project:approve", "portfolio:edit", "program:edit"],
   },
   {
     key: "PORTFOLIO_MANAGER",
@@ -95,6 +97,7 @@ export const PERMISSION_LABELS: Record<Resource, string> = {
   members: "Membres",
   roles: "Rôles",
   audit: "Journal d'audit",
+  billing: "Abonnement",
   portfolio: "Portefeuilles",
   program: "Programmes",
   project: "Projets",

@@ -6,6 +6,7 @@ import { generateToken, hashToken } from "@/server/auth/tokens";
 import { OWNER_ROLE_KEY } from "@/server/permissions/catalog";
 import { assertCan, type TenantContext } from "@/server/permissions/check";
 import { invitationSchema } from "@/lib/validation/schemas";
+import { assertMemberCapacity, FREE_ROLE_KEYS } from "./billing";
 
 const INVITE_DAYS = 7;
 
@@ -60,10 +61,12 @@ export async function inviteMember(ctx: TenantContext, input: z.input<typeof inv
 
   const token = generateToken();
   await db.$transaction(async (tx) => {
+    // Une nouvelle invitation remplace l'éventuelle invitation en attente pour le même email.
     await tx.invitation.updateMany({
       where: { organizationId: ctx.organizationId, email: data.email, status: "PENDING" },
       data: { status: "REVOKED" },
     });
+    await assertMemberCapacity(tx, ctx.organizationId, role.key);
     const inv = await tx.invitation.create({
       data: {
         organizationId: ctx.organizationId,
@@ -143,6 +146,8 @@ export async function changeMemberRole(ctx: TenantContext, membershipId: string,
     throw new AppError("CONFLICT", "L'organisation doit conserver au moins un propriétaire actif.");
   }
   await db.$transaction(async (tx) => {
+    // Passer d'un rôle gratuit (bailleur) à un rôle facturable consomme une place du plan.
+    if (FREE_ROLE_KEYS.includes(target.role.key) && !FREE_ROLE_KEYS.includes(role.key)) await assertMemberCapacity(tx, ctx.organizationId, role.key);
     await tx.membership.update({ where: { id: membershipId }, data: { roleId } });
     await audit(tx, { organizationId: ctx.organizationId, actorId: ctx.userId, action: "member.role_change", entityType: "Membership", entityId: membershipId, summary: `${target.user.name} : ${target.role.name} → ${role.name}`, changes: { role: { from: target.role.key, to: role.key } } });
   });
@@ -157,6 +162,7 @@ export async function setMemberStatus(ctx: TenantContext, membershipId: string, 
     if (status === "SUSPENDED" && (await countActiveOwners(ctx.organizationId)) <= 1) throw new AppError("CONFLICT", "L'organisation doit conserver au moins un propriétaire actif.");
   }
   await db.$transaction(async (tx) => {
+    if (status === "ACTIVE") await assertMemberCapacity(tx, ctx.organizationId, target.role.key);
     await tx.membership.update({ where: { id: membershipId }, data: { status } });
     await audit(tx, { organizationId: ctx.organizationId, actorId: ctx.userId, action: status === "SUSPENDED" ? "member.suspend" : "member.reactivate", entityType: "Membership", entityId: membershipId, summary: `${status === "SUSPENDED" ? "Suspension" : "Réactivation"} de ${target.user.name}` });
   });

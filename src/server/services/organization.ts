@@ -6,6 +6,7 @@ import { OWNER_ROLE_KEY, SYSTEM_ROLES } from "@/server/permissions/catalog";
 import { assertCan, type TenantContext } from "@/server/permissions/check";
 import { organizationCreateSchema, organizationProfileSchema } from "@/lib/validation/schemas";
 import { isUniqueViolation } from "./guards";
+import { TRIAL_DAYS, TRIAL_PLAN } from "@/lib/plans";
 import type { OrganizationType } from "@prisma/client";
 
 export async function createOrganization(userId: string, input: z.input<typeof organizationCreateSchema>) {
@@ -13,7 +14,15 @@ export async function createOrganization(userId: string, input: z.input<typeof o
   try {
     return await db.$transaction(async (tx) => {
       const org = await tx.organization.create({
-        data: { ...data, type: data.type as OrganizationType, createdById: userId },
+        data: {
+          ...data,
+          type: data.type as OrganizationType,
+          createdById: userId,
+          // Essai gratuit : toutes les fonctionnalités du plan Professionnel pendant 30 jours, sans paiement.
+          plan: TRIAL_PLAN,
+          subscriptionStatus: "TRIALING",
+          trialEndsAt: new Date(Date.now() + TRIAL_DAYS * 86_400_000),
+        },
       });
       await tx.role.createMany({
         data: SYSTEM_ROLES.map((r) => ({ ...r, organizationId: org.id, isSystem: true })),

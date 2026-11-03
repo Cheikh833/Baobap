@@ -14,6 +14,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
       org={{ id: ctx.organizationId, name: ctx.organizationName, roleName: ctx.roleName }}
       orgs={memberships.map((m) => ({ id: m.organization.id, name: m.organization.name }))}
       allowed={ALL_PERMISSIONS.filter((p) => can(ctx, p))}
+      subscription={{ ...ctx.subscription, canManage: can({ ...ctx, readOnly: false }, "billing:manage") }}
     >
       {children}
     </Shell>

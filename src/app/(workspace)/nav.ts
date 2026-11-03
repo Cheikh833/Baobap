@@ -3,40 +3,43 @@ import {
   BarChart3, Bell, BookOpen, Briefcase, Building2, FileText, FolderKanban, LayoutDashboard, Layers, Settings, ShieldAlert, Sparkles, Target, Wallet,
 } from "lucide-react";
 import type { Permission } from "@/server/permissions/catalog";
+import type { Messages } from "@/i18n/messages/fr";
+
+type NavKey = keyof Messages["nav"];
 
 // Navigation cible complète. Les modules non encore construits sont affichés comme « Bientôt »,
 // non cliquables : aucune route morte, aucune fonctionnalité présentée comme opérationnelle à tort.
-export type NavItem = { href: string; label: string; icon: LucideIcon; permission?: Permission; phase?: number };
+export type NavItem = { href: string; label: NavKey; icon: LucideIcon; permission?: Permission; phase?: number };
 
-export const NAV: { section: string; items: NavItem[] }[] = [
-  { section: "Pilotage", items: [{ href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard }] },
+export const NAV: { section: NavKey; items: NavItem[] }[] = [
+  { section: "pilotage", items: [{ href: "/dashboard", label: "dashboard", icon: LayoutDashboard }] },
   {
-    section: "Organisation",
+    section: "organizationSection",
     items: [
-      { href: "/organization", label: "Organisation", icon: Building2, permission: "organization:view" },
-      { href: "/strategy", label: "Stratégie", icon: Target, phase: 2 },
+      { href: "/organization", label: "organization", icon: Building2, permission: "organization:view" },
+      { href: "/strategy", label: "strategy", icon: Target, phase: 2 },
     ],
   },
   {
-    section: "Interventions",
+    section: "interventions",
     items: [
-      { href: "/portfolios", label: "Portefeuilles", icon: Briefcase, permission: "portfolio:view" },
-      { href: "/programs", label: "Programmes", icon: Layers, permission: "program:view" },
-      { href: "/projects", label: "Projets", icon: FolderKanban, permission: "project:view" },
+      { href: "/portfolios", label: "portfolios", icon: Briefcase, permission: "portfolio:view" },
+      { href: "/programs", label: "programs", icon: Layers, permission: "program:view" },
+      { href: "/projects", label: "projects", icon: FolderKanban, permission: "project:view" },
     ],
   },
   {
-    section: "Modules à venir",
+    section: "upcoming",
     items: [
-      { href: "/meal", label: "Suivi-évaluation / MEAL", icon: Target, phase: 4 },
-      { href: "/finance", label: "Finances", icon: Wallet, phase: 5 },
-      { href: "/risks", label: "Risques & conformité", icon: ShieldAlert, phase: 5 },
-      { href: "/knowledge", label: "Documents & connaissances", icon: BookOpen, phase: 6 },
-      { href: "/analytics", label: "Analyse de données", icon: BarChart3, phase: 7 },
-      { href: "/ai", label: "BAOBAB AI", icon: Sparkles, phase: 8 },
-      { href: "/studio", label: "BAOBAB Studio", icon: FileText, phase: 9 },
-      { href: "/notifications", label: "Notifications", icon: Bell, phase: 10 },
-      { href: "/administration", label: "Administration", icon: Settings, phase: 11 },
+      { href: "/meal", label: "meal", icon: Target, phase: 4 },
+      { href: "/finance", label: "finance", icon: Wallet, phase: 5 },
+      { href: "/risks", label: "risks", icon: ShieldAlert, phase: 5 },
+      { href: "/knowledge", label: "knowledge", icon: BookOpen, phase: 6 },
+      { href: "/analytics", label: "analytics", icon: BarChart3, phase: 7 },
+      { href: "/ai", label: "ai", icon: Sparkles, phase: 8 },
+      { href: "/studio", label: "studio", icon: FileText, phase: 9 },
+      { href: "/notifications", label: "notifications", icon: Bell, phase: 10 },
+      { href: "/administration", label: "administration", icon: Settings, phase: 11 },
     ],
   },
 ];

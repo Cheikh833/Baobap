@@ -28,6 +28,7 @@ async function main() {
     data: {
       name: "[DÉMO] ONG Fictive Sahel Avenir", shortName: "DÉMO", code: "DEMO", type: "NGO_NATIONAL", country: "Sénégal", city: "Thiès",
       sectors: ["Santé", "Éducation", "Agriculture"], defaultCurrency: "XOF",
+      plan: "PROFESSIONNEL", subscriptionStatus: "TRIALING", trialEndsAt: new Date(Date.now() + 30 * 86_400_000),
       description: "Organisation fictive créée pour la démonstration. Aucune de ces données n'est réelle.",
     },
   });

@@ -2,9 +2,11 @@ import { requireTenant } from "@/server/context";
 import { can } from "@/server/permissions/check";
 import { PageHeader } from "@/components/ui/display";
 import { TabNav } from "@/components/tabs";
+import { getMessages } from "@/i18n/server";
 
 export default async function OrganizationLayout({ children }: { children: React.ReactNode }) {
   const ctx = await requireTenant();
+  const { m } = await getMessages();
   const tabs = [
     { href: "/organization", label: "Vue d'ensemble", exact: true, ok: can(ctx, "organization:view") },
     { href: "/organization/profile", label: "Profil institutionnel", ok: can(ctx, "organization:view") },
@@ -12,6 +14,7 @@ export default async function OrganizationLayout({ children }: { children: React
     { href: "/organization/members", label: "Membres", ok: can(ctx, "members:view") },
     { href: "/organization/roles", label: "Rôles & permissions", ok: can(ctx, "roles:view") },
     { href: "/organization/audit", label: "Journal d'audit", ok: can(ctx, "audit:view") },
+    { href: "/organization/billing", label: m.billing.tab, ok: can(ctx, "billing:view") },
   ].filter((t) => t.ok);
   return (
     <>

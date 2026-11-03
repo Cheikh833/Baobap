@@ -6,6 +6,24 @@ import { assertCan, type TenantContext } from "@/server/permissions/check";
 import { PROJECT_LAST_EDIT_STEP, PROJECT_STEP_FIELDS, projectStepSchemas, type ProjectStep } from "@/lib/validation/schemas";
 import { lifecycleStatus } from "@/lib/validation/common";
 import { assertMember, assertPortfolio, assertProgram, isUniqueViolation } from "./guards";
+import { assertProjectCapacity } from "./billing";
+
+/**
+ * Deux projets d'un même programme (ou deux projets hors programme) ne peuvent pas porter le même nom :
+ * chaque projet doit être identifiable. Le même intitulé reste possible dans deux programmes différents,
+ * le code (unique dans l'organisation) les distingue alors.
+ */
+async function assertDistinctName(tx: Prisma.TransactionClient, ctx: TenantContext, name: string, programId: string | null, exceptId?: string) {
+  const clash = await tx.project.findFirst({
+    where: { organizationId: ctx.organizationId, deletedAt: null, programId, name: { equals: name, mode: "insensitive" }, ...(exceptId ? { id: { not: exceptId } } : {}) },
+    select: { code: true },
+  });
+  if (clash) {
+    throw new AppError("CONFLICT", programId
+      ? `Un projet portant ce nom existe déjà dans ce programme (${clash.code}). Donnez-lui un nom distinctif.`
+      : `Un projet hors programme portant ce nom existe déjà (${clash.code}). Donnez-lui un nom distinctif.`);
+  }
+}
 
 const live = (ctx: TenantContext) => ({ organizationId: ctx.organizationId, deletedAt: null });
 
@@ -55,8 +73,10 @@ export async function createProjectDraft(ctx: TenantContext, input: unknown) {
   const data = projectStepSchemas[1].parse(input);
   try {
     return await db.$transaction(async (tx) => {
+      await assertProjectCapacity(tx, ctx.organizationId);
       const h = await resolveHierarchy(tx, ctx, data);
       await assertMember(tx, ctx.organizationId, data.managerId, "Le chef de projet");
+      await assertDistinctName(tx, ctx, data.name, h.programId);
       const org = await tx.organization.findUniqueOrThrow({ where: { id: ctx.organizationId }, select: { defaultCurrency: true } });
       const p = await tx.project.create({
         data: { ...data, ...h, currency: org.defaultCurrency, status: "DRAFT", wizardStep: 2, organizationId: ctx.organizationId, createdById: ctx.userId, updatedById: ctx.userId },
@@ -83,8 +103,10 @@ export async function saveProjectStep(ctx: TenantContext, id: string, step: Proj
       const fields = PROJECT_STEP_FIELDS[step];
       const full: Record<string, unknown> = Object.fromEntries(fields.map((k) => [k, data[k] ?? null]));
       if (step === 1) {
-        Object.assign(full, await resolveHierarchy(tx, ctx, data as { portfolioId?: string; programId?: string }));
+        const h = await resolveHierarchy(tx, ctx, data as { portfolioId?: string; programId?: string });
+        Object.assign(full, h);
         await assertMember(tx, ctx.organizationId, data.managerId as string | undefined, "Le chef de projet");
+        await assertDistinctName(tx, ctx, data.name as string, h.programId, id);
       }
       const nextStep = Math.max(before.wizardStep, Math.min(step + 1, PROJECT_LAST_EDIT_STEP + 1));
       const p = await tx.project.update({ where: { id }, data: { ...full, wizardStep: nextStep, updatedById: ctx.userId } as Prisma.ProjectUncheckedUpdateInput });

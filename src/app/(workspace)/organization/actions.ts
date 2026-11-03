@@ -6,6 +6,8 @@ import { updateOrganizationProfile } from "@/server/services/organization";
 import { createUnit, deleteUnit, updateUnit } from "@/server/services/units";
 import { changeMemberRole, inviteMember, revokeInvitation, setMemberStatus, setMemberUnits } from "@/server/services/members";
 import { createRole, deleteRole, updateRole } from "@/server/services/roles";
+import { requestPlan } from "@/server/services/billing";
+import { getMessages } from "@/i18n/server";
 
 const input = (fd: FormData) => formToObject(fd) as never;
 
@@ -62,4 +64,10 @@ export async function updateRoleAction(id: string, _: ActionState, fd: FormData)
 export async function deleteRoleAction(id: string, _: ActionState) {
   const ctx = await requireTenant();
   return runAction(() => deleteRole(ctx, id), "Rôle supprimé.");
+}
+
+export async function requestPlanAction(_: ActionState, fd: FormData) {
+  const ctx = await requireTenant();
+  const { m } = await getMessages();
+  return runAction(() => requestPlan(ctx, input(fd)).then(() => {}), m.billing.sent);
 }

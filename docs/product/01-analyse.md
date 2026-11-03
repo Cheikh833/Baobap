@@ -76,11 +76,19 @@ Conséquence : l'IA et le Studio arrivent **après** les modules qui produisent 
 | Comportements du routeur client Next.js 15 | Moyen | Constatés en test navigateur et contournés (ADR-004) ; parcours E2E en non-régression |
 | Statistiques avancées en TypeScript | Moyen | Service Python dédié (statsmodels/scipy) derrière une API interne (phase 7) |
 
-## 5. Décisions qui nécessitent votre arbitrage
+## 5. Arbitrages
 
-1. **Modèle commercial** : gratuit / freemium / abonnement par organisation ? (impacte les CTA, la page Tarifs, les plans).
-2. **Projet multi-programmes** (I2) : autoriser ou non ?
-3. **Fournisseur email** (I12) et **hébergement** (Vercel + PostgreSQL managé, ou serveur en Afrique de l'Ouest pour la souveraineté des données).
-4. **Fournisseur d'IA** principal et politique de données (hébergement des embeddings, rétention).
-5. **Langues** : français seul, ou français + anglais (+ wolof, etc.) dès la phase 2 ?
-6. **Devise de reporting** et source des taux de change.
+### Tranchés par le porteur de projet (2026-11-03)
+| Sujet | Décision | Mise en œuvre |
+|---|---|---|
+| Modèle commercial | Essai gratuit, puis payant | Essai de 30 jours, 4 plans, lecture seule après l'essai : [tarification.md](tarification.md), ADR-005 |
+| Projet multi-programmes (I2) | Chaque projet appartient à un seul programme ; deux projets doivent être distinguables | Code unique dans l'organisation (déjà en place) + nom unique dans un même programme (nouveau, testé). Un même intitulé dans deux programmes = deux projets distincts aux codes différents |
+| IA | Utiliser l'IA de manière responsable et respectueuse | [charte-ia.md](charte-ia.md) (phase 8) |
+| Langues | Toutes les langues possibles, y compris les langues nationales | Multilingue en place (fr, en, wolof bêta) : [langues.md](langues.md), ADR-006 |
+
+### Restant à arbitrer
+1. **Agrégateur de paiement** (Wave/Orange Money via PayDunya, CinetPay… ; cartes via Stripe) et facturation/TVA.
+2. **Fournisseur email** (invitations, réinitialisation de mot de passe) et **hébergement** (Vercel + PostgreSQL managé, ou hébergement en Afrique de l'Ouest pour la souveraineté des données).
+3. **Fournisseur d'IA** principal (proposition : architecture multi-fournisseurs, en commençant par un seul fournisseur avec engagement de non-réutilisation des données).
+4. **Relecteurs natifs** pour valider le wolof, puis les autres langues nationales.
+5. **Validation des prix** auprès de 5 à 10 organisations pilotes pendant l'essai.

@@ -14,6 +14,9 @@ Convention : chaque document distingue **Décision confirmée** (implémentée o
 | 7 | Cartographie des parcours utilisateurs | [product/07-parcours-utilisateurs.md](product/07-parcours-utilisateurs.md) |
 | 8–10 | Plan par phases, backlog initial, critères d'acceptation | [product/08-plan-backlog-criteres.md](product/08-plan-backlog-criteres.md) |
 | — | Règles métier et formules de calcul | [product/business-rules.md](product/business-rules.md) |
+| — | Tarification (essai gratuit puis abonnement) | [product/tarification.md](product/tarification.md) |
+| — | Langues | [product/langues.md](product/langues.md) |
+| — | Charte d'IA responsable | [product/charte-ia.md](product/charte-ia.md) |
 | — | Design system | [design/design-system.md](design/design-system.md) |
 | — | Décisions d'architecture (ADR) | [decisions/](decisions/) |
 | 7 (livrable) | Rapport de validation | [validation/rapport-validation.md](validation/rapport-validation.md) |

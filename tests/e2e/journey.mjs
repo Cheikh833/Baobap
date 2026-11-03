@@ -12,7 +12,7 @@ const results = [];
 const check = (name, ok, detail = "") => { results.push({ name, ok, detail }); console.log(`${ok ? "✔" : "✘"} ${name}${detail ? " — " + detail : ""}`); };
 
 const browser = await chromium.launch();
-const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: "fr-FR" });
 const page = await ctx.newPage();
 const consoleErrors = [];
 page.on("console", (m) => m.type() === "error" && consoleErrors.push(m.text()));
@@ -38,6 +38,26 @@ try {
   await go(BASE + "/");
   check("Landing page", await vis(page.getByRole("heading", { name: /Gérez vos projets/ })));
   await shot("01-landing");
+
+  // Tarifs
+  await go("/pricing");
+  check("Page Tarifs : 4 plans", (await page.locator("main article").count()) === 4);
+  check("Tarifs : prix annuel affiché", await vis(page.getByText(/490\s000/)));
+  await go("/pricing?cycle=monthly");
+  check("Tarifs : prix mensuel affiché", await vis(page.getByText(/49\s000/)));
+  await shot("01b-tarifs");
+
+  // Changement de langue (formulaire natif)
+  await page.selectOption("#locale-select", "en");
+  await page.waitForURL("**/pricing");
+  await page.waitForLoadState("networkidle");
+  check("Langue : anglais", await vis(page.getByRole("heading", { name: /Pricing designed for impact/ })));
+  await page.selectOption("#locale-select", "wo");
+  await page.waitForLoadState("networkidle");
+  check("Langue : wolof (bêta, repli français)", await vis(page.getByRole("link", { name: "Njëg yi" })));
+  await page.selectOption("#locale-select", "fr");
+  await page.waitForLoadState("networkidle");
+  check("Langue : retour au français", await vis(page.getByRole("heading", { name: /Des tarifs pensés/ })));
 
   // Validation côté serveur : erreurs affichées
   await go(BASE + "/signup");
@@ -144,6 +164,12 @@ try {
   check("Journal d'audit", await vis(page.getByText(/Invitation de invite-/)));
   await go(BASE + "/organization/roles");
   check("Rôles & permissions", await vis(page.getByText("Chef de projet").first()));
+  await go(BASE + "/organization/billing");
+  check("Abonnement : essai gratuit affiché", await vis(page.getByText("Essai gratuit").first()));
+  await page.fill("[name=contactPhone]", "+221 77 000 00 00");
+  await page.click("button:has-text('Envoyer la demande')");
+  check("Abonnement : demande enregistrée", await vis(page.getByText("En attente de traitement")));
+  await shot("07-abonnement");
 
   // Déconnexion → invité accepte
   await go(BASE + "/dashboard");

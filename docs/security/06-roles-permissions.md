@@ -7,6 +7,7 @@
 - Rôles système créés automatiquement ; tous modifiables sauf **Propriétaire** (tous les droits). Rôles personnalisés possibles.
 - Garde-fous : au moins un propriétaire actif ; seul un propriétaire attribue ou retire le rôle Propriétaire ; on ne peut pas suspendre son propre compte ; un rôle utilisé ne peut pas être supprimé.
 - Activer un projet (`ACTIVE`) exige `project:approve` (séparation préparation / validation).
+- **Lecture seule d'abonnement** : après l'essai (ou un abonnement expiré), seules les permissions `*:view` restent effectives, quel que soit le rôle, propriétaire compris. Exception : la demande d'abonnement (`billing:manage`) reste possible.
 - Les permissions des modules futurs (MEAL, finances, risques, documents, IA, exports, partages) seront ajoutées au catalogue avec leur module ; les rôles MEAL, Finance, etc. existent déjà avec des droits de lecture.
 
 ## Matrice des rôles système (générée depuis le code)
@@ -25,6 +26,8 @@
 | Rôles — Consulter (`roles:view`) | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |  |
 | Rôles — Gérer (`roles:manage`) | ✔ | ✔ |  |  |  |  |  |  |  |  |  |
 | Journal d'audit — Consulter (`audit:view`) | ✔ | ✔ | ✔ |  |  |  |  |  |  |  |  |
+| Abonnement — Consulter (`billing:view`) | ✔ | ✔ | ✔ |  |  |  |  |  |  |  |  |
+| Abonnement — Gérer (`billing:manage`) | ✔ | ✔ |  |  |  |  |  |  |  |  |  |
 | Portefeuilles — Consulter (`portfolio:view`) | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Portefeuilles — Créer (`portfolio:create`) | ✔ | ✔ |  | ✔ |  |  |  |  |  |  |  |
 | Portefeuilles — Modifier (`portfolio:edit`) | ✔ | ✔ | ✔ | ✔ |  |  |  |  |  |  |  |

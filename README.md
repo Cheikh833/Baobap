@@ -5,7 +5,7 @@ _Planifier. Exécuter. Impacter._
 
 BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, agences de développement, bailleurs et cabinets : stratégie, projets, suivi-évaluation (MEAL), finances, risques, données, IA et reporting dans un même modèle de données.
 
-> **État actuel : Phase 0 (fondations) + Phase 1 (fondation organisationnelle) + début des phases 2–3 (portefeuilles, programmes, projets).**
+> **État actuel : Phase 0 (fondations) + Phase 1 (fondation organisationnelle) + début des phases 2–3 (portefeuilles, programmes, projets) + abonnement et multilingue.**
 > Les autres modules (MEAL, Finances, Risques, Documents, Analyse, IA, Studio…) sont **affichés comme « Bientôt » et non cliquables** : aucune fonctionnalité n'est présentée comme opérationnelle si elle ne l'est pas.
 
 ## Ce qui fonctionne aujourd'hui
@@ -21,7 +21,9 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 | Portefeuilles / Programmes | Création, fiche, modification, suppression logique, rattachements contrôlés |
 | Projets | Assistant de création en 8 étapes avec **brouillon** et reprise, fiche projet, santé du projet (règles documentées), cycle de vie (Brouillon → Préparation → Actif → Suspendu/Clôturé → Archivé), filtres |
 | Tableau de bord | Indicateurs calculés **uniquement** à partir des données enregistrées (budgets par devise, avancement temporel pondéré, alertes de retard/échéance) |
-| Site public | Landing page (sans faux clients, témoignages ni chiffres) |
+| Site public | Landing page (sans faux clients, témoignages ni chiffres), page Tarifs |
+| Abonnement | Essai gratuit de 30 jours (plan Professionnel), 4 plans en FCFA, limites appliquées (membres, projets), lecture seule après l'essai, demande d'activation + back-office |
+| Langues | Français, anglais, wolof (bêta, à valider) — sélecteur de langue, repli automatique sur le français |
 
 ## Démarrage rapide
 

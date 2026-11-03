@@ -62,6 +62,28 @@ enum OrganizationType {
   OTHER
 }
 
+// ───────────── Abonnement ─────────────
+// Catalogue des plans et limites : src/lib/plans.ts. Règles : docs/product/tarification.md.
+
+enum PlanCode {
+  ESSENTIEL
+  PROFESSIONNEL
+  INSTITUTION
+  ENTREPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING // essai gratuit en cours
+  ACTIVE // abonnement payé
+  PAST_DUE // paiement en retard (période de grâce)
+  CANCELED // résilié
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
 model Organization {
   id           String           @id @default(cuid())
   name         String
@@ -83,6 +105,11 @@ model Organization {
   values       String?
   size         String?
   defaultCurrency String        @default("XOF")
+  plan               PlanCode           @default(PROFESSIONNEL)
+  subscriptionStatus SubscriptionStatus @default(TRIALING)
+  billingCycle       BillingCycle       @default(MONTHLY)
+  trialEndsAt        DateTime?
+  currentPeriodEnd   DateTime? // fin de la période payée
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   createdById  String?
@@ -95,6 +122,7 @@ model Organization {
   portfolios  Portfolio[]
   programs    Program[]
   projects    Project[]
+  planRequests PlanRequest[]
 }
 
 enum UnitType {
@@ -349,4 +377,30 @@ model Project {
   @@index([organizationId, status])
   @@index([programId])
   @@index([portfolioId])
+}
+
+// Demande d'activation / changement de plan, traitée par l'équipe BAOBAB (scripts/billing.ts)
+// tant que le paiement en ligne n'est pas intégré.
+enum PlanRequestStatus {
+  PENDING
+  DONE
+  CANCELED
+}
+
+model PlanRequest {
+  id             String            @id @default(cuid())
+  organizationId String
+  plan           PlanCode
+  cycle          BillingCycle
+  solidarity     Boolean           @default(false) // tarif solidaire demandé (justificatif à fournir)
+  contactPhone   String?
+  message        String?
+  status         PlanRequestStatus @default(PENDING)
+  requestedById  String
+  createdAt      DateTime          @default(now())
+  processedAt    DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
 }
