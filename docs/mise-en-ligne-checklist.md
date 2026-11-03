@@ -36,7 +36,8 @@ Durée totale estimée pour les étapes 1 à 5 : environ 30 à 45 minutes. Tout 
 **Ne collez jamais de mot de passe ou de clé dans une conversation** : saisissez-les uniquement dans Vercel.
 
 ### En cas d'échec du build
-- Message « BAOBAB — réglage manquant : DATABASE_URL » (ou, avant cette vérification, `Environment variable not found: DATABASE_URL`) : la variable n'est pas enregistrée, ou pas cochée pour l'environnement construit. Ajoutez-la (Settings → Environment Variables), cochez les trois environnements, puis **Deployments → ⋯ → Redeploy**. Une variable ajoutée après un déploiement n'est prise en compte qu'au déploiement suivant.
+- Désactivez la **traduction automatique du navigateur** sur Vercel : elle peut modifier les noms de variables (`DATABASE_URL` affiché « URL_DATABASE »). Le nom doit être saisi exactement `DATABASE_URL`. Les noms créés par l'intégration Vercel ↔ Neon (`POSTGRES_URL`, `DATABASE_URL_UNPOOLED`…) sont aussi acceptés.
+- Message « BAOBAB — adresse de la base de données introuvable » (il liste les noms de variables proches trouvés) ou « réglage manquant : DATABASE_URL » (ou, avant cette vérification, `Environment variable not found: DATABASE_URL`) : la variable n'est pas enregistrée, ou pas cochée pour l'environnement construit. Ajoutez-la (Settings → Environment Variables), cochez les trois environnements, puis **Deployments → ⋯ → Redeploy**. Une variable ajoutée après un déploiement n'est prise en compte qu'au déploiement suivant.
 - Erreur de connexion pendant `prisma migrate deploy` : vérifiez que l'adresse Neon est la connexion directe et qu'elle se termine par `?sslmode=require`.
 
 ## Étape 3 — Premiers contrôles en ligne (👤 10 min)
