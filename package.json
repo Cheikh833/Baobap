@@ -16,7 +16,7 @@
     "db:studio": "prisma studio",
     "billing": "tsx scripts/billing.ts",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma migrate deploy && next build"
+    "vercel-build": "node scripts/check-env.mjs && prisma migrate deploy && next build"
   },
   "repository": {
     "type": "git",

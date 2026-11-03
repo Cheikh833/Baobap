@@ -13,6 +13,7 @@ Durée totale estimée pour les étapes 1 à 5 : environ 30 à 45 minutes. Tout 
 1. Aller sur **neon.tech**, cliquer « Sign up », choisir **Continue with GitHub**.
 2. Créer un projet `baobab`, région **Europe (Frankfurt)**, la plus proche de Dakar parmi les offres gratuites.
 3. Copier la **Connection string** (commence par `postgresql://…`). C'est votre `DATABASE_URL`.
+   Prenez la connexion **directe** : désactivez l'option « Connection pooling » avant de copier, car les mises à jour de la base (migrations) en ont besoin. Gardez `?sslmode=require` à la fin.
 
 ## Étape 2 — Hébergement (👤 10 min)
 1. Aller sur **vercel.com** → « Sign up » → **Continue with GitHub** (offre gratuite « Hobby »).
@@ -29,9 +30,14 @@ Durée totale estimée pour les étapes 1 à 5 : environ 30 à 45 minutes. Tout 
 | `PAYMENT_MOBILE_NAME` | le nom du titulaire, tel qu'il s'affiche chez l'opérateur |
 | `PAYMENT_MOBILE_OPERATORS` | `Wave,Orange Money` |
 
+   Pour chaque variable, cochez **Production, Preview et Development**.
 4. Cliquer **Deploy**. Vercel construit l'application et crée les tables. Vous obtenez une adresse `https://….vercel.app`.
 
 **Ne collez jamais de mot de passe ou de clé dans une conversation** : saisissez-les uniquement dans Vercel.
+
+### En cas d'échec du build
+- Message « BAOBAB — réglage manquant : DATABASE_URL » (ou, avant cette vérification, `Environment variable not found: DATABASE_URL`) : la variable n'est pas enregistrée, ou pas cochée pour l'environnement construit. Ajoutez-la (Settings → Environment Variables), cochez les trois environnements, puis **Deployments → ⋯ → Redeploy**. Une variable ajoutée après un déploiement n'est prise en compte qu'au déploiement suivant.
+- Erreur de connexion pendant `prisma migrate deploy` : vérifiez que l'adresse Neon est la connexion directe et qu'elle se termine par `?sslmode=require`.
 
 ## Étape 3 — Premiers contrôles en ligne (👤 10 min)
 - [ ] `https://<adresse>/api/health` affiche `{"status":"ok",…}`.
