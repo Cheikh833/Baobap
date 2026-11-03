@@ -1,0 +1,352 @@
+// BAOBAB — schéma relationnel (Phase 1 + tranche Portefeuille → Programme → Projet)
+// Le modèle cible complet est documenté dans docs/database/data-model.md.
+// Règles : chaque ressource métier appartient à une organisation (organizationId),
+// horodatage + auteur de création/modification, soft delete (deletedAt) sur les entités métier.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────── Identité ─────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  jobTitle     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+
+  sessions    Session[]
+  memberships Membership[]
+}
+
+model Session {
+  id          String   @id // hash SHA-256 du jeton (le jeton brut n'est jamais stocké)
+  userId      String
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  userAgent   String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ───────────── Organisation ─────────────
+
+enum OrganizationType {
+  NGO_NATIONAL
+  NGO_INTERNATIONAL
+  ASSOCIATION
+  FOUNDATION
+  COMMUNITY
+  PUBLIC_INSTITUTION
+  MINISTRY
+  LOCAL_GOVERNMENT
+  DEVELOPMENT_AGENCY
+  UN_AGENCY
+  INTERNATIONAL_ORGANIZATION
+  DONOR
+  CONSULTING
+  COMPANY
+  RESEARCH
+  OTHER
+}
+
+model Organization {
+  id           String           @id @default(cuid())
+  name         String
+  shortName    String?
+  code         String           @unique
+  type         OrganizationType @default(OTHER)
+  description  String?
+  country      String
+  region       String?
+  city         String?
+  address      String?
+  phone        String?
+  email        String?
+  website      String?
+  foundedYear  Int?
+  sectors      String[]
+  mission      String?
+  vision       String?
+  values       String?
+  size         String?
+  defaultCurrency String        @default("XOF")
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  createdById  String?
+
+  memberships Membership[]
+  roles       Role[]
+  units       OrganizationalUnit[]
+  invitations Invitation[]
+  auditLogs   AuditLog[]
+  portfolios  Portfolio[]
+  programs    Program[]
+  projects    Project[]
+}
+
+enum UnitType {
+  DIRECTORATE
+  DEPARTMENT
+  SERVICE
+  UNIT
+  BRANCH
+  REGIONAL_OFFICE
+  TEAM
+  PROJECT_CELL
+}
+
+model OrganizationalUnit {
+  id             String    @id @default(cuid())
+  organizationId String
+  parentId       String?
+  name           String
+  code           String?
+  type           UnitType
+  description    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  createdById    String?
+  updatedById    String?
+  deletedAt      DateTime?
+
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  parent       OrganizationalUnit?  @relation("UnitTree", fields: [parentId], references: [id])
+  children     OrganizationalUnit[] @relation("UnitTree")
+  members      UnitMembership[]
+
+  @@index([organizationId])
+}
+
+// Rôle configurable par organisation. Les rôles système sont créés à la création de l'organisation.
+model Role {
+  id             String   @id @default(cuid())
+  organizationId String
+  key            String // ex. ORG_OWNER, PROJECT_MANAGER
+  name           String
+  description    String?
+  permissions    String[] // codes "ressource:action" (src/server/permissions/catalog.ts)
+  isSystem       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships  Membership[]
+  invitations  Invitation[]
+
+  @@unique([organizationId, key])
+}
+
+enum MembershipStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model Membership {
+  id             String           @id @default(cuid())
+  userId         String
+  organizationId String
+  roleId         String
+  status         MembershipStatus @default(ACTIVE)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role         Role             @relation(fields: [roleId], references: [id])
+  units        UnitMembership[]
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model UnitMembership {
+  membershipId String
+  unitId       String
+  position     String?
+
+  membership Membership         @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  unit       OrganizationalUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@id([membershipId, unitId])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+model Invitation {
+  id             String           @id @default(cuid())
+  organizationId String
+  email          String
+  roleId         String
+  tokenHash      String           @unique
+  status         InvitationStatus @default(PENDING)
+  invitedById    String
+  expiresAt      DateTime
+  createdAt      DateTime         @default(now())
+  acceptedAt     DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role         Role         @relation(fields: [roleId], references: [id])
+
+  @@index([organizationId, email])
+}
+
+// ───────────── Audit ─────────────
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String?
+  actorId        String?
+  action         String // ex. project.create
+  entityType     String
+  entityId       String?
+  summary        String
+  changes        Json?
+  ip             String?
+  createdAt      DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([entityType, entityId])
+}
+
+// ───────────── Portefeuilles / Programmes / Projets ─────────────
+
+enum LifecycleStatus {
+  DRAFT
+  PREPARATION
+  ACTIVE
+  SUSPENDED
+  CLOSED
+  ARCHIVED
+}
+
+model Portfolio {
+  id             String          @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  description    String?
+  objective      String?
+  managerId      String? // User.id (membre de l'organisation)
+  startDate      DateTime?
+  endDate        DateTime?
+  plannedBudget  Decimal?        @db.Decimal(18, 2)
+  currency       String          @default("XOF")
+  status         LifecycleStatus @default(DRAFT)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  createdById    String?
+  updatedById    String?
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  programs     Program[]
+  projects     Project[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+}
+
+model Program {
+  id               String          @id @default(cuid())
+  organizationId   String
+  portfolioId      String?
+  name             String
+  code             String
+  managerId        String?
+  coordinatorId    String?
+  sectors          String[]
+  zones            String[]
+  context          String?
+  problemStatement String?
+  generalObjective String?
+  startDate        DateTime?
+  endDate          DateTime?
+  plannedBudget    Decimal?        @db.Decimal(18, 2)
+  currency         String          @default("XOF")
+  status           LifecycleStatus @default(DRAFT)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  createdById      String?
+  updatedById      String?
+  deletedAt        DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  portfolio    Portfolio?   @relation(fields: [portfolioId], references: [id])
+  projects     Project[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([portfolioId])
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Project {
+  id               String          @id @default(cuid())
+  organizationId   String
+  portfolioId      String?
+  programId        String?
+  name             String
+  code             String
+  shortDescription String?
+  type             String?
+  sectors          String[]
+  managerId        String? // chef de projet
+  priority         Priority        @default(MEDIUM)
+  sdgs             Int[] // ODD 1–17
+  context          String?
+  problemStatement String?
+  justification    String?
+  generalObjective String?
+  specificObjectives String[]
+  country          String?
+  region           String?
+  zones            String[]
+  directBeneficiaries   Int?
+  indirectBeneficiaries Int?
+  startDate        DateTime?
+  endDate          DateTime?
+  plannedBudget    Decimal?        @db.Decimal(18, 2)
+  currency         String          @default("XOF")
+  status           LifecycleStatus @default(DRAFT)
+  wizardStep       Int             @default(1) // reprise du brouillon
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  createdById      String?
+  updatedById      String?
+  deletedAt        DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  portfolio    Portfolio?   @relation(fields: [portfolioId], references: [id])
+  program      Program?     @relation(fields: [programId], references: [id])
+
+  @@unique([organizationId, code])
+  @@index([organizationId, status])
+  @@index([programId])
+  @@index([portfolioId])
+}

@@ -1,0 +1,47 @@
+import "server-only";
+import { cookies, headers } from "next/headers";
+import { db } from "@/server/db";
+import { generateToken, hashToken } from "./tokens";
+
+export const SESSION_COOKIE = "baobab_session";
+export const ORG_COOKIE = "baobab_org";
+const SESSION_DAYS = 14;
+
+const cookieBase = () => ({
+  httpOnly: true,
+  sameSite: "lax" as const,
+  secure: process.env.COOKIE_SECURE === "true",
+  path: "/",
+});
+
+export async function createSession(userId: string) {
+  const token = generateToken();
+  const expiresAt = new Date(Date.now() + SESSION_DAYS * 86_400_000);
+  const ua = (await headers()).get("user-agent")?.slice(0, 255);
+  await db.session.create({ data: { id: hashToken(token), userId, expiresAt, userAgent: ua } });
+  (await cookies()).set(SESSION_COOKIE, token, { ...cookieBase(), expires: expiresAt });
+}
+
+export async function getSessionUser() {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+  const session = await db.session.findUnique({ where: { id: hashToken(token) }, include: { user: true } });
+  if (!session || session.expiresAt < new Date()) return null;
+  return session.user;
+}
+
+export async function destroySession() {
+  const jar = await cookies();
+  const token = jar.get(SESSION_COOKIE)?.value;
+  if (token) await db.session.deleteMany({ where: { id: hashToken(token) } });
+  jar.delete(SESSION_COOKIE);
+  jar.delete(ORG_COOKIE);
+}
+
+export async function setActiveOrganization(organizationId: string) {
+  (await cookies()).set(ORG_COOKIE, organizationId, { ...cookieBase(), maxAge: 60 * 60 * 24 * 365 });
+}
+
+export async function getActiveOrganizationId() {
+  return (await cookies()).get(ORG_COOKIE)?.value ?? null;
+}
