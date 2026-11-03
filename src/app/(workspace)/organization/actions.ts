@@ -7,6 +7,9 @@ import { createUnit, deleteUnit, updateUnit } from "@/server/services/units";
 import { changeMemberRole, inviteMember, revokeInvitation, setMemberStatus, setMemberUnits } from "@/server/services/members";
 import { createRole, deleteRole, updateRole } from "@/server/services/roles";
 import { requestPlan } from "@/server/services/billing";
+import { startOnlinePayment } from "@/server/services/payments";
+import { baseUrl } from "@/server/base-url";
+import { navigateTo } from "@/server/action";
 import { getMessages } from "@/i18n/server";
 
 const input = (fd: FormData) => formToObject(fd) as never;
@@ -70,4 +73,13 @@ export async function requestPlanAction(_: ActionState, fd: FormData) {
   const ctx = await requireTenant();
   const { m } = await getMessages();
   return runAction(() => requestPlan(ctx, input(fd)).then(() => {}), m.billing.sent);
+}
+
+export async function startPaymentAction(_: ActionState, fd: FormData) {
+  const ctx = await requireTenant();
+  const { locale } = await getMessages();
+  return runAction(async () => {
+    const { paymentUrl } = await startOnlinePayment(ctx, input(fd), { baseUrl: await baseUrl(), lang: locale === "en" ? "en" : "fr" });
+    return navigateTo(paymentUrl);
+  });
 }

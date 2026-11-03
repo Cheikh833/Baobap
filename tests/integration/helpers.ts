@@ -5,7 +5,7 @@ import { loadTenantContext } from "@/server/tenant";
 
 export async function resetDb() {
   await db.$executeRawUnsafe(
-    `TRUNCATE "AuditLog","Invitation","UnitMembership","Membership","Role","OrganizationalUnit","Project","Program","Portfolio","Organization","Session","User" CASCADE`,
+    `TRUNCATE "Payment","PlanRequest","AuditLog","Invitation","UnitMembership","Membership","Role","OrganizationalUnit","Project","Program","Portfolio","Organization","Session","User" CASCADE`,
   );
 }
 

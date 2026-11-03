@@ -82,19 +82,27 @@ export async function requestPlan(ctx: TenantContext, input: unknown) {
   });
 }
 
-/** Opération plateforme (équipe BAOBAB) : active un abonnement après réception du paiement. */
-export async function activateSubscription(organizationId: string, plan: string, cycle: "MONTHLY" | "YEARLY", now = new Date()) {
+/**
+ * Active (ou prolonge) un abonnement dans une transaction existante.
+ * Renouvellement anticipé : la nouvelle période démarre à la fin de la période payée en cours.
+ */
+export async function activateIn(tx: Prisma.TransactionClient, organizationId: string, plan: string, cycle: "MONTHLY" | "YEARLY", now = new Date(), source = "manuel") {
   const p = getPlan(plan);
-  const end = new Date(now);
+  const current = await tx.organization.findUniqueOrThrow({ where: { id: organizationId }, select: { subscriptionStatus: true, currentPeriodEnd: true } });
+  const start = current.subscriptionStatus === "ACTIVE" && current.currentPeriodEnd && current.currentPeriodEnd > now ? new Date(current.currentPeriodEnd) : new Date(now);
+  const end = new Date(start);
   if (cycle === "YEARLY") end.setFullYear(end.getFullYear() + 1);
   else end.setMonth(end.getMonth() + 1);
-  return db.$transaction(async (tx) => {
-    const org = await tx.organization.update({
-      where: { id: organizationId },
-      data: { plan: p.code, billingCycle: cycle, subscriptionStatus: "ACTIVE", currentPeriodEnd: end },
-    });
-    await tx.planRequest.updateMany({ where: { organizationId, status: "PENDING" }, data: { status: "DONE", processedAt: now } });
-    await audit(tx, { organizationId, actorId: null, action: "billing.activate", entityType: "Organization", entityId: organizationId, summary: `Abonnement ${planName(p.code)} activé jusqu'au ${end.toISOString().slice(0, 10)}` });
-    return org;
+  const org = await tx.organization.update({
+    where: { id: organizationId },
+    data: { plan: p.code, billingCycle: cycle, subscriptionStatus: "ACTIVE", currentPeriodEnd: end },
   });
+  await tx.planRequest.updateMany({ where: { organizationId, status: "PENDING" }, data: { status: "DONE", processedAt: now } });
+  await audit(tx, { organizationId, actorId: null, action: "billing.activate", entityType: "Organization", entityId: organizationId, summary: `Abonnement ${planName(p.code)} actif jusqu'au ${end.toISOString().slice(0, 10)} (${source})` });
+  return org;
+}
+
+/** Opération plateforme (équipe BAOBAB) : active un abonnement après réception d'un paiement hors ligne. */
+export async function activateSubscription(organizationId: string, plan: string, cycle: "MONTHLY" | "YEARLY", now = new Date()) {
+  return db.$transaction((tx) => activateIn(tx, organizationId, plan, cycle, now));
 }

@@ -123,6 +123,7 @@ model Organization {
   programs    Program[]
   projects    Project[]
   planRequests PlanRequest[]
+  payments     Payment[]
 }
 
 enum UnitType {
@@ -403,4 +404,36 @@ model PlanRequest {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([status, createdAt])
+}
+
+// Paiement en ligne d'un abonnement (CinetPay : Wave, Orange Money, MTN, Moov, cartes).
+// Le statut n'est JAMAIS déduit de la notification seule : il est confirmé par l'API de vérification.
+enum PaymentStatus {
+  PENDING
+  ACCEPTED
+  REFUSED
+  CANCELED
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  organizationId String
+  provider       String        @default("cinetpay")
+  transactionId  String        @unique // identifiant transmis au prestataire
+  plan           PlanCode
+  cycle          BillingCycle
+  amountXof      Int
+  currency       String        @default("XOF")
+  status         PaymentStatus @default(PENDING)
+  paymentUrl     String?
+  paymentMethod  String? // ex. WAVECI, OMSN, cartes…
+  providerData   Json?
+  requestedById  String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  paidAt         DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
 }
