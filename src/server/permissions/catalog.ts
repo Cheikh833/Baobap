@@ -24,7 +24,7 @@ export const RESOURCE_ACTIONS: Record<Resource, readonly Action[]> = {
   units: ["view", "create", "edit", "delete"],
   members: ["view", "manage"],
   roles: ["view", "manage"],
-  audit: ["view", "export"],
+  audit: ["view"], // « export » sera ajouté avec la fonction d'export (phase 9)
   portfolio: ["view", "create", "edit", "delete"],
   program: ["view", "create", "edit", "delete"],
   project: ["view", "create", "edit", "delete", "approve"],
