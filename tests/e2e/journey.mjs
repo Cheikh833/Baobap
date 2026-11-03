@@ -39,6 +39,16 @@ try {
   check("Landing page", await vis(page.getByRole("heading", { name: /Gérez vos projets/ })));
   await shot("01-landing");
 
+  // Pages légales, santé, mot de passe oublié
+  await go("/legal/privacy");
+  check("Page légale : confidentialité", await vis(page.getByRole("heading", { name: "Politique de confidentialité" })));
+  const health = await page.request.get(BASE + "/api/health");
+  check("Supervision : /api/health répond 200", health.status() === 200);
+  await go("/forgot-password");
+  await page.fill("[name=email]", "quelquun@test.sn");
+  await page.click("button[type=submit]");
+  check("Mot de passe oublié : message honnête sans SMTP", await vis(page.getByText(/pas encore configuré/)));
+
   // Tarifs
   await go("/pricing");
   check("Page Tarifs : 4 plans", (await page.locator("main article").count()) === 4);
@@ -66,7 +76,9 @@ try {
   await page.fill("[name=password]", "court");
   await page.click("button[type=submit]");
   check("Erreur de validation affichée", await vis(page.getByText(/au moins 10 caractères/)));
+  check("Inscription : acceptation des conditions exigée", await vis(page.getByText(/accepter les conditions/).last()));
   await page.fill("[name=password]", "motdepasse123");
+  await page.check("[name=terms]");
   await page.click("button[type=submit]");
   await waitUrl("**/onboarding");
   check("Inscription → onboarding", true);
@@ -149,6 +161,14 @@ try {
   check("Tableau de bord : budget consolidé réel", /25\s000\s000/.test(dashText.replace(/ | /g, " ")));
   await shot("05-dashboard");
 
+  // Espace de travail en anglais puis retour au français
+  await page.selectOption("#locale-select", "en");
+  await page.waitForLoadState("networkidle");
+  check("Espace de travail en anglais", await vis(page.getByRole("heading", { name: "Dashboard" })));
+  await page.selectOption("#locale-select", "fr");
+  await page.waitForLoadState("networkidle");
+  check("Espace de travail : retour au français", await vis(page.getByRole("heading", { name: "Tableau de bord" })));
+
   // Organisation
   await go(BASE + "/organization/units");
   await page.fill("[name=name]", "Direction E2E");
@@ -180,6 +200,7 @@ try {
   await page.fill("[name=name]", "Invité E2E");
   await page.fill("[name=email]", `invite-${stamp}@test.sn`);
   await page.fill("[name=password]", "motdepasse123");
+  await page.check("[name=terms]");
   await page.click("button[type=submit]");
   await waitUrl(/\/invitation\//);
   await page.click("button:has-text(\"Accepter l'invitation\")");

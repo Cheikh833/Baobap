@@ -179,6 +179,8 @@ const fr = {
     createAccount: "Créer un compte",
     haveAccount: "Déjà inscrit ?",
     goLogin: "Se connecter",
+    acceptTerms: "J'accepte les conditions d'utilisation et la politique de confidentialité",
+    acceptTermsRequired: "Vous devez accepter les conditions d'utilisation.",
     forgotLink: "Mot de passe oublié ?",
     forgotTitle: "Mot de passe oublié",
     forgotText: "Indiquez l'email de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe.",
@@ -272,6 +274,13 @@ const fr = {
     ORG_OWNER: "Propriétaire de l'organisation", ORG_ADMIN: "Administrateur", EXECUTIVE_DIRECTOR: "Directeur exécutif",
     PORTFOLIO_MANAGER: "Responsable de portefeuille", PROGRAM_MANAGER: "Responsable de programme", PROJECT_MANAGER: "Chef de projet",
     MEAL_MANAGER: "Responsable MEAL", FINANCE_MANAGER: "Responsable financier", TEAM_MEMBER: "Membre d'équipe", VIEWER: "Lecteur", DONOR_VIEWER: "Bailleur (lecture)",
+  },
+  legal: {
+    terms: "Conditions d'utilisation",
+    privacy: "Confidentialité",
+    notice: "Mentions légales",
+    updated: "Dernière mise à jour :",
+    draftNotice: "Document en cours de finalisation : modèle à faire valider par un juriste ; les mentions entre crochets seront complétées avant le lancement commercial.",
   },
   ui: {
     save: "Enregistrer",

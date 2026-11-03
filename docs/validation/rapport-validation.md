@@ -8,13 +8,14 @@ Date : 2026-11-03 · Environnement : Node 22, PostgreSQL 16, build de production
 | TypeScript strict (`npm run typecheck`) | ✅ 0 erreur |
 | ESLint (`npm run lint`) | ✅ 0 avertissement |
 | Build de production | ✅ |
-| Tests unitaires + intégration (`npm test`, PostgreSQL réel) | ✅ 63/63 |
-| Parcours navigateur Playwright (`tests/e2e/journey.mjs`) | ✅ 53/53, deux exécutions consécutives, aucune nouvelle tentative, aucune erreur console |
+| Tests unitaires + intégration (`npm test`, PostgreSQL réel) | ✅ 77/77 |
+| Parcours navigateur Playwright (`tests/e2e/journey.mjs`) | ✅ 59/59, deux exécutions consécutives, aucune nouvelle tentative, aucune erreur console |
 
 ## Couverture des tests automatisés
 - **Unitaires** : formules (avancement temporel, durée, retard, budgets par devise, pondération), santé du projet, validation (mot de passe, codes, dates, champs facultatifs, montants « 1 250 000,50 »), redirections sûres, cohérence du catalogue de permissions.
 - **Intégration** : isolation multi-tenant (lecture, modification, suppression, références croisées, codes par organisation, membres suspendus), RBAC (lecteur, bailleur, chef de projet vs validation), authentification (doublons, mauvais mot de passe, email inconnu, limitation, succès non comptés, hachage), invitations (email ciblé, usage unique, expiration, propriétaire), garde-fous propriétaires, rôles personnalisés, audit, arbre des structures sans cycle, assistant projet (champs par étape, historique), hiérarchie (héritage, propagation), cycle de vie, suppression logique, tableau de bord.
 - **Abonnement et langues** (ajout) : état d'essai/grâce/expiration, lecture seule (consultation permise, écriture refusée même au propriétaire, demande d'abonnement possible), activation après paiement, limites Essentiel (5 membres hors bailleurs, 10 projets), nom de projet unique par programme, négociation de langue, complétude de l'anglais, repli du wolof sur le français ; navigateur : page Tarifs (annuel/mensuel), changement de langue fr → en → wo → fr, page Abonnement et demande d'activation.
+- **Paiement, comptes, langues** (ajout) : CinetPay simulé (initialisation, paiement accepté, appels concurrents sans double activation, montant falsifié refusé, en attente, refusé, renouvellement prolongeant la période, prestataire indisponible, signature HMAC), mot de passe oublié (lien unique, expiration, sessions fermées, pas d'énumération, limitation), traduction des messages serveur ; navigateur : conditions d'utilisation obligatoires, pages légales, `/api/health`, mot de passe oublié sans SMTP, espace de travail en anglais.
 - **Navigateur** : landing, erreurs de validation affichées, inscription → onboarding → tableau de bord, contrôle des dates, portefeuille, programme, assistant complet (retour arrière sans perte, refus de saut d'étape, synthèse), fiche et santé, activation, historique, tableau de bord alimenté, structures, invitation → déconnexion → inscription de l'invité → acceptation, restrictions d'un membre d'équipe, compte bailleur de démo (audit interdit, isolation), 404, absence de défilement horizontal sur 8 tailles d'écran, menu mobile, landing en mobile.
 
 ## Routes vérifiées dans le navigateur
@@ -33,9 +34,11 @@ Date : 2026-11-03 · Environnement : Node 22, PostgreSQL 16, build de production
 
 ## Limites restantes (connues)
 - Modules MEAL, Finances, Risques, Documents, Analyse, IA, Studio, Notifications, Workflows : **non implémentés** (affichés « Bientôt »).
-- Paiement en ligne non intégré : activation des abonnements par demande puis script back-office.
-- Traduction progressive : seuls le site public, l'authentification, la navigation, le tableau de bord et l'abonnement sont traduits ; wolof en bêta à faire valider ; messages de validation serveur en français.
-- Pas d'envoi d'emails : l'invitation est un lien à transmettre manuellement ; pas de réinitialisation de mot de passe.
+- CinetPay testé uniquement avec un prestataire simulé (API non joignable ici, pas de compte marchand) : premier paiement réel à faire après création du compte.
+- Emails non testés avec un vrai serveur SMTP (testés avec une boîte d'envoi simulée).
+- `Dockerfile` non testé (pas de démon Docker dans l'environnement) ; la CI GitHub n'a pas encore tourné au moment de la rédaction.
+- Wolof en bêta à faire valider ; autres langues nationales à produire avec des traducteurs natifs.
+- Pages légales : modèles à compléter et faire valider par un juriste.
 - Logo et documents institutionnels : attendent le stockage de fichiers (phase 6).
 - Limitation de connexion en mémoire (une seule instance).
 - Pas de RLS PostgreSQL, de CSP stricte ni de 2FA (phase 11).

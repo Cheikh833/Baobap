@@ -179,6 +179,8 @@ const en: DeepPartial<Messages> = {
     createAccount: "Create an account",
     haveAccount: "Already registered?",
     goLogin: "Sign in",
+    acceptTerms: "I accept the terms of use and the privacy policy",
+    acceptTermsRequired: "You must accept the terms of use.",
     forgotLink: "Forgot your password?",
     forgotTitle: "Forgot password",
     forgotText: "Enter your account email: you will receive a link to choose a new password.",
@@ -272,6 +274,13 @@ const en: DeepPartial<Messages> = {
     ORG_OWNER: "Organization owner", ORG_ADMIN: "Administrator", EXECUTIVE_DIRECTOR: "Executive director",
     PORTFOLIO_MANAGER: "Portfolio manager", PROGRAM_MANAGER: "Program manager", PROJECT_MANAGER: "Project manager",
     MEAL_MANAGER: "MEAL manager", FINANCE_MANAGER: "Finance manager", TEAM_MEMBER: "Team member", VIEWER: "Viewer", DONOR_VIEWER: "Donor (read-only)",
+  },
+  legal: {
+    terms: "Terms of use",
+    privacy: "Privacy",
+    notice: "Legal notice",
+    updated: "Last updated:",
+    draftNotice: "Document being finalized: template to be reviewed by a lawyer; bracketed details will be completed before the commercial launch.",
   },
   ui: {
     save: "Save",

@@ -23,7 +23,10 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 | Tableau de bord | Indicateurs calculés **uniquement** à partir des données enregistrées (budgets par devise, avancement temporel pondéré, alertes de retard/échéance) |
 | Site public | Landing page (sans faux clients, témoignages ni chiffres), page Tarifs |
 | Abonnement | Essai gratuit de 30 jours (plan Professionnel), 4 plans en FCFA, limites appliquées (membres, projets), lecture seule après l'essai, demande d'activation + back-office |
-| Langues | Français, anglais, wolof (bêta, à valider) — sélecteur de langue, repli automatique sur le français |
+| Paiement en ligne | CinetPay (Wave, Orange Money, MTN, Moov, cartes), vérification serveur, activation automatique ; désactivé tant que les clés ne sont pas configurées |
+| Langues | Application entièrement en français et en anglais, wolof (bêta, à valider) — sélecteur de langue, repli automatique sur le français |
+| Comptes | Mot de passe oublié (lien unique 1 h), invitations par email (SMTP), acceptation des conditions à l'inscription |
+| Lancement | Pages légales (modèles), SEO (aperçu de partage, sitemap, robots), supervision `/api/health`, CI GitHub, Docker |
 
 ## Démarrage rapide
 
@@ -57,9 +60,13 @@ Préparer la base de test : `createdb baobab_test` puis `DATABASE_URL=postgresql
 | Variable | Description |
 |---|---|
 | `DATABASE_URL` | Connexion PostgreSQL |
-| `SESSION_SECRET` | Secret aléatoire (32+ caractères) — réservé aux évolutions (signature) |
+| `APP_URL` | URL publique (liens d'emails, paiements, SEO) |
 | `COOKIE_SECURE` | `true` en production (cookies `Secure`, HTTPS obligatoire) |
+| `CINETPAY_API_KEY`, `CINETPAY_SITE_ID`, `CINETPAY_SECRET_KEY` | Paiement en ligne (optionnel) |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Envoi d'emails (optionnel) |
 | `TEST_DATABASE_URL` | Base utilisée par les tests (optionnel) |
+
+Mise en ligne : voir [`docs/deploiement.md`](docs/deploiement.md).
 
 ## Documentation
 

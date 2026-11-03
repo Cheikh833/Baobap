@@ -49,6 +49,13 @@ export function SignupForm({ next }: { next?: string }) {
       <Field label={A.password} name="password" error={state?.errors?.password} hint={A.passwordHint} required>
         <Input name="password" type="password" autoComplete="new-password" required error={state?.errors?.password} />
       </Field>
+      <div>
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" name="terms" required className="mt-0.5 h-4 w-4 rounded border-line text-brand" aria-invalid={state?.errors?.terms ? true : undefined} />
+          <span>{A.acceptTerms} (<Link href="/legal/terms" target="_blank" className="text-brand hover:underline">{m.legal.terms}</Link>, <Link href="/legal/privacy" target="_blank" className="text-brand hover:underline">{m.legal.privacy}</Link>)</span>
+        </label>
+        {state?.errors?.terms && <p className="mt-1 text-xs text-danger" role="alert">{state.errors.terms}</p>}
+      </div>
       <SubmitButton className="w-full" pendingLabel={A.signupPending}>{A.signupSubmit}</SubmitButton>
       <p className="text-center text-sm text-slate-600">
         {A.haveAccount} <Link className="font-medium text-brand hover:underline" href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}>{A.goLogin}</Link>

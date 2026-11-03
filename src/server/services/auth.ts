@@ -9,12 +9,12 @@ import type { z } from "zod";
 // Hash factice pour équilibrer le temps de réponse quand l'email n'existe pas.
 const DUMMY_HASH = "$2b$12$C6UzMDM.H6dfI/f/IKcEeO5c3A3oBhA6pR3bwSbqfJZQ8JqW7mT6e";
 
-export async function registerUser(input: z.infer<typeof signupSchema>) {
+export async function registerUser(input: z.infer<typeof signupSchema>, opts: { termsAccepted?: boolean } = {}) {
   const data = signupSchema.parse(input);
   const existing = await db.user.findUnique({ where: { email: data.email } });
   if (existing) throw new AppError("CONFLICT", "Un compte existe déjà avec cette adresse email.");
   const user = await db.user.create({
-    data: { email: data.email, name: data.name, passwordHash: await hashPassword(data.password) },
+    data: { email: data.email, name: data.name, passwordHash: await hashPassword(data.password), termsAcceptedAt: opts.termsAccepted ? new Date() : null },
   });
   await audit(db, { organizationId: null, actorId: user.id, action: "user.signup", entityType: "User", entityId: user.id, summary: "Création du compte" });
   return user;

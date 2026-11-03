@@ -5,11 +5,13 @@ import { createSession } from "@/server/auth/session";
 import { authenticate, registerUser } from "@/server/services/auth";
 import { formToObject } from "@/lib/validation/common";
 import { safeNext } from "@/lib/safe-next";
+import { signupFormSchema } from "@/lib/validation/schemas";
 
 export async function signupAction(_: ActionState, fd: FormData): Promise<ActionState> {
   const next = safeNext(fd.get("next"));
   return runAction(async () => {
-    const user = await registerUser(formToObject(fd) as never);
+    const data = signupFormSchema.parse(formToObject(fd));
+    const user = await registerUser(data, { termsAccepted: true });
     await createSession(user.id);
     return navigateTo(next ?? "/onboarding");
   });

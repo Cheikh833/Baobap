@@ -4,6 +4,7 @@ import { Field, FormMessage, Input, Select, Textarea } from "@/components/ui/for
 import { FormPendingContext, SubmitButton } from "@/components/ui/submit";
 import { useActionForm } from "./use-action-form";
 import { T } from "@/i18n/T";
+import { useI18n } from "@/i18n/client";
 import { cn } from "@/components/ui/cn";
 
 type State = { ok: boolean; message?: string; errors?: Record<string, string>; data?: Record<string, string> } | null;
@@ -41,12 +42,13 @@ export function ActionForm({
 }
 
 function InviteLink({ url }: { url: string }) {
+  const { m } = useI18n();
   const full = typeof window !== "undefined" ? new URL(url, window.location.origin).toString() : url;
   return (
     <div className="rounded-lg border border-info/30 bg-blue-50 p-3 text-sm text-blue-900">
       <p className="font-medium"><T k="ui.inviteLinkTitle" /></p>
       <p className="mt-1 text-xs"><T k="ui.inviteLinkText" /></p>
-      <input readOnly value={full} onFocus={(e) => e.currentTarget.select()} className="mt-2 w-full rounded border border-line bg-white px-2 py-1 font-mono text-xs" aria-label="invitation" />
+      <input readOnly value={full} onFocus={(e) => e.currentTarget.select()} className="mt-2 w-full rounded border border-line bg-white px-2 py-1 font-mono text-xs" aria-label={m.ui.inviteLinkLabel} />
     </div>
   );
 }

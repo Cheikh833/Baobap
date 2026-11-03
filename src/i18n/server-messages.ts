@@ -67,6 +67,7 @@ const EXACT_EN: Record<string, string> = {
   "Une structure ne peut pas être rattachée à elle-même ou à l'une de ses sous-structures.": "A unit cannot report to itself or to one of its sub-units.",
   "Vous ne pouvez pas modifier votre propre statut.": "You cannot change your own status.",
   "Lien de réinitialisation invalide ou expiré.": "Invalid or expired reset link.",
+  "Vous devez accepter les conditions d'utilisation.": "You must accept the terms of use.",
   // Messages de succès
   "Invitation révoquée.": "Invitation revoked.",
   "Membre suspendu.": "Member suspended.",

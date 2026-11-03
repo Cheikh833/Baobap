@@ -17,6 +17,7 @@ Convention : chaque document distingue **Décision confirmée** (implémentée o
 | — | Tarification (essai gratuit puis abonnement) | [product/tarification.md](product/tarification.md) |
 | — | Langues | [product/langues.md](product/langues.md) |
 | — | Charte d'IA responsable | [product/charte-ia.md](product/charte-ia.md) |
+| — | Guide de mise en ligne (Vercel ou serveur, CinetPay, emails) | [deploiement.md](deploiement.md) |
 | — | Design system | [design/design-system.md](design/design-system.md) |
 | — | Décisions d'architecture (ADR) | [decisions/](decisions/) |
 | 7 (livrable) | Rapport de validation | [validation/rapport-validation.md](validation/rapport-validation.md) |

@@ -36,6 +36,9 @@ export async function PublicFooter() {
         <Logo light />
         <div className="flex flex-wrap items-center gap-4">
           <Link href="/pricing" className="hover:text-white">{m.common.pricing}</Link>
+          <Link href="/legal/terms" className="hover:text-white">{m.legal.terms}</Link>
+          <Link href="/legal/privacy" className="hover:text-white">{m.legal.privacy}</Link>
+          <Link href="/legal/notice" className="hover:text-white">{m.legal.notice}</Link>
           <LanguageSwitcher className="[&_select]:bg-navy [&_select]:text-white" />
         </div>
         <p>© {new Date().getFullYear()} BAOBAB — {m.landing.tagline}</p>

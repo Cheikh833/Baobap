@@ -34,7 +34,7 @@ Repères : 15 000 FCFA par mois représentent environ le coût d'une connexion i
 2. L'équipe BAOBAB liste les demandes : `npm run billing -- list`.
 3. Après réception du paiement (Wave, Orange Money, virement) : `npm run billing -- activate <CODE_ORG> <PLAN> <MONTHLY|YEARLY>`. L'activation est journalisée.
 
-**À arbitrer** : agrégateur de paiement pour l'automatisation (PayDunya, CinetPay ou équivalent pour Wave et Orange Money ; Stripe pour les cartes internationales), facturation électronique, TVA applicable.
+**Paiement en ligne** : intégré via **CinetPay** (ADR-007). Wave, Orange Money, MTN, Moov et cartes ; l'abonnement est activé automatiquement après vérification du paiement. Le tarif solidaire et le plan Entreprise passent par la demande manuelle, car ils nécessitent un justificatif ou un devis. **Reste à arbitrer** : facturation électronique et TVA applicable.
 
 ## Points de vigilance
 - Abus d'essai (création répétée d'organisations) : à surveiller ; mesure possible : un essai par utilisateur propriétaire.

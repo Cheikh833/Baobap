@@ -86,8 +86,11 @@ Conséquence : l'IA et le Studio arrivent **après** les modules qui produisent 
 | IA | Utiliser l'IA de manière responsable et respectueuse | [charte-ia.md](charte-ia.md) (phase 8) |
 | Langues | Toutes les langues possibles, y compris les langues nationales | Multilingue en place (fr, en, wolof bêta) : [langues.md](langues.md), ADR-006 |
 
+| Paiement | Choix délégué entre PayDunya et CinetPay | **CinetPay** intégré (Wave, Orange Money, MTN, Moov, cartes) : ADR-007 |
+| Langues (suite) | « Je vous laisse gérer » | Application entièrement traduite en anglais, wolof bêta étendu ; recrutement de traducteurs natifs ensuite |
+
 ### Restant à arbitrer
-1. **Agrégateur de paiement** (Wave/Orange Money via PayDunya, CinetPay… ; cartes via Stripe) et facturation/TVA.
+1. **Création du compte marchand CinetPay** et **facturation/TVA**.
 2. **Fournisseur email** (invitations, réinitialisation de mot de passe) et **hébergement** (Vercel + PostgreSQL managé, ou hébergement en Afrique de l'Ouest pour la souveraineté des données).
 3. **Fournisseur d'IA** principal (proposition : architecture multi-fournisseurs, en commençant par un seul fournisseur avec engagement de non-réutilisation des données).
 4. **Relecteurs natifs** pour valider le wolof, puis les autres langues nationales.

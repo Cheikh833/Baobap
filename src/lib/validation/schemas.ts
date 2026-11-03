@@ -32,6 +32,11 @@ export const signupSchema = z.object({
     .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre."),
 });
 
+/** Inscription depuis le formulaire : acceptation explicite des conditions exigée. */
+export const signupFormSchema = signupSchema.extend({
+  terms: z.literal("on", { errorMap: () => ({ message: "Vous devez accepter les conditions d'utilisation." }) }),
+});
+
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email("Adresse email invalide."),
   password: z.string().min(1, "Le mot de passe est obligatoire."),

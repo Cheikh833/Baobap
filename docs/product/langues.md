@@ -5,10 +5,10 @@
 ## Ce qui est en place
 - Infrastructure multilingue (`src/i18n/`). La langue est choisie par le sélecteur (cookie d'un an), sinon d'après les préférences du navigateur, sinon le français. L'attribut `lang` de la page suit la langue active, ce qui sert les lecteurs d'écran et la traduction automatique du navigateur.
 - **Français** : langue de référence, complète.
-- **Anglais** : complet sur les écrans traduits (un test vérifie qu'aucune clé ne manque).
-- **Wolof (bêta)** : termes courants seulement (connexion, menu, accroche). Le reste s'affiche en français. Mention « bêta » dans le sélecteur.
+- **Anglais** : complet sur **toute l'application** (un test vérifie qu'aucune clé ne manque), y compris les messages d'erreur et de succès renvoyés par le serveur.
+- **Wolof (bêta)** : navigation, accueil, connexion, création d'organisation, tableau de bord, tarifs, boutons courants. Les termes techniques sans équivalent établi (portefeuille, cadre logique, statuts…) restent volontairement en français. Mention « bêta » dans le sélecteur.
 
-Écrans traduits : site public, page Tarifs, connexion, inscription, création d'organisation, navigation, bandeau d'abonnement, tableau de bord, page Abonnement. Les autres écrans de l'espace de travail restent en français pour l'instant : la traduction est progressive, écran par écran. Les messages de validation renvoyés par le serveur sont encore en français.
+Tous les écrans sont traduisibles : site public, Tarifs, pages légales, authentification, mot de passe oublié, invitation, organisation (profil, structures, membres, rôles, audit, abonnement), portefeuilles, programmes, projets, assistant et fiche projet. Les dates et montants suivent la langue. Seul le contenu saisi par les utilisateurs, et le journal d'audit qui en garde la trace, reste dans la langue où il a été écrit.
 
 ## Pourquoi pas toutes les langues nationales tout de suite
 Une traduction approximative d'un outil de gestion (budget, indicateurs, permissions) peut induire en erreur. Ce serait contraire au principe « ne jamais sacrifier la fiabilité à l'apparence ». Une langue n'est donc publiée qu'avec une relecture par des locuteurs natifs. L'infrastructure est prête : ajouter une langue revient à ajouter un fichier.

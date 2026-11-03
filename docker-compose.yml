@@ -1,0 +1,21 @@
+# Démarrage local ou sur un serveur (VPS) : docker compose up -d
+# Renseigner les variables dans un fichier .env (voir .env.example).
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: baobab
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: baobab
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on: [db]
+    ports: ["3000:3000"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://baobab:${POSTGRES_PASSWORD:-change-me}@db:5432/baobab
+volumes:
+  pgdata:

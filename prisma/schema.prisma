@@ -23,6 +23,7 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   lastLoginAt  DateTime?
+  termsAcceptedAt DateTime? // acceptation des CGU et de la politique de confidentialité
 
   sessions    Session[]
   memberships Membership[]
