@@ -1,9 +1,10 @@
 import type { DeepPartial } from "../types";
 import type { Messages } from "./fr";
 
-// WOLOF — VERSION BÊTA, À FAIRE VALIDER PAR DES LOCUTEURS NATIFS.
-// Volontairement limitée aux termes courants ; tout le reste s'affiche en français.
-// Contribuer : docs/product/langues.md.
+// WOLOF — VERSION BÊTA, À FAIRE VALIDER PAR DES LOCUTEURS NATIFS (voir docs/product/langues.md).
+// Couvre la navigation, l'accueil, la connexion, le tableau de bord, les tarifs et les boutons courants.
+// Les termes techniques sans équivalent établi (portefeuille, cadre logique, statuts…) restent en français
+// pour éviter les contresens ; toute clé absente s'affiche en français.
 const wo: DeepPartial<Messages> = {
   common: {
     language: "Làkk",
@@ -12,35 +13,115 @@ const wo: DeepPartial<Messages> = {
     openWorkspace: "Ubbi sama bérab",
     logout: "Génn",
     soon: "Dina ñëw",
+    available: "Am na",
+    inProgress: "Ñu ngi koy defar",
+    backHome: "Dellu ci xët wu njëkk wi",
     pricing: "Njëg yi",
     betaTranslation: "Tekki bii dañu koy saytu",
+    skipToContent: "Dem ci li ci biir",
+    unlimited: "Amul dayo",
+    perMonth: "/ weer",
+    perYear: "/ at",
+    onQuote: "Njëg gi, ñu waxtaan ko",
   },
   nav: {
-    organization: "Mbootaay",
+    pilotage: "Jiite",
+    dashboard: "Tablo jiite",
     organizationSection: "Mbootaay",
-    projects: "Porose yi",
+    organization: "Mbootaay",
+    interventions: "Liggéey yi",
     programs: "Prograam yi",
+    projects: "Porose yi",
+    upcoming: "Li dinañu yokk",
+    activeOrg: "Mbootaay bi nga nekk",
+    role: "Sa wàll : {role}",
     newOrg: "Mbootaay bu bees",
+    changeOrg: "Soppi mbootaay",
     openMenu: "Ubbi menu bi",
     closeMenu: "Tëj menu bi",
+    plannedPhase: "Dina ñëw ci tappu {phase}",
   },
-  banner: { action: "Xool njëg yi" },
+  banner: {
+    trial: "Jéem bu amul pay : {days} fan yu des — lépp ci plan Professionnel.",
+    grace: "Yeesal sa abonmaa : {days} fan yu des.",
+    expired: "Jéem bi walla abonmaa bi jeex na : mën ngaa xool rekk. Sa xibaar yépp ñu ngi leen denc.",
+    action: "Xool njëg yi",
+  },
   landing: {
     tagline: "Waajal. Def. Soppi.",
     heroTitle1: "Toppatoo sa porose yi.",
     heroTitle2: "Yokk sa njariñ.",
+    ctaStart: "Jéem ko 30 fan, amul pay",
+    ctaDiscover: "Xam platforme bi",
+    problemsTitle: "Jafe-jafe yi BAOBAB di saafara",
+    platformTitle: "Platforme bi",
+    languagesTitle: "Ci sa làkk",
+    faqTitle: "Laaj yi ñuy faral di laaj",
+    finalCta: "Sos sama mbootaay",
+  },
+  pricing: {
+    monthly: "Weer wu nekk",
+    yearly: "At mu nekk (2 weer yu ñu la may)",
+    popular: "Ñu ngi la ko digal",
+    startTrial: "Tàmbali jéem bu amul pay",
+    contactUs: "Laaj njëg",
+    availableNow: "Am na",
+    comingSoon: "Dina ñëw",
   },
   auth: {
     loginTitle: "Dugg",
+    loginSubtitle: "Duggal ci sa bérabu jiite.",
     signupTitle: "Ubbi kont",
+    workEmail: "Email bu liggéey",
     password: "Baatu jàll",
     fullName: "Sa tur ak sa sant",
     loginSubmit: "Dugg",
+    loginPending: "Mi ngi dugg…",
     signupSubmit: "Ubbi sama kont",
+    signupPending: "Mi ngi koy sos…",
     noAccount: "Amuloo kont ?",
     createAccount: "Ubbi kont",
     haveAccount: "Am nga kont ba noppi ?",
     goLogin: "Dugg",
+  },
+  onboarding: {
+    welcome: "Dalal ak jàmm, {name}",
+    title: "Sos sa mbootaay",
+    back: "Dellu ci sama bérab",
+  },
+  dashboard: {
+    title: "Tablo jiite",
+    firstSteps: "Jëf yu njëkk",
+    projects: "Porose yi",
+    programs: "Prograam yi",
+    members: "Way-bokk yu dox",
+    noProject: "Amul benn porose.",
+    alerts: "Artu",
+    noAlert: "Amul benn artu.",
+    activity: "Li ñu def leegi",
+    noActivity: "Amul dara.",
+  },
+  ui: {
+    save: "Denc",
+    saving: "Mi ngi koy denc…",
+    create: "Sos",
+    edit: "Soppi",
+    search: "Seet",
+    view: "Xool",
+    you: "(yow)",
+    reset: "Dellu ci njëkk",
+  },
+  states: {
+    retry: "Jéemaatal",
+    backDashboard: "Dellu ci tablo jiite",
+  },
+  billing: {
+    tab: "Abonmaa",
+  },
+  invitation: {
+    accept: "Nangu woote bi",
+    createAccount: "Ubbi sama kont",
+    haveAccount: "Am naa kont ba noppi",
   },
 };
 

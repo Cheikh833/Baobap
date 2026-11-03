@@ -21,6 +21,7 @@ export function LoginForm({ next }: { next?: string }) {
       <Field label={A.password} name="password" error={state?.errors?.password} required>
         <Input name="password" type="password" autoComplete="current-password" required error={state?.errors?.password} />
       </Field>
+      <p className="-mt-2 text-right text-xs"><Link className="text-brand hover:underline" href="/forgot-password">{A.forgotLink}</Link></p>
       <SubmitButton className="w-full" pendingLabel={A.loginPending}>{A.loginSubmit}</SubmitButton>
       <p className="text-center text-sm text-slate-600">
         {A.noAccount} <Link className="font-medium text-brand hover:underline" href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"}>{A.createAccount}</Link>

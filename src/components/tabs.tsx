@@ -6,7 +6,7 @@ import { cn } from "./ui/cn";
 export function TabNav({ tabs }: { tabs: { href: string; label: string; exact?: boolean }[] }) {
   const path = usePathname();
   return (
-    <nav className="-mx-4 mb-6 overflow-x-auto border-b border-line px-4 sm:mx-0 sm:px-0" aria-label="Sections">
+    <nav className="-mx-4 mb-6 overflow-x-auto border-b border-line px-4 sm:mx-0 sm:px-0" aria-label="tabs">
       <ul className="flex gap-1">
         {tabs.map((t) => {
           const active = t.exact ? path === t.href : path === t.href || path.startsWith(t.href + "/");

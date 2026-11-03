@@ -41,7 +41,7 @@ export async function listInvitations(ctx: TenantContext) {
   });
   return db.invitation.findMany({
     where: { organizationId: ctx.organizationId, status: "PENDING" },
-    include: { role: { select: { name: true } } },
+    include: { role: { select: { name: true, key: true } } },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -101,7 +101,7 @@ export async function wasAcceptedBy(token: string, email: string) {
 export async function getInvitationByToken(token: string) {
   const inv = await db.invitation.findUnique({
     where: { tokenHash: hashToken(token) },
-    include: { organization: { select: { name: true } }, role: { select: { name: true } } },
+    include: { organization: { select: { name: true } }, role: { select: { name: true, key: true } } },
   });
   if (!inv || inv.status !== "PENDING" || inv.expiresAt < new Date()) return null;
   return inv;

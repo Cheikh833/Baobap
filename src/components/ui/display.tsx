@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "./cn";
+import { T } from "@/i18n/T";
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
   return <section className={cn("min-w-0 rounded-xl border border-line bg-white p-5 shadow-sm", className)}>{children}</section>;
@@ -10,7 +11,7 @@ export function PageHeader({ title, description, actions, breadcrumb }: { title:
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        {breadcrumb && <nav aria-label="Fil d'Ariane" className="mb-1 text-xs text-slate-500">{breadcrumb}</nav>}
+        {breadcrumb && <nav aria-label="breadcrumb" className="mb-1 text-xs text-slate-500">{breadcrumb}</nav>}
         <h1 className="truncate text-2xl font-semibold tracking-tight text-navy">{title}</h1>
         {description && <p className="mt-1 text-sm text-slate-600">{description}</p>}
       </div>
@@ -72,7 +73,7 @@ export function DefinitionList({ items }: { items: [string, ReactNode][] }) {
       {items.map(([k, v]) => (
         <div key={k}>
           <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{k}</dt>
-          <dd className="mt-0.5 whitespace-pre-line text-sm text-navy">{v || <span className="text-slate-400">Non renseigné</span>}</dd>
+          <dd className="mt-0.5 whitespace-pre-line text-sm text-navy">{v || <span className="text-slate-400"><T k="ui.notProvided" /></span>}</dd>
         </div>
       ))}
     </dl>

@@ -56,9 +56,20 @@ describe("langues", () => {
   it("une langue bêta retombe sur le français pour les clés manquantes", () => {
     const wo = messagesFor("wo");
     expect(wo.common.signIn).toBe("Dugg");
-    expect(wo.dashboard.title).toBe(fr.dashboard.title);
+    expect(wo.dashboard.budgetHint).toBe(fr.dashboard.budgetHint);
+    expect(wo.status.DRAFT).toBe(fr.status.DRAFT);
   });
   it("remplacement des variables", () => {
     expect(fill("Fin le {date} ({n})", { date: "1 mai", n: 3 })).toBe("Fin le 1 mai (3)");
+  });
+});
+
+import { translateServerMessage } from "@/i18n/server-messages";
+describe("messages serveur", () => {
+  it("traduits en anglais (exacts et à variables), inchangés en français", () => {
+    expect(translateServerMessage("Projet introuvable.", "en")).toBe("Project not found.");
+    expect(translateServerMessage("Le nom du projet est obligatoire.", "en")).toBe("Project name is required.");
+    expect(translateServerMessage("Limite de 5 membres du plan Essentiel atteinte (invitations en attente comprises).", "en")).toContain("limit of 5 members");
+    expect(translateServerMessage("Projet introuvable.", "fr")).toBe("Projet introuvable.");
   });
 });

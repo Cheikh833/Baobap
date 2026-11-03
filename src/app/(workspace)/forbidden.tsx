@@ -1,6 +1,8 @@
 import { ShieldAlert } from "lucide-react";
 import { EmptyState } from "@/components/ui/display";
+import { getMessages } from "@/i18n/server";
 
-export function Forbidden() {
-  return <EmptyState icon={ShieldAlert} title="Accès non autorisé" description="Votre rôle ne vous permet pas de consulter cette page. Contactez un administrateur de l'organisation si vous pensez qu'il s'agit d'une erreur." />;
+export async function Forbidden() {
+  const { m } = await getMessages();
+  return <EmptyState icon={ShieldAlert} title={m.states.forbiddenTitle} description={m.states.forbiddenText} />;
 }

@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useRef, type ReactNode } from "re
 import { Field, FormMessage, Input, Select, Textarea } from "@/components/ui/form";
 import { FormPendingContext, SubmitButton } from "@/components/ui/submit";
 import { useActionForm } from "./use-action-form";
+import { T } from "@/i18n/T";
 import { cn } from "@/components/ui/cn";
 
 type State = { ok: boolean; message?: string; errors?: Record<string, string>; data?: Record<string, string> } | null;
@@ -12,7 +13,7 @@ const Ctx = createContext<State>(null);
 
 /** Formulaire relié à une Server Action : états chargement / succès / erreur, erreurs par champ. */
 export function ActionForm({
-  action, children, submitLabel = "Enregistrer", className, resetOnSuccess = false, submitVariant, footer, confirm,
+  action, children, submitLabel, className, resetOnSuccess = false, submitVariant, footer, confirm,
 }: {
   action: Action; children?: ReactNode; submitLabel?: string; className?: string; resetOnSuccess?: boolean;
   submitVariant?: "primary" | "secondary" | "danger"; footer?: ReactNode; confirm?: string;
@@ -29,7 +30,7 @@ export function ActionForm({
         <FormMessage state={state} />
         {children}
         <div className="flex flex-wrap items-center gap-2">
-          <SubmitButton variant={submitVariant}>{submitLabel}</SubmitButton>
+          <SubmitButton variant={submitVariant}>{submitLabel ?? <T k="ui.save" />}</SubmitButton>
           {footer}
         </div>
         {state?.ok && state.data?.inviteUrl && <InviteLink url={state.data.inviteUrl} />}
@@ -43,9 +44,9 @@ function InviteLink({ url }: { url: string }) {
   const full = typeof window !== "undefined" ? new URL(url, window.location.origin).toString() : url;
   return (
     <div className="rounded-lg border border-info/30 bg-blue-50 p-3 text-sm text-blue-900">
-      <p className="font-medium">Lien d&apos;invitation (affiché une seule fois)</p>
-      <p className="mt-1 text-xs">L&apos;envoi d&apos;emails n&apos;est pas encore configuré : transmettez ce lien à la personne invitée. Il expire dans 7 jours.</p>
-      <input readOnly value={full} onFocus={(e) => e.currentTarget.select()} className="mt-2 w-full rounded border border-line bg-white px-2 py-1 font-mono text-xs" aria-label="Lien d'invitation" />
+      <p className="font-medium"><T k="ui.inviteLinkTitle" /></p>
+      <p className="mt-1 text-xs"><T k="ui.inviteLinkText" /></p>
+      <input readOnly value={full} onFocus={(e) => e.currentTarget.select()} className="mt-2 w-full rounded border border-line bg-white px-2 py-1 font-mono text-xs" aria-label="invitation" />
     </div>
   );
 }

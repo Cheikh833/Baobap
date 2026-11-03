@@ -1,29 +1,33 @@
 import { requireTenant } from "@/server/context";
 import { can } from "@/server/permissions/check";
 import { listRoles } from "@/server/services/roles";
-import { ACTION_LABELS, OWNER_ROLE_KEY, PERMISSION_LABELS, RESOURCE_ACTIONS, RESOURCES } from "@/server/permissions/catalog";
+import { OWNER_ROLE_KEY, RESOURCE_ACTIONS, RESOURCES } from "@/server/permissions/catalog";
 import { Badge, Card } from "@/components/ui/display";
 import { ActionForm, TextField } from "@/components/forms/action-form";
+import { getMessages } from "@/i18n/server";
+import { fill } from "@/i18n/translate";
+import { roleLabel } from "@/i18n/roles";
+import type { Messages } from "@/i18n/messages/fr";
 import { Forbidden } from "../../forbidden";
 import { createRoleAction, deleteRoleAction, updateRoleAction } from "../actions";
 
 export const metadata = { title: "Rôles et permissions" };
 
-function PermissionMatrix({ selected, disabled }: { selected: string[]; disabled?: boolean }) {
+function PermissionMatrix({ selected, disabled, m }: { selected: string[]; disabled?: boolean; m: Messages }) {
   return (
     <fieldset disabled={disabled} className="overflow-x-auto">
-      <legend className="mb-2 text-sm font-medium">Permissions</legend>
+      <legend className="mb-2 text-sm font-medium">{m.roles.permissions}</legend>
       <table className="text-sm">
         <tbody>
           {RESOURCES.map((r) => (
             <tr key={r} className="border-t border-line">
-              <th scope="row" className="whitespace-nowrap py-2 pr-4 text-left font-medium">{PERMISSION_LABELS[r]}</th>
+              <th scope="row" className="whitespace-nowrap py-2 pr-4 text-left font-medium">{m.perm.resources[r]}</th>
               <td className="py-2">
                 <div className="flex flex-wrap gap-x-4 gap-y-1">
                   {RESOURCE_ACTIONS[r].map((a) => (
                     <label key={a} className="flex items-center gap-1.5 whitespace-nowrap">
                       <input type="checkbox" name="permissions" value={`${r}:${a}`} defaultChecked={selected.includes(`${r}:${a}`)} className="h-4 w-4 rounded border-line text-brand" />
-                      {ACTION_LABELS[a]}
+                      {m.perm.actions[a]}
                     </label>
                   ))}
                 </div>
@@ -39,18 +43,20 @@ function PermissionMatrix({ selected, disabled }: { selected: string[]; disabled
 export default async function RolesPage() {
   const ctx = await requireTenant();
   if (!can(ctx, "roles:view")) return <Forbidden />;
-  const roles = await listRoles(ctx);
+  const [roles, { m }] = await Promise.all([listRoles(ctx), getMessages()]);
+  const R = m.roles;
   const manage = can(ctx, "roles:manage");
+  const all = RESOURCES.flatMap((res) => RESOURCE_ACTIONS[res].map((a) => `${res}:${a}`));
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">Les permissions sont vérifiées côté serveur pour chaque action. Les rôles système peuvent être ajustés (sauf Propriétaire) ; vous pouvez aussi créer des rôles personnalisés.</p>
+      <p className="text-sm text-slate-600">{R.intro}</p>
       {roles.map((r) => (
         <Card key={r.id}>
           <details>
             <summary className="flex cursor-pointer flex-wrap items-center gap-2">
-              <span className="font-semibold">{r.name}</span>
-              {r.isSystem ? <Badge>Système</Badge> : <Badge tone="info">Personnalisé</Badge>}
-              <span className="text-xs text-slate-500">{r._count.memberships} membre(s) · {r.key === OWNER_ROLE_KEY ? "tous les droits" : `${r.permissions.length} permission(s)`}</span>
+              <span className="font-semibold">{roleLabel(r, m)}</span>
+              {r.isSystem ? <Badge>{R.system}</Badge> : <Badge tone="info">{R.custom}</Badge>}
+              <span className="text-xs text-slate-500">{fill(R.members, { n: r._count.memberships })} · {r.key === OWNER_ROLE_KEY ? R.all : fill(R.perms, { n: r.permissions.length })}</span>
             </summary>
             {r.description && <p className="mt-2 text-sm text-slate-600">{r.description}</p>}
             <div className="mt-4">
@@ -58,15 +64,15 @@ export default async function RolesPage() {
                 <>
                   <ActionForm action={updateRoleAction.bind(null, r.id)}>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <TextField name="name" label="Nom" defaultValue={r.name} required />
-                      <TextField name="description" label="Description" defaultValue={r.description ?? ""} />
+                      <TextField name="name" label={R.name} defaultValue={r.name} required />
+                      <TextField name="description" label={R.description} defaultValue={r.description ?? ""} />
                     </div>
-                    <PermissionMatrix selected={r.permissions} />
+                    <PermissionMatrix selected={r.permissions} m={m} />
                   </ActionForm>
-                  {!r.isSystem && <div className="mt-3"><ActionForm action={deleteRoleAction.bind(null, r.id)} submitLabel="Supprimer ce rôle" submitVariant="danger" confirm={`Supprimer le rôle « ${r.name} » ?`} /></div>}
+                  {!r.isSystem && <div className="mt-3"><ActionForm action={deleteRoleAction.bind(null, r.id)} submitLabel={R.deleteBtn} submitVariant="danger" confirm={fill(m.ui.confirmDelete, { name: r.name })} /></div>}
                 </>
               ) : (
-                <PermissionMatrix selected={r.key === OWNER_ROLE_KEY ? RESOURCES.flatMap((res) => RESOURCE_ACTIONS[res].map((a) => `${res}:${a}`)) : r.permissions} disabled />
+                <PermissionMatrix selected={r.key === OWNER_ROLE_KEY ? all : r.permissions} disabled m={m} />
               )}
             </div>
           </details>
@@ -74,13 +80,13 @@ export default async function RolesPage() {
       ))}
       {manage && (
         <Card>
-          <h2 className="mb-4 font-semibold">Nouveau rôle personnalisé</h2>
-          <ActionForm action={createRoleAction} submitLabel="Créer le rôle" resetOnSuccess>
+          <h2 className="mb-4 font-semibold">{R.new}</h2>
+          <ActionForm action={createRoleAction} submitLabel={R.createSubmit} resetOnSuccess>
             <div className="grid gap-3 sm:grid-cols-2">
-              <TextField name="name" label="Nom" required />
-              <TextField name="description" label="Description" />
+              <TextField name="name" label={R.name} required />
+              <TextField name="description" label={R.description} />
             </div>
-            <PermissionMatrix selected={[]} />
+            <PermissionMatrix selected={[]} m={m} />
           </ActionForm>
         </Card>
       )}

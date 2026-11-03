@@ -8,7 +8,7 @@ import { Card, PageHeader, ProgressBar, Stat } from "@/components/ui/display";
 import { ButtonLink } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { STATUS_LABELS } from "@/lib/labels";
-import { formatDate, formatMoney } from "@/lib/metrics";
+import { formatDate, formatMoney, intlLocale } from "@/lib/metrics";
 import { getMessages } from "@/i18n/server";
 import { fill } from "@/i18n/translate";
 
@@ -18,7 +18,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const ctx = await requireTenant();
   const [d, activity] = await Promise.all([getDashboard(ctx), recentActivity(ctx)]);
   const welcome = (await searchParams).welcome;
-  const { m } = await getMessages();
+  const { m, locale } = await getMessages();
   const D = m.dashboard;
   const empty = d.projects?.total === 0 && !d.portfolios && !d.programs;
 
@@ -68,7 +68,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <p className="mt-3 text-sm text-slate-500">{D.noBudget}</p>
             ) : (
               <ul className="mt-3 space-y-1">
-                {Object.entries(d.projects.budget.totals).map(([cur, v]) => <li key={cur} className="text-lg font-semibold">{formatMoney(v, cur)}</li>)}
+                {Object.entries(d.projects.budget.totals).map(([cur, v]) => <li key={cur} className="text-lg font-semibold">{formatMoney(v, cur, locale)}</li>)}
               </ul>
             )}
             {d.projects.budget.missing > 0 && <p className="mt-2 text-xs text-amber-700">{fill(D.missingBudget, { n: d.projects.budget.missing })}</p>}
@@ -103,13 +103,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 {d.projects.overdue.map((p) => (
                   <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 py-2">
                     <Link className="min-w-0 break-words font-medium hover:underline" href={`/projects/${p.id}`}>{p.code} · {p.name}</Link>
-                    <span className="text-xs font-medium text-danger">{fill(D.lateSince, { date: formatDate(p.endDate) })}</span>
+                    <span className="text-xs font-medium text-danger">{fill(D.lateSince, { date: formatDate(p.endDate, locale) })}</span>
                   </li>
                 ))}
                 {d.projects.upcoming.map((p) => (
                   <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 py-2">
                     <Link className="min-w-0 break-words font-medium hover:underline" href={`/projects/${p.id}`}>{p.code} · {p.name}</Link>
-                    <span className="flex items-center gap-1 text-xs text-amber-700"><CalendarClock className="h-3.5 w-3.5" aria-hidden />{fill(D.endsOn, { date: formatDate(p.endDate) })}</span>
+                    <span className="flex items-center gap-1 text-xs text-amber-700"><CalendarClock className="h-3.5 w-3.5" aria-hidden />{fill(D.endsOn, { date: formatDate(p.endDate, locale) })}</span>
                   </li>
                 ))}
               </ul>
@@ -136,7 +136,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               {activity.map((a) => (
                 <li key={a.id} className="py-2">
                   <p>{a.summary}</p>
-                  <p className="text-xs text-slate-500">{a.actorName} · {new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(a.createdAt)}</p>
+                  <p className="text-xs text-slate-500">{a.actorName} · {new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: "short", timeStyle: "short" }).format(a.createdAt)}</p>
                 </li>
               ))}
             </ul>

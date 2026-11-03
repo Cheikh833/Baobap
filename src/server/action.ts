@@ -3,11 +3,22 @@ import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 import { AppError } from "@/server/errors";
 import { fieldErrors, type FieldErrors } from "@/lib/validation/common";
+import { getLocale } from "@/i18n/server";
+import { translateServerMessage } from "@/i18n/server-messages";
 
 export type ActionState = { ok: boolean; message?: string; errors?: FieldErrors; data?: Record<string, string> } | null;
 
 /** Exécute une action métier et traduit les erreurs en état affichable (jamais de faux succès). */
 export async function runAction(fn: () => Promise<ActionState | void>, successMessage?: string): Promise<ActionState> {
+  const res = await runRaw(fn, successMessage);
+  if (!res) return res;
+  // Messages serveur (succès et erreurs) traduits dans la langue de l'utilisateur.
+  const locale = await getLocale();
+  const tr = (x: string) => translateServerMessage(x, locale);
+  return { ...res, message: res.message && tr(res.message), errors: res.errors && Object.fromEntries(Object.entries(res.errors).map(([k, v]) => [k, tr(v)])) };
+}
+
+async function runRaw(fn: () => Promise<ActionState | void>, successMessage?: string): Promise<ActionState> {
   try {
     const res = await fn();
     // Les pages sont toutes dynamiques : on invalide l'arbre pour que la réponse de l'action

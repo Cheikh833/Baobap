@@ -10,6 +10,7 @@ import { requestPlan } from "@/server/services/billing";
 import { startOnlinePayment } from "@/server/services/payments";
 import { baseUrl } from "@/server/base-url";
 import { navigateTo } from "@/server/action";
+import { layout, sendMail } from "@/server/mail/mailer";
 import { getMessages } from "@/i18n/server";
 
 const input = (fd: FormData) => formToObject(fd) as never;
@@ -36,7 +37,14 @@ export async function inviteAction(_: ActionState, fd: FormData): Promise<Action
   const ctx = await requireTenant();
   return runAction(async () => {
     const { token } = await inviteMember(ctx, input(fd));
-    return { ok: true, message: "Invitation créée.", data: { inviteUrl: `/invitation/${token}` } };
+    const url = `${await baseUrl()}/invitation/${token}`;
+    const { html, text } = layout(`Invitation à rejoindre ${ctx.organizationName} sur BAOBAB`, [
+      `${ctx.userName} vous invite à rejoindre l'organisation ${ctx.organizationName} sur BAOBAB, la plateforme de pilotage des projets et programmes.`,
+      `${ctx.userName} invites you to join ${ctx.organizationName} on BAOBAB.`,
+      "Ce lien est personnel et expire dans 7 jours. / This link is personal and expires in 7 days.",
+    ], { label: "Rejoindre l'organisation / Join", url });
+    const mail = await sendMail({ to: String(fd.get("email") ?? "").trim().toLowerCase(), subject: `Invitation — ${ctx.organizationName} (BAOBAB)`, html, text });
+    return { ok: true, message: mail.sent ? "Invitation créée et envoyée par email." : "Invitation créée.", data: { inviteUrl: `/invitation/${token}` } };
   });
 }
 export async function revokeInvitationAction(id: string, _: ActionState) {

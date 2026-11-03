@@ -60,14 +60,17 @@ export function weightedTimeProgress(items: { startDate: Date | null; endDate: D
   return { value: weights ? Math.round(weighted / weights) : null, excluded };
 }
 
-export function formatMoney(amount: number, currency: string) {
+/** Locale Intl d'une langue de l'interface (le wolof utilise les conventions sénégalaises en français). */
+export const intlLocale = (locale?: string) => (locale === "en" ? "en-GB" : "fr-FR");
+
+export function formatMoney(amount: number, currency: string, locale?: string) {
   try {
-    return new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+    return new Intl.NumberFormat(intlLocale(locale), { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
   } catch {
     return `${amount.toLocaleString("fr-FR")} ${currency}`;
   }
 }
 
-export function formatDate(d: Date | null | undefined) {
-  return d ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeZone: "UTC" }).format(d) : "—";
+export function formatDate(d: Date | null | undefined, locale?: string) {
+  return d ? new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: "medium", timeZone: "UTC" }).format(d) : "—";
 }

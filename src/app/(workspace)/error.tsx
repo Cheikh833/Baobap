@@ -2,7 +2,9 @@
 import { AlertTriangle } from "lucide-react";
 import { EmptyState } from "@/components/ui/display";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n/client";
 
 export default function WorkspaceError({ reset }: { error: Error; reset: () => void }) {
-  return <EmptyState icon={AlertTriangle} title="Une erreur est survenue" description="La page n'a pas pu être chargée. Réessayez dans un instant." action={<Button onClick={reset}>Réessayer</Button>} />;
+  const { m } = useI18n();
+  return <EmptyState icon={AlertTriangle} title={m.states.errorTitle} description={m.states.errorText} action={<Button onClick={reset}>{m.states.retry}</Button>} />;
 }

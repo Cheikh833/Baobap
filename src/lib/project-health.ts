@@ -2,8 +2,10 @@ import { isOverdue, timeProgress } from "./metrics";
 
 // Santé du projet : chaque dimension est calculée par une règle documentée, à partir des données réelles.
 // Les dimensions dont les données n'existent pas encore sont explicitement « non évaluées ».
+// Les textes sont des clés de traduction (project.health.*) avec leurs variables.
 export type HealthLevel = "good" | "watch" | "critical" | "unknown";
-export type HealthDimension = { key: string; label: string; level: HealthLevel; detail: string };
+export type HealthKey = "planning" | "data" | "activities" | "budget" | "indicators" | "risks";
+export type HealthDimension = { key: HealthKey; level: HealthLevel; detail: { k: string; vars?: Record<string, string | number> }; missing?: string[] };
 
 type P = {
   status: string; startDate: Date | null; endDate: Date | null; name: string; code: string;
@@ -11,10 +13,11 @@ type P = {
   shortDescription: string | null; specificObjectives: string[]; country: string | null; directBeneficiaries: number | null;
 };
 
+/** Champs clés de la fiche → clé de libellé (wizard.fields.*). */
 export const COMPLETENESS_FIELDS: [keyof P, string][] = [
-  ["managerId", "Chef de projet"], ["shortDescription", "Description courte"], ["context", "Contexte"],
-  ["generalObjective", "Objectif général"], ["specificObjectives", "Objectifs spécifiques"], ["country", "Pays"],
-  ["directBeneficiaries", "Bénéficiaires directs"], ["startDate", "Date de début"], ["endDate", "Date de fin"], ["plannedBudget", "Budget"],
+  ["managerId", "manager"], ["shortDescription", "shortDescription"], ["context", "context"],
+  ["generalObjective", "generalObjective"], ["specificObjectives", "specificObjectives"], ["country", "country"],
+  ["directBeneficiaries", "direct"], ["startDate", "start"], ["endDate", "end"], ["plannedBudget", "budget"],
 ];
 
 export function completeness(p: P) {
@@ -26,34 +29,27 @@ export function completeness(p: P) {
 }
 
 export function projectHealth(p: P, now = new Date()): HealthDimension[] {
-  // Planning — règle : en retard si fin dépassée et non clôturé (critique) ;
-  // vigilance si < 15 % du temps restant ou < 30 jours avant la fin ; inconnu sans dates.
+  // Planning — règle : critique si en retard ; vigilance si ≤ 30 jours restants ou ≥ 85 % du temps écoulé ; inconnu sans dates.
   let planning: HealthDimension;
-  if (!p.startDate || !p.endDate) planning = { key: "planning", label: "Planning", level: "unknown", detail: "Dates de début et de fin non renseignées." };
-  else if (isOverdue(p.status, p.endDate, now)) planning = { key: "planning", label: "Planning", level: "critical", detail: "Date de fin dépassée sans clôture du projet." };
+  if (!p.startDate || !p.endDate) planning = { key: "planning", level: "unknown", detail: { k: "noDates" } };
+  else if (isOverdue(p.status, p.endDate, now)) planning = { key: "planning", level: "critical", detail: { k: "overdue" } };
   else {
     const t = timeProgress(p.startDate, p.endDate, now)!;
     const daysLeft = Math.ceil((p.endDate.getTime() - now.getTime()) / 86_400_000);
     planning = ["CLOSED", "ARCHIVED"].includes(p.status)
-      ? { key: "planning", label: "Planning", level: "good", detail: "Projet clôturé." }
+      ? { key: "planning", level: "good", detail: { k: "closed" } }
       : daysLeft <= 30 || t >= 85
-        ? { key: "planning", label: "Planning", level: "watch", detail: `${t} % du temps écoulé, ${daysLeft} jour(s) restant(s).` }
-        : { key: "planning", label: "Planning", level: "good", detail: `${t} % du temps écoulé.` };
+        ? { key: "planning", level: "watch", detail: { k: "ending", vars: { pct: t, days: daysLeft } } }
+        : { key: "planning", level: "good", detail: { k: "onTrack", vars: { pct: t } } };
   }
-  // Qualité des données de la fiche — règle : ≥ 80 % bon, ≥ 50 % vigilance, sinon critique.
+  // Complétude de la fiche — règle : ≥ 80 % bon, ≥ 50 % vigilance, sinon critique.
   const c = completeness(p);
   const data: HealthDimension = {
-    key: "data", label: "Complétude de la fiche",
+    key: "data",
     level: c.pct >= 80 ? "good" : c.pct >= 50 ? "watch" : "critical",
-    detail: c.missing.length ? `${c.pct} % — manquant : ${c.missing.join(", ")}.` : "100 % des champs clés renseignés.",
+    detail: c.missing.length ? { k: "completeMissing", vars: { pct: c.pct } } : { k: "completeAll" },
+    missing: c.missing,
   };
-  const pending = (key: string, label: string, module: string): HealthDimension => ({ key, label, level: "unknown", detail: `Non évalué : nécessite le module ${module}.` });
-  return [
-    planning,
-    data,
-    pending("activities", "Activités", "Planification (phase 3)"),
-    pending("budget", "Budget", "Finances (phase 5)"),
-    pending("indicators", "Indicateurs & résultats", "MEAL (phase 4)"),
-    pending("risks", "Risques", "Risques (phase 5)"),
-  ];
+  const pending = (key: "activities" | "budget" | "indicators" | "risks"): HealthDimension => ({ key, level: "unknown", detail: { k: "pending", vars: { module: key } } });
+  return [planning, data, pending("activities"), pending("budget"), pending("indicators"), pending("risks")];
 }

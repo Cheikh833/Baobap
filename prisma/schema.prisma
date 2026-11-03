@@ -26,6 +26,7 @@ model User {
 
   sessions    Session[]
   memberships Membership[]
+  resetTokens PasswordResetToken[]
 }
 
 model Session {
@@ -436,4 +437,18 @@ model Payment {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, createdAt])
+}
+
+// Réinitialisation du mot de passe : jeton à usage unique, haché, valable 1 heure.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
