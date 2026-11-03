@@ -24,6 +24,15 @@ Implémentation : `src/lib/metrics.ts`, `src/lib/project-health.ts`, services `s
 | Complétude de la fiche | Part des 10 champs clés renseignés (chef de projet, description, contexte, objectif général, objectifs spécifiques, pays, bénéficiaires directs, début, fin, budget) : ≥ 80 % Bon, ≥ 50 % Vigilance, sinon Critique | ✅ |
 | Activités, Budget, Indicateurs, Risques | Affichées « Non évalué » avec le module requis — **jamais estimées** | 🔜 |
 
+## Stratégie (phase 2)
+- Hiérarchie : **plan stratégique → axes → objectifs**. Codes d'axe et d'objectif uniques dans un plan.
+- **Un seul plan actif** par organisation. Un plan actif ne peut pas être supprimé (il faut le clôturer d'abord).
+- **Contributions** : un projet peut contribuer à plusieurs objectifs (plusieurs-à-plusieurs), avec une **part en %** pour chacun. La **somme des parts d'un projet ne dépasse jamais 100 %**.
+- **Budget aligné sur un objectif** = Σ (budget prévu du projet × part / 100), par devise. Comme les parts d'un projet totalisent au plus 100 %, la somme sur tous les objectifs ne dépasse jamais le budget des projets : **pas de double comptage**. Les projets archivés sont exclus.
+- **Objectif couvert** = au moins une contribution d'un projet non archivé. **Taux de couverture** = objectifs couverts / objectifs du plan.
+- **Projets non alignés** = projets en cours (ni clôturés, ni archivés) sans aucune contribution à un objectif du plan.
+- Suppression : un axe qui contient des objectifs, ou un objectif qui reçoit des contributions, ne peut pas être supprimé.
+
 ## Cycle de vie du projet
 Brouillon → Préparation | Actif | Archivé ; Préparation → Brouillon | Actif | Archivé ; Actif → Suspendu | Clôturé ; Suspendu → Actif | Clôturé ; Clôturé → Archivé. Passer en **Actif** exige les dates de début et de fin et la permission `project:approve`.
 

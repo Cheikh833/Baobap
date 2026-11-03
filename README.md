@@ -18,11 +18,13 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 | Membres | Invitations par lien (expirant, à usage unique, liées à l'email), changement de rôle, suspension |
 | Rôles & permissions | 11 rôles système + rôles personnalisés, matrice de permissions `ressource:action`, vérification **côté serveur** |
 | Audit | Journal des modifications importantes (avant/après), historique par projet |
+| Stratégie | Plans stratégiques (un seul actif), axes, objectifs, contributions pondérées des projets (≤ 100 %), couverture des objectifs, budget aligné sans double comptage, projets non alignés |
 | Portefeuilles / Programmes | Création, fiche, modification, suppression logique, rattachements contrôlés |
 | Projets | Assistant de création en 8 étapes avec **brouillon** et reprise, fiche projet, santé du projet (règles documentées), cycle de vie (Brouillon → Préparation → Actif → Suspendu/Clôturé → Archivé), filtres |
 | Tableau de bord | Indicateurs calculés **uniquement** à partir des données enregistrées (budgets par devise, avancement temporel pondéré, alertes de retard/échéance) |
 | Site public | Landing page (sans faux clients, témoignages ni chiffres), page Tarifs |
 | Abonnement | Essai gratuit de 30 jours (plan Professionnel), 4 plans en FCFA, limites appliquées (membres, projets), lecture seule après l'essai, demande d'activation + back-office |
+| Paiement Mobile Money | Transfert Wave / Orange Money vers votre numéro, déclaration par le client, confirmation dans `/admin` (administration plateforme) |
 | Paiement en ligne | CinetPay (Wave, Orange Money, MTN, Moov, cartes), vérification serveur, activation automatique ; désactivé tant que les clés ne sont pas configurées |
 | Langues | Application entièrement en français et en anglais, wolof (bêta, à valider) — sélecteur de langue, repli automatique sur le français |
 | Comptes | Mot de passe oublié (lien unique 1 h), invitations par email (SMTP), acceptation des conditions à l'inscription |

@@ -56,3 +56,22 @@ describe("weightedTimeProgress", () => {
     expect(weightedTimeProgress([{ startDate: null, endDate: null }]).value).toBeNull();
   });
 });
+
+import { objectiveAlignment, planCoverage } from "@/lib/strategy";
+describe("alignement stratégique", () => {
+  const proj = (budget: number | null, status = "ACTIVE", currency = "XOF") => ({ id: Math.random().toString(), status, plannedBudget: budget, currency });
+  it("budget pondéré par devise, projets archivés exclus, sans budget comptés à part", () => {
+    const r = objectiveAlignment({ id: "o", contributions: [
+      { weight: 50, project: proj(1000) }, { weight: 100, project: proj(200, "ACTIVE", "EUR") },
+      { weight: 100, project: proj(999, "ARCHIVED") }, { weight: 30, project: proj(null) },
+    ] });
+    expect(r.budget).toEqual({ XOF: 500, EUR: 200 });
+    expect(r.projects).toBe(3);
+    expect(r.withoutBudget).toBe(1);
+  });
+  it("couverture du plan", () => {
+    const c = planCoverage([{ id: "a", contributions: [{ weight: 100, project: proj(10) }] }, { id: "b", contributions: [] }]);
+    expect(c).toMatchObject({ objectives: 2, covered: 1, rate: 50 });
+    expect(planCoverage([]).rate).toBeNull();
+  });
+});

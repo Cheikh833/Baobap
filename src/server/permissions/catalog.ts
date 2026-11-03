@@ -8,6 +8,7 @@ export const RESOURCES = [
   "roles",
   "audit",
   "billing",
+  "strategy",
   "portfolio",
   "program",
   "project",
@@ -27,6 +28,7 @@ export const RESOURCE_ACTIONS: Record<Resource, readonly Action[]> = {
   roles: ["view", "manage"],
   audit: ["view"], // « export » sera ajouté avec la fonction d'export (phase 9)
   billing: ["view", "manage"],
+  strategy: ["view", "create", "edit", "delete"],
   portfolio: ["view", "create", "edit", "delete"],
   program: ["view", "create", "edit", "delete"],
   project: ["view", "create", "edit", "delete", "approve"],
@@ -57,13 +59,13 @@ export const SYSTEM_ROLES: SystemRole[] = [
     key: "EXECUTIVE_DIRECTOR",
     name: "Directeur exécutif",
     description: "Vision globale, validation des projets, consultation de l'audit.",
-    permissions: [...VIEW_ALL, "audit:view", "billing:view", "project:approve", "portfolio:edit", "program:edit"],
+    permissions: [...VIEW_ALL, "audit:view", "billing:view", "project:approve", "portfolio:edit", "program:edit", "strategy:create", "strategy:edit"],
   },
   {
     key: "PORTFOLIO_MANAGER",
     name: "Responsable de portefeuille",
     description: "Gère portefeuilles, programmes et projets.",
-    permissions: [...VIEW_ALL, "portfolio:create", "portfolio:edit", "program:create", "program:edit", "project:create", "project:edit"],
+    permissions: [...VIEW_ALL, "strategy:edit", "portfolio:create", "portfolio:edit", "program:create", "program:edit", "project:create", "project:edit"],
   },
   {
     key: "PROGRAM_MANAGER",
@@ -85,7 +87,7 @@ export const SYSTEM_ROLES: SystemRole[] = [
     key: "DONOR_VIEWER",
     name: "Bailleur (lecture)",
     description: "Consultation des portefeuilles, programmes et projets.",
-    permissions: ["organization:view", "portfolio:view", "program:view", "project:view"],
+    permissions: ["organization:view", "strategy:view", "portfolio:view", "program:view", "project:view"],
   },
 ];
 
@@ -98,6 +100,7 @@ export const PERMISSION_LABELS: Record<Resource, string> = {
   roles: "Rôles",
   audit: "Journal d'audit",
   billing: "Abonnement",
+  strategy: "Stratégie",
   portfolio: "Portefeuilles",
   program: "Programmes",
   project: "Projets",

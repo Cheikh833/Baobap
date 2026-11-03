@@ -76,6 +76,24 @@ const EXACT_EN: Record<string, string> = {
   "Ce paiement a déjà été traité.": "This payment has already been processed.",
   "Paiement introuvable.": "Payment not found.",
   "Demande introuvable ou déjà traitée.": "Request not found or already processed.",
+  "Plan stratégique introuvable.": "Strategic plan not found.",
+  "Axe introuvable.": "Axis not found.",
+  "Objectif introuvable.": "Objective not found.",
+  "Axe invalide.": "Invalid axis.",
+  "Objectif invalide.": "Invalid objective.",
+  "Pourcentage invalide.": "Invalid percentage.",
+  "Pourcentage entier attendu.": "A whole percentage is expected.",
+  "Chaque contribution doit être d'au moins 1 %.": "Each contribution must be at least 1%.",
+  "Une contribution ne peut pas dépasser 100 %.": "A contribution cannot exceed 100%.",
+  "La somme des contributions d'un projet ne peut pas dépasser 100 %.": "The sum of a project's contributions cannot exceed 100%.",
+  "Objectif sélectionné plusieurs fois.": "Objective selected more than once.",
+  "Objectif stratégique introuvable dans cette organisation.": "Strategic objective not found in this organization.",
+  "Un plan actif ne peut pas être supprimé : clôturez-le d'abord.": "An active plan cannot be deleted: close it first.",
+  "Ce code d'axe est déjà utilisé dans ce plan.": "This axis code is already used in this plan.",
+  "Ce code d'objectif est déjà utilisé dans ce plan.": "This objective code is already used in this plan.",
+  "Cet axe contient des objectifs : supprimez-les ou déplacez-les d'abord.": "This axis contains objectives: delete or move them first.",
+  "Des projets contribuent à cet objectif : retirez d'abord leurs contributions.": "Projects contribute to this objective: remove their contributions first.",
+  "Un objectif ne peut être déplacé que vers un axe du même plan.": "An objective can only be moved to an axis of the same plan.",
   // Messages de succès
   "Invitation révoquée.": "Invitation revoked.",
   "Membre suspendu.": "Member suspended.",
@@ -95,6 +113,13 @@ const EXACT_EN: Record<string, string> = {
   "Structure supprimée.": "Unit deleted.",
   "Invitation créée.": "Invitation created.",
   "Abonnement activé.": "Subscription activated.",
+  "Plan enregistré.": "Plan saved.",
+  "Axe ajouté.": "Axis added.",
+  "Axe enregistré.": "Axis saved.",
+  "Axe supprimé.": "Axis deleted.",
+  "Objectif ajouté.": "Objective added.",
+  "Objectif enregistré.": "Objective saved.",
+  "Objectif supprimé.": "Objective deleted.",
   "Paiement rejeté.": "Payment rejected.",
   "Paiement déclaré. Vous serez activé dès la confirmation de réception.": "Payment declared. You will be activated as soon as receipt is confirmed.",
   "Invitation créée et envoyée par email.": "Invitation created and sent by email.",
@@ -102,7 +127,7 @@ const EXACT_EN: Record<string, string> = {
 
 const LABELS_EN: Record<string, string> = {
   "Le nom": "Name", "Le pays": "Country", "Le nom de l'organisation": "Organization name", "Le nom du projet": "Project name",
-  "Le nom du rôle": "Role name", "Le responsable": "The manager", "Le coordinateur": "The coordinator", "Le chef de projet": "The project manager",
+  "Le nom du rôle": "Role name", "Le titre": "Title", "L'intitulé": "Title", "Le responsable": "The manager", "Le coordinateur": "The coordinator", "Le chef de projet": "The project manager",
 };
 
 const RULES_EN: [RegExp, (...g: string[]) => string][] = [
@@ -113,6 +138,7 @@ const RULES_EN: [RegExp, (...g: string[]) => string][] = [
   [/^Limite de (\d+) projets non archivés du plan (.+) atteinte.*$/, (n, p) => `The ${p} plan limit of ${n} non-archived projects has been reached. Archive a completed project or upgrade your plan.`],
   [/^Un projet portant ce nom existe déjà dans ce programme \((.+)\)\..*$/, (c) => `A project with this name already exists in this program (${c}). Give it a distinctive name.`],
   [/^Un projet hors programme portant ce nom existe déjà \((.+)\)\..*$/, (c) => `A project outside any program already has this name (${c}). Give it a distinctive name.`],
+  [/^Un autre plan stratégique est déjà actif \(« (.+) »\)\..*$/, (t) => `Another strategic plan is already active (“${t}”). Close it before activating a new one.`],
   [/^Permission inconnue : (.+)$/, (p) => `Unknown permission: ${p}`],
 ];
 

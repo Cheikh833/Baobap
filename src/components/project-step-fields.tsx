@@ -5,7 +5,11 @@ import type { ProjectStep } from "@/lib/validation/schemas";
 import type { Messages } from "@/i18n/messages/fr";
 
 type Opt = readonly (readonly [string, string])[];
-export type StepOptions = { members: Opt; portfolios: Opt; programs: Opt; currency: string; defaults?: { programId?: string } };
+export type StrategyOptions = {
+  plans: { id: string; title: string; axes: { id: string; code: string; title: string; objectives: { id: string; code: string; title: string }[] }[] }[];
+  current: Record<string, number>; // objectiveId → part (%)
+};
+export type StepOptions = { members: Opt; portfolios: Opt; programs: Opt; currency: string; defaults?: { programId?: string }; strategy?: StrategyOptions };
 
 /** Champs de chaque étape, partagés entre l'assistant de création et l'édition de la fiche projet. */
 export function ProjectStepFields({ step, p, o, m }: { step: ProjectStep; p?: Project | null; o: StepOptions; m: Messages }) {
@@ -29,7 +33,7 @@ export function ProjectStepFields({ step, p, o, m }: { step: ProjectStep; p?: Pr
         <>
           <SelectField name="priority" label={F.priority} options={Object.entries(m.priority)} defaultValue={p?.priority ?? "MEDIUM"} />
           <CheckboxGroup name="sdgs" label={F.sdgs} options={m.sdg.map((l, i) => [String(i + 1), `${F.sdgShort} ${i + 1} — ${l}`] as const)} defaultValues={(p?.sdgs ?? []).map(String)} />
-          <p className="text-xs text-slate-500">{F.strategyNote}</p>
+          <ObjectivesPicker s={o.strategy} m={m} />
         </>
       );
     case 3:
@@ -75,4 +79,49 @@ export function ProjectStepFields({ step, p, o, m }: { step: ProjectStep; p?: Pr
         </div>
       );
   }
+}
+
+function ObjectivesPicker({ s, m }: { s?: StrategyOptions; m: Messages }) {
+  const S = m.strategy;
+  const objectives = (s?.plans ?? []).flatMap((p) => p.axes.flatMap((a) => a.objectives));
+  return (
+    <fieldset className="rounded-lg border border-line p-4">
+      <legend className="px-1 text-sm font-medium text-navy">{S.projectFieldTitle}</legend>
+      {objectives.length === 0 ? (
+        <p className="text-sm text-slate-500">{S.noObjectivesYet}</p>
+      ) : (
+        <>
+          <p className="mb-3 text-xs text-slate-500">{S.projectFieldHint}</p>
+          {s!.plans.map((plan) => (
+            <div key={plan.id} className="mb-3">
+              {s!.plans.length > 1 && <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">{plan.title}</p>}
+              {plan.axes.filter((a) => a.objectives.length).map((axis) => (
+                <div key={axis.id} className="mb-2">
+                  <p className="text-xs font-medium text-brand-deep">{axis.code} · {axis.title}</p>
+                  <ul className="mt-1 space-y-1.5">
+                    {axis.objectives.map((obj) => {
+                      const w = s!.current[obj.id];
+                      return (
+                        <li key={obj.id} className="flex flex-wrap items-center gap-2 text-sm">
+                          <label className="flex min-w-0 flex-1 items-start gap-2">
+                            <input type="checkbox" name={`obj_${obj.id}`} defaultChecked={w !== undefined} className="mt-0.5 h-4 w-4 rounded border-line text-brand" />
+                            <span><span className="font-mono text-xs text-slate-500">{obj.code}</span> {obj.title}</span>
+                          </label>
+                          <label className="flex items-center gap-1 text-xs text-slate-600">
+                            {S.share}
+                            <input type="number" name={`weight_${obj.id}`} min={1} max={100} defaultValue={w ?? 100} className="h-8 w-16 rounded-md border border-line px-2 text-sm" aria-label={`${S.share} ${obj.code}`} />
+                            %
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ))}
+        </>
+      )}
+    </fieldset>
+  );
 }

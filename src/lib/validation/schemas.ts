@@ -189,3 +189,55 @@ export const PROJECT_STEP_FIELDS: Record<ProjectStep, readonly string[]> = {
   6: ["startDate", "endDate"],
   7: ["plannedBudget", "currency"],
 };
+
+// ───────────── Stratégie ─────────────
+export const strategicPlanSchema = dateRange(
+  z.object({
+    title: reqText("Le titre", 200),
+    reference: optText(60),
+    startDate: optDate,
+    endDate: optDate,
+    context: optText(),
+    vision: optText(),
+    mission: optText(),
+    status: lifecycleStatus.default("DRAFT"),
+  }),
+);
+
+export const axisSchema = z.object({
+  code,
+  title: reqText("L'intitulé", 200),
+  description: optText(),
+  position: optInt,
+});
+
+export const objectiveSchema = z.object({
+  axisId: z.string().cuid("Axe invalide."),
+  code,
+  title: reqText("L'intitulé", 300),
+  description: optText(),
+  expectedResult: optText(),
+  ownerId: optId,
+  position: optInt,
+});
+
+/**
+ * Contributions d'un projet aux objectifs stratégiques, lues depuis le formulaire :
+ * case « obj_<id> » cochée + champ « weight_<id> » (pourcentage, 100 par défaut).
+ */
+export function parseContributions(form: Record<string, unknown>) {
+  const items: { objectiveId: string; weight: number }[] = [];
+  for (const [k, v] of Object.entries(form)) {
+    if (!k.startsWith("obj_") || v !== "on") continue;
+    const id = k.slice(4);
+    const raw = form[`weight_${id}`];
+    const weight = raw === undefined || raw === "" ? 100 : Number(raw);
+    items.push({ objectiveId: id, weight });
+  }
+  return items;
+}
+
+export const contributionsSchema = z
+  .array(z.object({ objectiveId: z.string().cuid("Objectif invalide."), weight: z.number({ invalid_type_error: "Pourcentage invalide." }).int("Pourcentage entier attendu.").min(1, "Chaque contribution doit être d'au moins 1 %.").max(100, "Une contribution ne peut pas dépasser 100 %.") }))
+  .max(30)
+  .refine((items) => items.reduce((s, i) => s + i.weight, 0) <= 100, { message: "La somme des contributions d'un projet ne peut pas dépasser 100 %." });

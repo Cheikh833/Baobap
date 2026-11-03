@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { AlertTriangle, Briefcase, CalendarClock, FolderKanban, Layers, Users } from "lucide-react";
+import { AlertTriangle, Briefcase, CalendarClock, FolderKanban, Layers, Target, Users } from "lucide-react";
 import { requireTenant } from "@/server/context";
 import { can } from "@/server/permissions/check";
 import { getDashboard } from "@/server/services/dashboard";
 import { recentActivity } from "@/server/services/audit-log";
+import { activePlanSummary } from "@/server/services/strategy";
+import { planCoverage } from "@/lib/strategy";
 import { Card, PageHeader, ProgressBar, Stat } from "@/components/ui/display";
 import { ButtonLink } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
@@ -16,7 +18,7 @@ export const metadata = { title: "Tableau de bord" };
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
   const ctx = await requireTenant();
-  const [d, activity] = await Promise.all([getDashboard(ctx), recentActivity(ctx)]);
+  const [d, activity, plan] = await Promise.all([getDashboard(ctx), recentActivity(ctx), activePlanSummary(ctx)]);
   const welcome = (await searchParams).welcome;
   const { m, locale } = await getMessages();
   const D = m.dashboard;
@@ -45,6 +47,27 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         {d.projects && <Stat label={D.projects} value={d.projects.total} hint={fill(D.projectsHint, { active: d.projects.runningCount, drafts: d.projects.drafts.length })} icon={FolderKanban} />}
         {d.members !== null && <Stat label={D.members} value={d.members} icon={Users} />}
       </div>
+
+      {can(ctx, "strategy:view") && (() => {
+        const cov = plan ? planCoverage(plan.axes.flatMap((x) => x.objectives)) : null;
+        return (
+          <Card className="mt-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="flex items-center gap-2 font-semibold"><Target className="h-4 w-4 text-brand" aria-hidden />{m.strategy.dashboardTitle}</h2>
+              {plan && <Link href={`/strategy/${plan.id}`} className="text-xs font-medium text-brand hover:underline">{plan.title}</Link>}
+            </div>
+            {plan && cov ? (
+              <div className="mt-3 grid gap-4 sm:grid-cols-3">
+                <div><p className="text-2xl font-semibold">{cov.rate === null ? "—" : `${cov.rate} %`}</p><p className="text-xs text-slate-500">{fill(m.strategy.coverageValue, { covered: cov.covered, total: cov.objectives })}</p></div>
+                <div><p className="text-2xl font-semibold">{plan.axes.length}</p><p className="text-xs text-slate-500">{m.strategy.axes}</p></div>
+                <div><p className="text-sm font-semibold">{Object.entries(cov.budget).map(([c, v]) => formatMoney(v, c, locale)).join(" · ") || "—"}</p><p className="text-xs text-slate-500">{m.strategy.alignedBudget}</p></div>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-slate-500">{m.strategy.noActivePlan} {can(ctx, "strategy:create") && <Link className="font-medium text-brand hover:underline" href="/strategy">{m.strategy.createPlanCta}</Link>}</p>
+            )}
+          </Card>
+        );
+      })()}
 
       {d.projects && (
         <div className="mt-6 grid gap-6 lg:grid-cols-3">

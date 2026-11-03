@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { requireTenant } from "@/server/context";
 import { can } from "@/server/permissions/check";
 import { getProject } from "@/server/services/projects";
-import { hierarchyOptions } from "@/server/services/options";
+import { hierarchyOptions, strategyOptions } from "@/server/services/options";
 import { Card, DefinitionList, PageHeader } from "@/components/ui/display";
 import { ActionForm } from "@/components/forms/action-form";
 import { ProjectStepFields } from "@/components/project-step-fields";
@@ -24,7 +24,8 @@ export default async function WizardPage({ params }: { params: Promise<{ id: str
   const ctx = await requireTenant();
   if (!can(ctx, "project:edit")) return <Forbidden />;
   const { id, step: rawStep } = await params;
-  const [p, o, { m, locale }] = await Promise.all([orNotFound(getProject(ctx, id)), hierarchyOptions(ctx), getMessages()]);
+  const [p, base, strategy, { m, locale }] = await Promise.all([orNotFound(getProject(ctx, id)), hierarchyOptions(ctx), strategyOptions(ctx, id), getMessages()]);
+  const o = { ...base, strategy };
   const step = Math.min(Math.max(Number(rawStep) || p.wizardStep, 1), PROJECT_LAST_EDIT_STEP + 1);
   // On ne peut pas sauter une étape non encore atteinte.
   if (step > p.wizardStep || String(step) !== rawStep) redirect(`/projects/new/${id}/${Math.min(step, p.wizardStep)}`);

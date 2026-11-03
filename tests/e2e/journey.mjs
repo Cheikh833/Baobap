@@ -111,8 +111,28 @@ try {
   await page.click("button[type=submit]");
   await waitUrl(/\/programs\/c/);
   check("Programme créé et rattaché", await vis(page.getByRole("link", { name: "Portefeuille E2E" })));
+  const programUrl = page.url();
+
+  // Stratégie : plan actif, axe, objectif
+  await go("/strategy/new");
+  await page.fill("[name=title]", "Plan stratégique E2E");
+  await page.selectOption("[name=status]", "ACTIVE");
+  await page.click("button[type=submit]");
+  await waitUrl(/\/strategy\/c/);
+  const planUrl = page.url();
+  await page.fill("form:has(button:has-text('Créer')) [name=code]", "A1");
+  await page.fill("form:has(button:has-text('Créer')) [name=title]", "Axe santé E2E");
+  await page.click("button:has-text('Créer')");
+  check("Stratégie : axe créé", await vis(page.getByText("Axe santé E2E")));
+  await page.click("summary:has-text('Nouvel objectif')");
+  const objForm = page.locator("details[open] form").first();
+  await objForm.locator("[name=code]").fill("OS1");
+  await objForm.locator("[name=title]").fill("Objectif E2E");
+  await objForm.locator("button[type=submit]").click();
+  check("Stratégie : objectif créé (non couvert)", await vis(page.getByText("Non couvert")));
 
   // Assistant projet
+  await go(programUrl);
   await clickNav("text=+ Ajouter un projet", /\/projects\/new\?programId=/);
   await page.fill("[name=name]", "Projet E2E");
   await page.fill("[name=code]", "PRJ-E2E");
@@ -120,6 +140,7 @@ try {
   await waitStep(2);
   check("Brouillon créé à l'étape 1", true);
   await page.check("input[name=sdgs][value='3']");
+  await page.locator("input[name^=obj_]").first().check();
   await page.click("button[type=submit]:has-text('Enregistrer et continuer')");
   await waitStep(3);
   await page.fill("[name=context]", "Contexte de test");
@@ -146,6 +167,11 @@ try {
   await shot("03-verification");
   await clickNav("text=Terminer (rester en brouillon)", /\/projects\/c[^/]+$/);
   check("Fiche projet : santé calculée", await vis(page.getByText("Santé du projet")));
+  check("Fiche projet : contribution à l'objectif stratégique", await vis(page.getByText("Objectif E2E")));
+  const projectUrl = page.url();
+  await go(planUrl);
+  check("Stratégie : couverture 100 % après alignement du projet", await vis(page.getByText("1 / 1 objectifs couverts par au moins un projet")));
+  await go(projectUrl);
   await shot("04-fiche-projet");
 
   // Activation (propriétaire)

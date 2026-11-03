@@ -126,6 +126,7 @@ model Organization {
   projects    Project[]
   planRequests PlanRequest[]
   payments     Payment[]
+  strategicPlans StrategicPlan[]
 }
 
 enum UnitType {
@@ -375,6 +376,7 @@ model Project {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   portfolio    Portfolio?   @relation(fields: [portfolioId], references: [id])
   program      Program?     @relation(fields: [programId], references: [id])
+  objectiveContributions ProjectObjectiveContribution[]
 
   @@unique([organizationId, code])
   @@index([organizationId, status])
@@ -456,4 +458,85 @@ model PasswordResetToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// ───────────── Stratégie (phase 2) ─────────────
+// Plan stratégique → Axes → Objectifs stratégiques ; les projets y contribuent (plusieurs-à-plusieurs, pondéré).
+
+model StrategicPlan {
+  id             String          @id @default(cuid())
+  organizationId String
+  title          String
+  reference      String?
+  startDate      DateTime?
+  endDate        DateTime?
+  context        String?
+  vision         String?
+  mission        String?
+  status         LifecycleStatus @default(DRAFT)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  createdById    String?
+  updatedById    String?
+  deletedAt      DateTime?
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  axes         StrategicAxis[]
+
+  @@index([organizationId, status])
+}
+
+model StrategicAxis {
+  id             String    @id @default(cuid())
+  organizationId String
+  planId         String
+  code           String
+  title          String
+  description    String?
+  position       Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  plan       StrategicPlan        @relation(fields: [planId], references: [id], onDelete: Cascade)
+  objectives StrategicObjective[]
+
+  @@index([planId])
+}
+
+model StrategicObjective {
+  id             String    @id @default(cuid())
+  organizationId String
+  axisId         String
+  code           String
+  title          String
+  description    String?
+  expectedResult String?
+  ownerId        String? // responsable (membre de l'organisation)
+  position       Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  axis          StrategicAxis                  @relation(fields: [axisId], references: [id], onDelete: Cascade)
+  contributions ProjectObjectiveContribution[]
+
+  @@index([axisId])
+  @@index([organizationId])
+}
+
+/// Contribution d'un projet à un objectif stratégique. `weight` = part (%) du projet affectée à l'objectif :
+/// la somme des poids d'un projet ne dépasse jamais 100 %, ce qui évite les doubles comptages budgétaires.
+model ProjectObjectiveContribution {
+  projectId   String
+  objectiveId String
+  weight      Int      @default(100)
+  note        String?
+  createdAt   DateTime @default(now())
+
+  project   Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  objective StrategicObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, objectiveId])
+  @@index([objectiveId])
 }

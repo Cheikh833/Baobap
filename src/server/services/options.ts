@@ -1,6 +1,7 @@
 import { db } from "@/server/db";
 import type { TenantContext } from "@/server/permissions/check";
 import { listActiveMemberOptions } from "./members";
+import { objectiveOptions } from "./strategy";
 
 /** Listes de choix pour les formulaires, toujours limitées à l'organisation active. */
 export async function hierarchyOptions(ctx: TenantContext) {
@@ -18,4 +19,13 @@ export async function hierarchyOptions(ctx: TenantContext) {
     memberNames: new Map(members.map((m) => [m.id, m.name])),
     currency: org.defaultCurrency,
   };
+}
+
+/** Options d'objectifs stratégiques + contributions actuelles d'un projet (étape 2 de l'assistant). */
+export async function strategyOptions(ctx: TenantContext, projectId?: string) {
+  const [plans, current] = await Promise.all([
+    objectiveOptions(ctx),
+    projectId ? db.projectObjectiveContribution.findMany({ where: { projectId, project: { organizationId: ctx.organizationId } }, select: { objectiveId: true, weight: true } }) : Promise.resolve([]),
+  ]);
+  return { plans, current: Object.fromEntries(current.map((c) => [c.objectiveId, c.weight])) };
 }

@@ -6,6 +6,7 @@
 - Rôles **par organisation** : un utilisateur peut avoir un rôle différent dans chaque organisation.
 - Rôles système créés automatiquement ; tous modifiables sauf **Propriétaire** (tous les droits). Rôles personnalisés possibles.
 - Garde-fous : au moins un propriétaire actif ; seul un propriétaire attribue ou retire le rôle Propriétaire ; on ne peut pas suspendre son propre compte ; un rôle utilisé ne peut pas être supprimé.
+- **Administration plateforme** (`/admin`) : hors rôles d'organisation, réservée aux emails listés dans `PLATFORM_ADMIN_EMAILS` (vérification des paiements, activation des abonnements). Les autres utilisateurs reçoivent une page 404.
 - Activer un projet (`ACTIVE`) exige `project:approve` (séparation préparation / validation).
 - **Lecture seule d'abonnement** : après l'essai (ou un abonnement expiré), seules les permissions `*:view` restent effectives, quel que soit le rôle, propriétaire compris. Exception : la demande d'abonnement (`billing:manage`) reste possible.
 - Les permissions des modules futurs (MEAL, finances, risques, documents, IA, exports, partages) seront ajoutées au catalogue avec leur module ; les rôles MEAL, Finance, etc. existent déjà avec des droits de lecture.
@@ -28,6 +29,10 @@
 | Journal d'audit — Consulter (`audit:view`) | ✔ | ✔ | ✔ |  |  |  |  |  |  |  |  |
 | Abonnement — Consulter (`billing:view`) | ✔ | ✔ | ✔ |  |  |  |  |  |  |  |  |
 | Abonnement — Gérer (`billing:manage`) | ✔ | ✔ |  |  |  |  |  |  |  |  |  |
+| Stratégie — Consulter (`strategy:view`) | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Stratégie — Créer (`strategy:create`) | ✔ | ✔ | ✔ |  |  |  |  |  |  |  |  |
+| Stratégie — Modifier (`strategy:edit`) | ✔ | ✔ | ✔ | ✔ |  |  |  |  |  |  |  |
+| Stratégie — Supprimer (`strategy:delete`) | ✔ | ✔ |  |  |  |  |  |  |  |  |  |
 | Portefeuilles — Consulter (`portfolio:view`) | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Portefeuilles — Créer (`portfolio:create`) | ✔ | ✔ |  | ✔ |  |  |  |  |  |  |  |
 | Portefeuilles — Modifier (`portfolio:edit`) | ✔ | ✔ | ✔ | ✔ |  |  |  |  |  |  |  |

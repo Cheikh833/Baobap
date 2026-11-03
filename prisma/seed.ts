@@ -13,7 +13,8 @@ async function main() {
   if (process.env.NODE_ENV === "production") throw new Error("Seed de démonstration interdit en production.");
   const existing = await db.organization.findUnique({ where: { code: "DEMO" } });
   if (existing) {
-    console.log("Organisation de démonstration déjà présente — rien à faire.");
+    await seedStrategy(existing.id);
+    console.log("Organisation de démonstration déjà présente — stratégie vérifiée.");
     return;
   }
   const passwordHash = await bcrypt.hash("demo-baobab-2026", 12);
@@ -52,8 +53,28 @@ async function main() {
       { organizationId: org.id, portfolioId: pf.id, name: "Étude de base nutrition (fictif)", code: "PRJ-003", status: "DRAFT", managerId: pm, wizardStep: 3 },
     ],
   });
+  await seedStrategy(org.id);
   await db.auditLog.create({ data: { organizationId: org.id, actorId: owner, action: "seed.demo", entityType: "Organization", entityId: org.id, summary: "Chargement des données de démonstration (fictives)" } });
   console.log("Démo créée. Comptes (mot de passe : demo-baobab-2026) :", users.map((u) => u.user.email).join(", "));
+}
+
+/** Plan stratégique fictif + contributions des projets de démonstration (idempotent). */
+async function seedStrategy(organizationId: string) {
+  if (await db.strategicPlan.count({ where: { organizationId } })) return;
+  const plan = await db.strategicPlan.create({
+    data: { organizationId, title: "[DÉMO] Plan stratégique 2025–2028 (fictif)", reference: "PS-2025", status: "ACTIVE", startDate: new Date("2025-01-01"), endDate: new Date("2028-12-31"), vision: "Des communautés rurales en bonne santé et résilientes (exemple fictif)." },
+  });
+  const a1 = await db.strategicAxis.create({ data: { organizationId, planId: plan.id, code: "A1", title: "Santé communautaire", position: 1 } });
+  const a2 = await db.strategicAxis.create({ data: { organizationId, planId: plan.id, code: "A2", title: "Éducation et nutrition", position: 2 } });
+  const os11 = await db.strategicObjective.create({ data: { organizationId, axisId: a1.id, code: "OS1.1", title: "Améliorer l'accès aux soins prénatals", position: 1 } });
+  const os12 = await db.strategicObjective.create({ data: { organizationId, axisId: a1.id, code: "OS1.2", title: "Renforcer les compétences des agents de santé", position: 2 } });
+  await db.strategicObjective.create({ data: { organizationId, axisId: a2.id, code: "OS2.1", title: "Réduire la malnutrition infantile", position: 1 } });
+  const projects = await db.project.findMany({ where: { organizationId, code: { in: ["PRJ-001", "PRJ-002"] } } });
+  for (const p of projects) {
+    await db.projectObjectiveContribution.createMany({
+      data: p.code === "PRJ-001" ? [{ projectId: p.id, objectiveId: os11.id, weight: 70 }, { projectId: p.id, objectiveId: os12.id, weight: 30 }] : [{ projectId: p.id, objectiveId: os12.id, weight: 100 }],
+    });
+  }
 }
 
 main().finally(() => db.$disconnect());

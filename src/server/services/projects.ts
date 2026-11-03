@@ -7,6 +7,8 @@ import { PROJECT_LAST_EDIT_STEP, PROJECT_STEP_FIELDS, projectStepSchemas, type P
 import { lifecycleStatus } from "@/lib/validation/common";
 import { assertMember, assertPortfolio, assertProgram, isUniqueViolation } from "./guards";
 import { assertProjectCapacity } from "./billing";
+import { setProjectContributions } from "./strategy";
+import { parseContributions } from "@/lib/validation/schemas";
 
 /**
  * Deux projets d'un même programme (ou deux projets hors programme) ne peuvent pas porter le même nom :
@@ -108,9 +110,11 @@ export async function saveProjectStep(ctx: TenantContext, id: string, step: Proj
         await assertMember(tx, ctx.organizationId, data.managerId as string | undefined, "Le chef de projet");
         await assertDistinctName(tx, ctx, data.name as string, h.programId, id);
       }
+      // Étape 2 : contributions aux objectifs stratégiques (plusieurs-à-plusieurs, pondérées).
+      const contributionChanges = step === 2 ? await setProjectContributions(tx, ctx, id, parseContributions(input as Record<string, unknown>)) : null;
       const nextStep = Math.max(before.wizardStep, Math.min(step + 1, PROJECT_LAST_EDIT_STEP + 1));
       const p = await tx.project.update({ where: { id }, data: { ...full, wizardStep: nextStep, updatedById: ctx.userId } as Prisma.ProjectUncheckedUpdateInput });
-      const changes = diff(before, full);
+      const changes = { ...diff(before, full), ...(contributionChanges ? { objectives: contributionChanges } : {}) };
       if (Object.keys(changes).length) {
         await audit(tx, { organizationId: ctx.organizationId, actorId: ctx.userId, action: "project.update", entityType: "Project", entityId: id, summary: `Modification du projet « ${p.name} »`, changes: changes as Prisma.InputJsonValue });
       }

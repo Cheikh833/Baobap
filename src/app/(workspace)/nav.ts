@@ -17,7 +17,7 @@ export const NAV: { section: NavKey; items: NavItem[] }[] = [
     section: "organizationSection",
     items: [
       { href: "/organization", label: "organization", icon: Building2, permission: "organization:view" },
-      { href: "/strategy", label: "strategy", icon: Target, phase: 2 },
+      { href: "/strategy", label: "strategy", icon: Target, permission: "strategy:view" },
     ],
   },
   {

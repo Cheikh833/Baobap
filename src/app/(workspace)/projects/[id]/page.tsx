@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireTenant } from "@/server/context";
 import { can } from "@/server/permissions/check";
 import { allowedTransitions, getProject } from "@/server/services/projects";
-import { hierarchyOptions } from "@/server/services/options";
+import { hierarchyOptions, strategyOptions } from "@/server/services/options";
+import { getProjectContributions } from "@/server/services/strategy";
 import { db } from "@/server/db";
 import { Badge, Card, DefinitionList, PageHeader, ProgressBar, Stat } from "@/components/ui/display";
 import { ActionForm } from "@/components/forms/action-form";
@@ -39,7 +40,8 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
   const ctx = await requireTenant();
   if (!can(ctx, "project:view")) return <Forbidden />;
   const { id } = await params;
-  const [p, o, { m, locale }] = await Promise.all([orNotFound(getProject(ctx, id)), hierarchyOptions(ctx), getMessages()]);
+  const [p, base, strategy, contributions, { m, locale }] = await Promise.all([orNotFound(getProject(ctx, id)), hierarchyOptions(ctx), strategyOptions(ctx, id), getProjectContributions(ctx, id), getMessages()]);
+  const o = { ...base, strategy };
   const tab = (await searchParams).tab ?? "overview";
   const editable = can(ctx, "project:edit");
   const t = timeProgress(p.startDate, p.endDate);
@@ -88,6 +90,21 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
                 </li>
               ))}
             </ul>
+          </Card>
+          <Card>
+            <h2 className="mb-3 font-semibold">{m.strategy.contributionsTitle}</h2>
+            {contributions.length === 0 ? (
+              <p className="text-sm text-slate-500">{m.strategy.noContributions}</p>
+            ) : (
+              <ul className="divide-y divide-line text-sm">
+                {contributions.map((c) => (
+                  <li key={c.objectiveId} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                    <span><span className="font-mono text-xs text-slate-500">{c.objective.code}</span> {c.objective.title} <span className="text-xs text-slate-500">· {c.objective.axis.code} · <Link className="hover:underline" href={`/strategy/${c.objective.axis.plan.id}`}>{c.objective.axis.plan.title}</Link></span></span>
+                    <Badge tone="brand">{fill(m.strategy.weight, { w: c.weight })}</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Card>
           <Card>
             <h2 className="mb-4 font-semibold">{P.identity}</h2>
