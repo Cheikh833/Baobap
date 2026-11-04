@@ -138,6 +138,13 @@ export async function createDemoOrganization(userId: string, now = new Date()) {
       quarters.length >= 4 ? tx.indicatorValue.create({ data: { organizationId: o, indicatorId: i5.id, periodStart: d(`${y - 1}-01-01`), periodEnd: d(`${y - 1}-12-31`), value: 288, source: "Enquête annuelle du district (fictive)", collectedById: userId, status: "VALIDATED", validatedById: userId, validatedAt: d(`${y}-02-15`) } }) : null);
     await I({ logframeItemId: x21.id, code: "IND-6", name: "Maternités équipées en kits d'accouchement", definition: "Nombre de maternités de référence disposant du kit complet.", unit: "maternités", baseline: 0, baselineDate: d(`${y}-07-01`), target: 12, targetDate: d(`${y + 1}-06-30`), frequency: "SEMIANNUAL", source: "Inventaires (fictifs)", disaggregations: [] });
 
+    // Analyse de données (fictif) : enquête ménages générée de façon déterministe.
+    const survey = demoSurvey();
+    await tx.dataset.create({ data: {
+      organizationId: o, projectId: p1.id, name: "Enquête ménages — fictive", description: "Données d'enquête entièrement fictives, générées pour la démonstration.",
+      fileName: "enquete_menages_fictive.csv", delimiter: ";", headers: survey.headers, rows: survey.rows, rowCount: survey.rows.length, columnCount: survey.headers.length, createdById: userId,
+    } });
+
     await audit(tx, { organizationId: o, actorId: userId, action: "demo.create", entityType: "Organization", entityId: o, summary: "Création de l'espace de démonstration (données fictives)" });
     return { id: o };
   }, { timeout: 30_000, maxWait: 10_000 });
@@ -146,4 +153,24 @@ export async function createDemoOrganization(userId: string, now = new Date()) {
 /** Vrai si l'utilisateur possède déjà une démo (pour l'affichage du bouton). */
 export async function hasDemo(userId: string) {
   return (await db.organization.count({ where: { isDemo: true, createdById: userId } })) > 0;
+}
+
+/** Enquête fictive reproductible (générateur pseudo-aléatoire à graine fixe). */
+export function demoSurvey(n = 240) {
+  let seed = 20260101;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+  const pick = <T,>(xs: T[]) => xs[Math.floor(rnd() * xs.length)];
+  const headers = ["id", "region", "milieu", "age_mere", "distance_km", "nb_cpn", "accouchement_assiste", "satisfaction"];
+  const rows: string[][] = [];
+  for (let i = 1; i <= n; i++) {
+    const region = pick(["Thiès", "Thiès", "Diourbel", "Fatick"]);
+    const milieu = rnd() < 0.35 ? "Urbain" : "Rural";
+    const age = 17 + Math.floor(rnd() * 25);
+    const dist = Math.round((milieu === "Urbain" ? 1 + rnd() * 4 : 3 + rnd() * 14) * 10) / 10;
+    const cpn = Math.max(0, Math.min(8, Math.round((region === "Thiès" ? 4.2 : 3.2) - dist * 0.12 + (rnd() - 0.5) * 3)));
+    const assiste = rnd() < (dist < 5 ? 0.82 : 0.48) ? "Oui" : "Non";
+    const sat = String(Math.max(1, Math.min(5, Math.round(2.8 + (assiste === "Oui" ? 0.8 : 0) + (rnd() - 0.5) * 2.5))));
+    rows.push([String(i), region, milieu, rnd() < 0.03 ? "NA" : String(age), String(dist).replace(".", ","), String(cpn), assiste, rnd() < 0.05 ? "" : sat]);
+  }
+  return { headers, rows };
 }

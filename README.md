@@ -5,8 +5,8 @@ _Planifier. Exécuter. Impacter._
 
 BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, agences de développement, bailleurs et cabinets : stratégie, projets, suivi-évaluation (MEAL), finances, risques, données, IA et reporting dans un même modèle de données.
 
-> **État actuel : Phase 0 (fondations) + Phase 1 (fondation organisationnelle) + phases 2–4 (stratégie, projets, planification, suivi-évaluation) + abonnement et multilingue.**
-> Les autres modules (Finances, Risques, Documents, Analyse, IA, Studio…) sont **affichés comme « Bientôt » et non cliquables** : aucune fonctionnalité n'est présentée comme opérationnelle si elle ne l'est pas.
+> **État actuel : Phase 0 (fondations) + Phase 1 (fondation organisationnelle) + phases 2–4 et 7 (stratégie, projets, planification, suivi-évaluation, analyse de données) + abonnement et multilingue.**
+> Les autres modules (Finances, Risques, Documents, IA, Studio…) sont **affichés comme « Bientôt » et non cliquables** : aucune fonctionnalité n'est présentée comme opérationnelle si elle ne l'est pas.
 
 ## Ce qui fonctionne aujourd'hui
 
@@ -20,7 +20,8 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 | Audit | Journal des modifications importantes (avant/après), historique par projet |
 | Planification | Phases, activités, tâches, jalons, dépendances sans boucle ; diagramme de Gantt, tableau Kanban (glisser-déposer), « Mes tâches », alertes de retard, santé « Activités » calculée |
 | Suivi-évaluation (MEAL) | Cadre logique (Impact → Effets → Extrants → Activités) avec contrôles de cohérence, indicateurs (référence, cible, sens, fréquence, ventilations), saisie des valeurs, validation par une autre personne, corrections tracées, taux d'atteinte et trajectoire, alertes « non actualisé », courbes d'évolution |
-| Démo | Espace de démonstration fictif complet en un clic (stratégie, projets, planning, suivi-évaluation) |
+| Analyse de données | Import CSV (Excel compris), dictionnaire des variables, contrôle qualité (manquants, doublons, valeurs non conformes), statistiques descriptives, histogrammes, fréquences, tableaux croisés avec test du khi² et conditions d'application, comparaison de moyennes (ANOVA) |
+| Démo | Espace de démonstration fictif complet en un clic (stratégie, projets, planning, suivi-évaluation, enquête fictive) |
 | Stratégie | Plans stratégiques (un seul actif), axes, objectifs, contributions pondérées des projets (≤ 100 %), couverture des objectifs, budget aligné sans double comptage, projets non alignés |
 | Portefeuilles / Programmes | Création, fiche, modification, suppression logique, rattachements contrôlés |
 | Projets | Assistant de création en 8 étapes avec **brouillon** et reprise, fiche projet, santé du projet (règles documentées), cycle de vie (Brouillon → Préparation → Actif → Suspendu/Clôturé → Archivé), filtres |

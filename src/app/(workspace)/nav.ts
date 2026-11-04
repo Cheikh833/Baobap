@@ -27,6 +27,7 @@ export const NAV: { section: NavKey; items: NavItem[] }[] = [
       { href: "/programs", label: "programs", icon: Layers, permission: "program:view" },
       { href: "/projects", label: "projects", icon: FolderKanban, permission: "project:view" },
       { href: "/meal", label: "meal", icon: Gauge, permission: "meal:view" },
+      { href: "/analytics", label: "analytics", icon: BarChart3, permission: "analytics:view" },
     ],
   },
   {
@@ -35,7 +36,6 @@ export const NAV: { section: NavKey; items: NavItem[] }[] = [
       { href: "/finance", label: "finance", icon: Wallet, phase: 5 },
       { href: "/risks", label: "risks", icon: ShieldAlert, phase: 5 },
       { href: "/knowledge", label: "knowledge", icon: BookOpen, phase: 6 },
-      { href: "/analytics", label: "analytics", icon: BarChart3, phase: 7 },
       { href: "/ai", label: "ai", icon: Sparkles, phase: 8 },
       { href: "/studio", label: "studio", icon: FileText, phase: 9 },
       { href: "/notifications", label: "notifications", icon: Bell, phase: 10 },

@@ -9,6 +9,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Import CSV (4 Mo maximum, contrôlé côté serveur) via les Server Actions.
+  experimental: { serverActions: { bodySizeLimit: "5mb" } },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

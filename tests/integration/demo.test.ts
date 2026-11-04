@@ -69,3 +69,24 @@ describe("démo : suivi-évaluation", () => {
     expect(st).toMatchObject({ "IND-2": "good", "IND-3": "critical", "IND-4": "good" });
   });
 });
+
+import { demoSurvey } from "@/server/services/demo";
+import { getDataset, listDatasets } from "@/server/services/analytics";
+import { column, crosstab, groupMeans } from "@/lib/analysis/stats";
+describe("démo : analyse de données", () => {
+  it("l'enquête fictive est importée et montre des associations interprétables", async () => {
+    const a = await ownerWithOrg("X");
+    const demo = await createDemoOrganization(a.user.id);
+    const ctx = (await loadTenantContext(a.user.id, demo.id))!;
+    const [ds] = await listDatasets(ctx);
+    const d = await getDataset(ctx, ds.id);
+    expect(d.rowCount).toBe(240);
+    expect(d.columns.find((c) => c.name === "distance_km")!.type).toBe("number");
+    expect(d.columns.find((c) => c.name === "milieu")!.type).toBe("categorical");
+    const s = demoSurvey();
+    const t = crosstab(column(s.rows, 2), column(s.rows, 6));
+    expect(!t.tooMany && t.conditionsMet && t.p! < 0.05).toBe(true);
+    const g = groupMeans(column(s.rows, 5), column(s.rows, 1));
+    expect(!g.tooMany && g.p! < 0.05).toBe(true);
+  });
+});

@@ -384,6 +384,7 @@ model Project {
   milestones   Milestone[]
   logframe     LogframeItem[]
   indicators   Indicator[]
+  datasets     Dataset[]
 
   @@unique([organizationId, code])
   @@index([organizationId, status])
@@ -783,4 +784,30 @@ model IndicatorValue {
   supersededBy IndicatorValue? @relation("Correction")
 
   @@index([indicatorId, periodEnd])
+}
+
+/// Jeu de données importé (CSV). Les cellules d'origine sont conservées telles quelles ;
+/// les types de colonnes sont inférés, et peuvent être corrigés (columnTypes) sans toucher aux données.
+model Dataset {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String?
+  name           String
+  description    String?
+  fileName       String
+  delimiter      String
+  headers        String[]
+  rows           Json // string[][]
+  rowCount       Int
+  columnCount    Int
+  columnTypes    Json      @default("{}") // { [colonne]: "number" | "date" | "categorical" | "text" }
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  project Project? @relation(fields: [projectId], references: [id])
+
+  @@index([organizationId])
+  @@index([projectId])
 }

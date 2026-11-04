@@ -58,6 +58,18 @@ Implémentation : `src/lib/metrics.ts`, `src/lib/project-health.ts`, services `s
 - **Situation** : atteinte ≥ 100 % → sur la trajectoire ; sinon écart (attendu − atteinte) ≤ 10 pts → sur la trajectoire, ≤ 25 → vigilance, au-delà → décrochage ; non évalué sans taux.
 - **Non actualisé** : aucune valeur validée depuis plus d'une période de collecte + 30 jours de grâce (ou depuis la date de référence s'il n'y a aucune valeur). Les indicateurs ponctuels ne sont jamais « non actualisés ».
 
+## Analyse de données (phase 7, cœur)
+- **Import** : CSV uniquement (virgule, point-virgule ou tabulation détectés automatiquement ; UTF-8, ou Windows-1252 pour les exports Excel), 4 Mo, 50 000 lignes et 200 colonnes maximum, première ligne = en-têtes (rendus uniques). Une ligne avec trop de valeurs est refusée avec son numéro ; une ligne incomplète est complétée par des cellules vides (et comptée).
+- **Données d'origine intactes** : les cellules sont stockées telles quelles ; le type de colonne est **inféré** et peut être **corrigé** (journalisé) sans modifier les données.
+- **Valeurs manquantes** : vide, NA, N/A, NaN, null, none, « - », « . », NR, NS, #N/A (sans tenir compte de la casse). Elles sont **exclues des calculs et toujours comptées**.
+- **Inférence** : ≥ 95 % des valeurs renseignées numériques (virgule décimale et espaces de milliers acceptés) → numérique ; ≥ 95 % de dates (AAAA-MM-JJ ou JJ/MM/AAAA) → date ; ≤ 20 modalités distinctes répétées → catégorielle ; sinon texte libre.
+- **Qualité** : cellules manquantes, lignes strictement identiques (doublons), valeurs non conformes au type, colonnes vides.
+- **Descriptives** : n, moyenne, écart-type corrigé (n − 1), quartiles **méthode type 7** (R, Excel QUARTILE.INC), min, max, somme ; valeurs atypiques par la règle 1,5 × IQR ; histogramme à classes égales (règle de Sturges, 5 à 15 classes). Fréquences en % des réponses valides.
+- **Tableau croisé** : lignes complètes uniquement (exclusions comptées), % en ligne ; **test du khi² de Pearson** (ddl = (l − 1)(c − 1)), **V de Cramér** (< 0,1 négligeable, < 0,3 faible, < 0,5 modérée, sinon forte). **Conditions de Cochran** : aucun effectif théorique < 1 et au plus 20 % < 5 ; sinon le résultat est explicitement déclaré non fiable. 30 modalités maximum.
+- **Comparaison de moyennes** : ANOVA à un facteur (F, ddl, p, η²) ; chaque groupe doit compter au moins 2 observations ; rappel des hypothèses (normalité, variances comparables).
+- Interprétation : seuil de 5 % ; une association statistique **n'est pas une preuve de causalité** (affiché).
+- Accès : `analytics:view` (consulter), `analytics:create` (importer, corriger un type), `analytics:delete` ; inclus à partir du plan Professionnel (et pendant l'essai).
+
 ## Cycle de vie du projet
 Brouillon → Préparation | Actif | Archivé ; Préparation → Brouillon | Actif | Archivé ; Actif → Suspendu | Clôturé ; Suspendu → Actif | Clôturé ; Clôturé → Archivé. Passer en **Actif** exige les dates de début et de fin et la permission `project:approve`.
 

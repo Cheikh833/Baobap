@@ -10,7 +10,7 @@
 | 4 — Impact & MEAL | Cadre logique ✅ avec contrôles de cohérence ✅, indicateurs ✅, ventilations ✅, collecte et validation à quatre yeux ✅, corrections tracées ✅, trajectoire et alertes d'actualisation ✅, santé du projet ✅ ; versions du cadre, ToC visuelle, évaluations, redevabilité, apprentissage 🔜 | ✅ (cœur) |
 | 5 — Finances & risques | Budgets, lignes, financements, dépenses, engagements, décaissements, variances, contrôles ; registre et matrice des risques, incidents | 🔜 |
 | 6 — Documents | Stockage privé, versions, extraction, indexation, recherche, RAG, citations | 🔜 |
-| 7 — Analyse de données | Import CSV/XLSX, dictionnaire, nettoyage traçable, statistiques déterministes, visualisations, insights | 🔜 |
+| 7 — Analyse de données | Import CSV ✅, dictionnaire et types corrigeables ✅, contrôle qualité ✅, statistiques descriptives ✅, fréquences ✅, tableau croisé + khi² avec conditions ✅, ANOVA ✅, histogrammes ✅ ; import XLSX, nettoyage traçable, régressions, insights IA 🔜 | ✅ (cœur) |
 | 8 — BAOBAB AI | Assistant général + Expert, Intent Router, Context Engine, outils sécurisés, confirmations, streaming, citations, garde-fous | 🔜 |
 | 9 — Studio | Dashboards, présentations, rapports, exports, partages, versions | 🔜 |
 | 10 — Pilotage exécutif | Vues par rôle, notifications, recherche globale, workflows | 🔜 |

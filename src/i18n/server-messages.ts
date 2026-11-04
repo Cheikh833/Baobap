@@ -190,6 +190,17 @@ const EXACT_EN: Record<string, string> = {
   "Valeur validée.": "Value validated.",
   "Valeur rejetée.": "Value rejected.",
   "Valeur supprimée.": "Value deleted.",
+  "L'analyse de données est incluse à partir du plan Professionnel.": "Data analysis is included from the Professional plan.",
+  "Choisissez un fichier CSV.": "Choose a CSV file.",
+  "Format non pris en charge : importez un fichier .csv (depuis Excel : « Enregistrer sous » → CSV).": "Unsupported format: import a .csv file (from Excel: “Save as” → CSV).",
+  "Fichier trop volumineux : 4 Mo maximum.": "File too large: 4 MB maximum.",
+  "Jeu de données introuvable.": "Dataset not found.",
+  "Colonne inconnue.": "Unknown column.",
+  "Type de colonne invalide.": "Invalid column type.",
+  "Guillemet non fermé dans le fichier.": "Unclosed quote in the file.",
+  "Le fichier doit contenir une ligne d'en-têtes et au moins une ligne de données.": "The file must contain a header row and at least one data row.",
+  "Type de colonne enregistré.": "Column type saved.",
+  "Jeu de données supprimé.": "Dataset deleted.",
 };
 
 const LABELS_EN: Record<string, string> = {
@@ -211,6 +222,8 @@ const RULES_EN: [RegExp, (...g: string[]) => string][] = [
   [/^Catégorie inconnue : (.+)\.$/, (c) => `Unknown category: ${c}.`],
   [/^Ventilation « (.+) » incomplète.*$/, (d) => `Disaggregation “${d}” is incomplete: fill in every category.`],
   [/^Ventilation incohérente : la somme « (.+) » \((.+)\) diffère de la valeur totale\.$/, (d, n) => `Inconsistent disaggregation: the “${d}” sum (${n}) differs from the total value.`],
+  [/^Ligne (\d+) : (\d+) valeurs pour (\d+) colonnes\..*$/, (l, n, c) => `Line ${l}: ${n} values for ${c} columns. Check the separator and quotes.`],
+  [/^Trop de (lignes|colonnes) \((\d+)\) : maximum (\d+)\.$/, (k, n, m) => `Too many ${k === "lignes" ? "rows" : "columns"} (${n}): maximum ${m}.`],
   [/^Permission inconnue : (.+)$/, (p) => `Unknown permission: ${p}`],
 ];
 

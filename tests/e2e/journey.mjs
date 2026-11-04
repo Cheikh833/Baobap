@@ -246,6 +246,25 @@ try {
   check("MEAL : valeur validée, taux d'atteinte calculé (25 %)", await vis(page.getByText("25\u00A0%").first()));
   await shot("05b-indicateur");
 
+  // Analyse de données : import CSV → dictionnaire & qualité → tableau croisé → ANOVA
+  await go(BASE + "/analytics");
+  check("Analyse : page vide explicite", await vis(page.getByText("Aucun jeu de données")));
+  const lines = ["id;sexe;zone;score"];
+  for (let i = 1; i <= 60; i++) lines.push(`${i};${i % 2 ? "F" : "H"};${i % 3 ? "Rurale" : "Urbaine"};${i % 2 ? 10 + (i % 7) : 14 + (i % 5)}`);
+  lines.push("60;H;Urbaine;18");
+  const impForm = page.locator("form:has([name=file])");
+  await impForm.locator("[name=name]").fill("Enquête E2E");
+  await impForm.locator("[name=file]").setInputFiles({ name: "enquete.csv", mimeType: "text/csv", buffer: Buffer.from(lines.join("\n")) });
+  await impForm.locator("button[type=submit]").click();
+  await waitUrl("**/analytics/c*");
+  check("Analyse : import et dictionnaire des variables", await vis(page.getByRole("cell", { name: "score" })));
+  check("Analyse : contrôle qualité (doublon détecté)", /Lignes en double/.test(await page.textContent("main")));
+  await go(page.url().split("?")[0] + "?view=crosstab");
+  check("Analyse : tableau croisé et test du khi²", await vis(page.getByText(/χ² = /)));
+  await go(page.url().split("?")[0] + "?view=groups");
+  check("Analyse : comparaison de moyennes (ANOVA)", await vis(page.getByText(/F = /)));
+  await shot("05c-analyse");
+
   // Tableau de bord alimenté
   await go(BASE + "/dashboard");
   const dashText = await page.textContent("main");
