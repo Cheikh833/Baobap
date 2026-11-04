@@ -274,3 +274,72 @@ export const milestoneSchema = z.object({
   title: reqText("L'intitulé", 200),
   dueDate: z.coerce.date({ required_error: "La date est obligatoire.", invalid_type_error: "Date invalide." }),
 });
+
+// ───────────── Suivi-évaluation ─────────────
+const optDecimal = z.preprocess(
+  (v) => (typeof v === "string" ? (v.replace(/\s/g, "").replace(",", ".") === "" ? undefined : v.replace(/\s/g, "").replace(",", ".")) : v),
+  z.coerce.number({ invalid_type_error: "Nombre invalide." }).finite("Nombre invalide.").optional(),
+);
+
+export const logframeItemSchema = z.object({
+  level: z.enum(["IMPACT", "OUTCOME", "OUTPUT", "ACTIVITY"]),
+  parentId: optId,
+  code: code,
+  title: reqText("L'intitulé", 300),
+  description: optText(),
+  assumptions: optText(),
+  position: optInt,
+});
+
+export const indicatorSchema = z
+  .object({
+    code: code,
+    name: reqText("Le nom de l'indicateur", 300),
+    definition: reqText("La définition", 2000),
+    unit: reqText("L'unité", 60),
+    logframeItemId: optId,
+    type: z.enum(["QUANTITATIVE", "QUALITATIVE"]).default("QUANTITATIVE"),
+    direction: z.enum(["INCREASE", "DECREASE"]).default("INCREASE"),
+    aggregation: z.enum(["LATEST", "SUM"]).default("LATEST"),
+    baseline: optDecimal,
+    baselineDate: optDate,
+    target: optDecimal,
+    targetDate: optDate,
+    frequency: z.enum(["MONTHLY", "QUARTERLY", "SEMIANNUAL", "ANNUAL", "ONE_TIME"]).default("QUARTERLY"),
+    source: optText(300),
+    method: optText(500),
+    responsibleId: optId,
+    // Une dimension par ligne : « Sexe : Femmes, Hommes »
+    disaggregations: z.preprocess(
+      (v) => (typeof v === "string" ? v.split(/\r?\n/).map((l) => l.trim()).filter(Boolean) : v ?? []),
+      z.array(z.string().max(300).regex(/^[^:]+:\s*[^,]+(,[^,]+)+$/, "Ventilation : « Dimension : catégorie 1, catégorie 2 » (au moins deux catégories).")).max(8),
+    ),
+  })
+  .refine((d) => !d.baselineDate || !d.targetDate || d.targetDate >= d.baselineDate, { message: "La date cible doit être postérieure à la date de référence.", path: ["targetDate"] })
+  .refine((d) => d.baseline === undefined || d.target === undefined || d.direction !== "INCREASE" || d.target >= d.baseline, { message: "Pour un indicateur à augmenter, la cible doit être supérieure ou égale à la référence.", path: ["target"] })
+  .refine((d) => d.baseline === undefined || d.target === undefined || d.direction !== "DECREASE" || d.target <= d.baseline, { message: "Pour un indicateur à faire baisser, la cible doit être inférieure ou égale à la référence.", path: ["target"] });
+
+export const indicatorValueSchema = z
+  .object({
+    periodStart: z.coerce.date({ required_error: "Le début de période est obligatoire.", invalid_type_error: "Date invalide." }),
+    periodEnd: z.coerce.date({ required_error: "La fin de période est obligatoire.", invalid_type_error: "Date invalide." }),
+    value: optDecimal,
+    textValue: optText(2000),
+    source: reqText("La source", 300),
+    comment: optText(1000),
+    disaggregation: z.record(z.record(z.number())).optional(),
+  })
+  .refine((d) => d.periodEnd >= d.periodStart, { message: "La fin de période doit suivre le début.", path: ["periodEnd"] });
+
+/** Ventilations saisies dans le formulaire : champs « dis__<dimension>__<catégorie> ». */
+export function parseDisaggregation(form: Record<string, unknown>) {
+  const out: Record<string, Record<string, number>> = {};
+  for (const [k, v] of Object.entries(form)) {
+    if (!k.startsWith("dis__") || v === "" || v === undefined) continue;
+    const [, dim, cat] = k.split("__");
+    const n = Number(String(v).replace(/\s/g, "").replace(",", "."));
+    if (!dim || !cat || !Number.isFinite(n)) continue;
+    (out[dim] ??= {})[cat] = n;
+  }
+  return Object.keys(out).length ? out : undefined;
+}

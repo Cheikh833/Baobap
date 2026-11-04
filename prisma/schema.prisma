@@ -382,6 +382,8 @@ model Project {
   activities   Activity[]
   tasks        Task[]
   milestones   Milestone[]
+  logframe     LogframeItem[]
+  indicators   Indicator[]
 
   @@unique([organizationId, code])
   @@index([organizationId, status])
@@ -657,4 +659,128 @@ model Milestone {
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
+}
+
+// ───────────── Suivi-évaluation / MEAL (phase 4) ─────────────
+
+enum ResultLevel {
+  IMPACT
+  OUTCOME
+  OUTPUT
+  ACTIVITY
+}
+
+/// Élément du cadre logique : Impact → Effets (outcomes) → Extrants (outputs) → Activités.
+model LogframeItem {
+  id             String      @id @default(cuid())
+  organizationId String
+  projectId      String
+  parentId       String?
+  level          ResultLevel
+  code           String
+  title          String
+  description    String?
+  assumptions    String? // hypothèses / conditions de réussite
+  position       Int         @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+
+  project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent     LogframeItem?  @relation("LogframeTree", fields: [parentId], references: [id])
+  children   LogframeItem[] @relation("LogframeTree")
+  indicators Indicator[]
+
+  @@index([projectId])
+}
+
+enum IndicatorType {
+  QUANTITATIVE
+  QUALITATIVE
+}
+
+enum IndicatorDirection {
+  INCREASE // une valeur plus élevée est meilleure
+  DECREASE // une valeur plus basse est meilleure
+}
+
+enum IndicatorAggregation {
+  LATEST // la valeur actuelle est la dernière valeur validée (taux, nombre cumulé déclaré…)
+  SUM // la valeur actuelle est la somme des valeurs validées des périodes
+}
+
+enum ReportingFrequency {
+  MONTHLY
+  QUARTERLY
+  SEMIANNUAL
+  ANNUAL
+  ONE_TIME
+}
+
+model Indicator {
+  id             String               @id @default(cuid())
+  organizationId String
+  projectId      String
+  logframeItemId String?
+  code           String
+  name           String
+  definition     String
+  unit           String
+  type           IndicatorType        @default(QUANTITATIVE)
+  direction      IndicatorDirection   @default(INCREASE)
+  aggregation    IndicatorAggregation @default(LATEST)
+  baseline       Decimal?             @db.Decimal(18, 4)
+  baselineDate   DateTime?
+  target         Decimal?             @db.Decimal(18, 4)
+  targetDate     DateTime?
+  frequency      ReportingFrequency   @default(QUARTERLY)
+  source         String? // source de vérification
+  method         String? // méthode de collecte
+  responsibleId  String?
+  disaggregations String[] // ex. ["Sexe", "Tranche d'âge"]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  createdById    String?
+  deletedAt      DateTime?
+
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  logframeItem LogframeItem?    @relation(fields: [logframeItemId], references: [id])
+  values       IndicatorValue[]
+
+  @@index([projectId])
+  @@index([organizationId])
+}
+
+enum ValueStatus {
+  DRAFT
+  VALIDATED
+  REJECTED
+}
+
+/// Valeur d'un indicateur pour une période. Une valeur validée n'est jamais modifiée :
+/// une correction crée une nouvelle valeur qui la remplace (supersedesId), l'ancienne reste tracée.
+model IndicatorValue {
+  id             String      @id @default(cuid())
+  organizationId String
+  indicatorId    String
+  periodStart    DateTime
+  periodEnd      DateTime
+  value          Decimal?    @db.Decimal(18, 4)
+  textValue      String? // indicateurs qualitatifs
+  disaggregation Json? // { "Sexe": { "Femmes": 120, "Hommes": 80 } }
+  source         String
+  comment        String?
+  status         ValueStatus @default(DRAFT)
+  supersedesId   String?     @unique
+  collectedById  String
+  validatedById  String?
+  validatedAt    DateTime?
+  reviewComment  String?
+  createdAt      DateTime    @default(now())
+
+  indicator    Indicator       @relation(fields: [indicatorId], references: [id], onDelete: Cascade)
+  supersedes   IndicatorValue? @relation("Correction", fields: [supersedesId], references: [id])
+  supersededBy IndicatorValue? @relation("Correction")
+
+  @@index([indicatorId, periodEnd])
 }

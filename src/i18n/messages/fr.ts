@@ -521,7 +521,7 @@ const fr = {
     REGIONAL_OFFICE: "Bureau régional", TEAM: "Équipe", PROJECT_CELL: "Cellule de projet",
   },
   perm: {
-    resources: { organization: "Organisation", units: "Structures internes", members: "Membres", roles: "Rôles", audit: "Journal d'audit", billing: "Abonnement", strategy: "Stratégie", portfolio: "Portefeuilles", program: "Programmes", project: "Projets" },
+    resources: { organization: "Organisation", units: "Structures internes", members: "Membres", roles: "Rôles", audit: "Journal d'audit", billing: "Abonnement", strategy: "Stratégie", meal: "Suivi-évaluation", analytics: "Analyse de données", portfolio: "Portefeuilles", program: "Programmes", project: "Projets" },
     actions: { view: "Consulter", create: "Créer", edit: "Modifier", delete: "Supprimer", approve: "Valider", export: "Exporter", share: "Partager", manage: "Gérer" },
   },
   org: {

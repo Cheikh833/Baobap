@@ -520,7 +520,7 @@ const en: DeepPartial<Messages> = {
     REGIONAL_OFFICE: "Regional office", TEAM: "Team", PROJECT_CELL: "Project unit",
   },
   perm: {
-    resources: { organization: "Organization", units: "Internal units", members: "Members", roles: "Roles", audit: "Audit log", billing: "Subscription", strategy: "Strategy", portfolio: "Portfolios", program: "Programs", project: "Projects" },
+    resources: { organization: "Organization", units: "Internal units", members: "Members", roles: "Roles", audit: "Audit log", billing: "Subscription", strategy: "Strategy", meal: "Monitoring & evaluation", analytics: "Data analysis", portfolio: "Portfolios", program: "Programs", project: "Projects" },
     actions: { view: "View", create: "Create", edit: "Edit", delete: "Delete", approve: "Approve", export: "Export", share: "Share", manage: "Manage" },
   },
   org: {
