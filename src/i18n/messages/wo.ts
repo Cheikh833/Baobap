@@ -90,6 +90,7 @@ const wo: DeepPartial<Messages> = {
     back: "Dellu ci sama bérab",
   },
   dashboard: {
+    hello: "Na nga def, {name}",
     title: "Tablo jiite",
     firstSteps: "Jëf yu njëkk",
     projects: "Porose yi",

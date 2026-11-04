@@ -3,16 +3,20 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "./cn";
 import { T } from "@/i18n/T";
 
-export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <section className={cn("min-w-0 rounded-xl border border-line bg-white p-5 shadow-sm", className)}>{children}</section>;
+export function Card({ className, children, interactive }: { className?: string; children: ReactNode; interactive?: boolean }) {
+  return (
+    <section className={cn("min-w-0 animate-fade-up rounded-2xl border border-line/80 bg-white p-5 shadow-soft", interactive && "transition duration-300 hover:-translate-y-0.5 hover:shadow-lift", className)}>
+      {children}
+    </section>
+  );
 }
 
 export function PageHeader({ title, description, actions, breadcrumb }: { title: string; description?: ReactNode; actions?: ReactNode; breadcrumb?: ReactNode }) {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-7 flex animate-fade-up flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        {breadcrumb && <nav aria-label="breadcrumb" className="mb-1 text-xs text-slate-500">{breadcrumb}</nav>}
-        <h1 className="truncate text-2xl font-semibold tracking-tight text-navy">{title}</h1>
+        {breadcrumb && <nav aria-label="breadcrumb" className="mb-1.5 text-xs font-medium text-slate-500">{breadcrumb}</nav>}
+        <h1 className="truncate font-display text-[1.7rem] font-bold leading-tight tracking-tight text-navy">{title}</h1>
         {description && <p className="mt-1 text-sm text-slate-600">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -35,25 +39,40 @@ export function Badge({ tone = "neutral", children }: { tone?: Tone; children: R
 
 export function EmptyState({ icon: Icon, title, description, action }: { icon: LucideIcon; title: string; description?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center rounded-xl border border-dashed border-line bg-white px-6 py-12 text-center">
-      <Icon className="h-10 w-10 text-brand" aria-hidden />
-      <h2 className="mt-3 font-semibold text-navy">{title}</h2>
+    <div className="flex animate-fade-up flex-col items-center rounded-2xl border border-dashed border-brand/25 bg-gradient-to-b from-white to-brand-50/40 px-6 py-14 text-center">
+      <div className="relative">
+        <span className="absolute inset-0 animate-pulse2 rounded-2xl bg-brand/15 blur-md" aria-hidden />
+        <span className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-deep text-white shadow-glow">
+          <Icon className="h-7 w-7" aria-hidden />
+        </span>
+      </div>
+      <h2 className="mt-4 font-display text-lg font-semibold text-navy">{title}</h2>
       {description && <p className="mt-1 max-w-md text-sm text-slate-600">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );
 }
 
-export function Stat({ label, value, hint, icon: Icon }: { label: string; value: ReactNode; hint?: ReactNode; icon?: LucideIcon }) {
+const statTones = {
+  brand: "from-brand to-brand-400 text-white",
+  navy: "from-navy to-[#1E4A6E] text-white",
+  ochre: "from-ochre to-[#F0C06E] text-navy",
+  teal: "from-[#0E9384] to-[#5FC4A8] text-white",
+};
+export function Stat({ label, value, hint, icon: Icon, tone = "brand", index = 0 }: { label: string; value: ReactNode; hint?: ReactNode; icon?: LucideIcon; tone?: keyof typeof statTones; index?: number }) {
   return (
-    <Card className="p-4">
-      <div className="flex items-center justify-between text-sm text-slate-600">
-        <span>{label}</span>
-        {Icon && <Icon className="h-4 w-4 text-brand" aria-hidden />}
+    <section className="group min-w-0 animate-fade-up rounded-2xl border border-line/80 bg-white p-4 shadow-soft transition duration-300 hover:-translate-y-0.5 hover:shadow-lift" style={{ animationDelay: `${index * 70}ms` }}>
+      <div className="flex items-start justify-between gap-3">
+        <span className="text-sm font-medium text-slate-600">{label}</span>
+        {Icon && (
+          <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-sm transition-transform duration-300 group-hover:scale-110", statTones[tone])}>
+            <Icon className="h-4 w-4" aria-hidden />
+          </span>
+        )}
       </div>
-      <div className="mt-2 text-2xl font-semibold text-navy">{value}</div>
+      <div className="mt-1 font-display text-[1.65rem] font-bold leading-tight text-navy tabular">{value}</div>
       {hint && <div className="mt-1 text-xs text-slate-500">{hint}</div>}
-    </Card>
+    </section>
   );
 }
 
@@ -61,7 +80,7 @@ export function ProgressBar({ value, label }: { value: number; label: string }) 
   return (
     <div>
       <div className="h-2 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100} aria-label={label}>
-        <div className="h-full rounded-full bg-brand" style={{ width: `${value}%` }} />
+        <div className="h-full origin-left animate-grow-x rounded-full bg-gradient-to-r from-brand to-brand-400" style={{ width: `${value}%` }} />
       </div>
     </div>
   );
@@ -82,9 +101,9 @@ export function DefinitionList({ items }: { items: [string, ReactNode][] }) {
 
 export function Table({ head, children }: { head: string[]; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-line bg-white">
+    <div className="animate-fade-up overflow-x-auto rounded-2xl border border-line/80 bg-white shadow-soft">
       <table className="min-w-full divide-y divide-line text-sm">
-        <thead className="bg-canvas">
+        <thead className="bg-gradient-to-r from-canvas to-white">
           <tr>{head.map((h) => <th key={h} scope="col" className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{h}</th>)}</tr>
         </thead>
         <tbody className="divide-y divide-line">{children}</tbody>

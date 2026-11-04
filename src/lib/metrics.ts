@@ -63,9 +63,12 @@ export function weightedTimeProgress(items: { startDate: Date | null; endDate: D
 /** Locale Intl d'une langue de l'interface (le wolof utilise les conventions sénégalaises en français). */
 export const intlLocale = (locale?: string) => (locale === "en" ? "en-GB" : "fr-FR");
 
+/** Espace insécable fine (U+202F) → insécable classique : certaines polices de titre n'ont pas le glyphe fin. */
+export const safeSpaces = (s: string) => s.replace(/\u202f/g, "\u00a0");
+
 export function formatMoney(amount: number, currency: string, locale?: string) {
   try {
-    return new Intl.NumberFormat(intlLocale(locale), { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+    return safeSpaces(new Intl.NumberFormat(intlLocale(locale), { style: "currency", currency, maximumFractionDigits: 0 }).format(amount));
   } catch {
     return `${amount.toLocaleString("fr-FR")} ${currency}`;
   }

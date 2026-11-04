@@ -18,7 +18,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
     <div className="bg-white">
       <PublicHeader />
       <main className="mx-auto max-w-6xl px-4 py-16">
-        <h1 className="text-center text-3xl font-semibold tracking-tight sm:text-4xl">{P.title}</h1>
+        <h1 className="animate-fade-up text-center font-display text-3xl font-extrabold tracking-tight sm:text-5xl">{P.title}</h1>
         <p className="mx-auto mt-4 max-w-2xl text-center text-slate-600">{P.subtitle}</p>
         <div className="mt-8 flex justify-center">
           <div className="inline-flex rounded-lg border border-line bg-canvas p-1 text-sm" role="group" aria-label="Facturation">
@@ -28,7 +28,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {PLANS.map((plan) => (
-            <article key={plan.code} className={cn("relative flex flex-col rounded-2xl border bg-white p-6", plan.highlighted ? "border-brand shadow-lg ring-1 ring-brand" : "border-line")}>
+            <article key={plan.code} className={cn("relative flex animate-fade-up flex-col rounded-2xl border bg-white p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lift", plan.highlighted ? "border-brand bg-gradient-to-b from-brand-50/70 to-white shadow-glow ring-1 ring-brand" : "border-line shadow-soft")}>
               {plan.highlighted && <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-0.5 text-xs font-medium text-white">{P.popular}</span>}
               <h2 className="text-lg font-semibold">{m.plans[plan.code].name}</h2>
               <p className="mt-1 min-h-10 text-sm text-slate-600">{m.plans[plan.code].audience}</p>

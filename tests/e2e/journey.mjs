@@ -190,10 +190,10 @@ try {
   // Espace de travail en anglais puis retour au français
   await page.selectOption("#locale-select", "en");
   await page.waitForLoadState("networkidle");
-  check("Espace de travail en anglais", await vis(page.getByRole("heading", { name: "Dashboard" })));
+  check("Espace de travail en anglais", await vis(page.getByRole("heading", { name: /^Hello,/ })));
   await page.selectOption("#locale-select", "fr");
   await page.waitForLoadState("networkidle");
-  check("Espace de travail : retour au français", await vis(page.getByRole("heading", { name: "Tableau de bord" })));
+  check("Espace de travail : retour au français", await vis(page.getByRole("heading", { name: /^Bonjour,/ })));
 
   // Organisation
   await go(BASE + "/organization/units");
@@ -216,6 +216,15 @@ try {
   await page.click("button:has-text('Envoyer la demande')");
   check("Abonnement : demande enregistrée", await vis(page.getByText("En attente de traitement")));
   await shot("07-abonnement");
+
+  // Espace de démonstration en un clic (données fictives), puis retour à l'organisation E2E
+  await go("/onboarding");
+  await page.click("button:has-text(\"Créer l'espace de démonstration\")");
+  await waitUrl("**/dashboard");
+  check("Démo : espace fictif créé et ouvert", await vis(page.locator("main").getByText("[DÉMO] ONG Sahel Avenir (fictif)").first()));
+  check("Démo : plan stratégique pré-rempli", await vis(page.getByText(/Plan stratégique .* \(fictif\)/).first()));
+  await page.selectOption("#organizationId", { label: `Organisation E2E ${stamp}` });
+  await waitUrl("**/dashboard");
 
   // Déconnexion → invité accepte
   await go(BASE + "/dashboard");

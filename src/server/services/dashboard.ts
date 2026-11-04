@@ -1,6 +1,6 @@
 import { db } from "@/server/db";
 import { can, type TenantContext } from "@/server/permissions/check";
-import { isOverdue, sumByCurrency, weightedTimeProgress } from "@/lib/metrics";
+import { isOverdue, sumByCurrency, timeProgress, weightedTimeProgress } from "@/lib/metrics";
 
 /**
  * Vue consolidée de l'organisation, calculée uniquement à partir des données enregistrées.
@@ -14,7 +14,7 @@ export async function getDashboard(ctx: TenantContext) {
     can(ctx, "project:view")
       ? db.project.findMany({
           where,
-          select: { id: true, name: true, code: true, status: true, startDate: true, endDate: true, plannedBudget: true, currency: true, wizardStep: true },
+          select: { id: true, name: true, code: true, status: true, startDate: true, endDate: true, plannedBudget: true, currency: true, wizardStep: true, portfolio: { select: { id: true, name: true } } },
         })
       : null,
     can(ctx, "members:view") ? db.membership.count({ where: { organizationId: ctx.organizationId, status: "ACTIVE" } }) : null,
@@ -34,11 +34,28 @@ export async function getDashboard(ctx: TenantContext) {
   const drafts = projects.filter((p) => p.status === "DRAFT");
   const active = projects.filter((p) => p.status !== "ARCHIVED");
 
+  // Budget prévu par portefeuille (par devise ; « Hors portefeuille » pour les projets non rattachés).
+  const byPortfolio = new Map<string, { name: string | null; totals: Record<string, number>; count: number }>();
+  for (const p of active) {
+    const key = p.portfolio?.id ?? "_none";
+    const e = byPortfolio.get(key) ?? { name: p.portfolio?.name ?? null, totals: {}, count: 0 };
+    e.count++;
+    if (p.plannedBudget !== null) e.totals[p.currency] = (e.totals[p.currency] ?? 0) + Number(p.plannedBudget);
+    byPortfolio.set(key, e);
+  }
+  const runningProgress = running
+    .map((p) => ({ id: p.id, code: p.code, name: p.name, endDate: p.endDate, progress: timeProgress(p.startDate, p.endDate, now) }))
+    .filter((p) => p.progress !== null)
+    .sort((a, b) => (b.progress ?? 0) - (a.progress ?? 0))
+    .slice(0, 6) as { id: string; code: string; name: string; endDate: Date | null; progress: number }[];
+
   return {
     portfolios,
     programs,
     members,
     projects: {
+      byPortfolio: [...byPortfolio.values()],
+      runningProgress,
       total: projects.length,
       byStatus,
       overdue,

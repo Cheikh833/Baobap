@@ -8,7 +8,7 @@ import { getMessages } from "@/i18n/server";
 export async function PublicHeader() {
   const [user, { m }] = await Promise.all([getSessionUser(), getMessages()]);
   return (
-    <header className="sticky top-0 z-20 border-b border-line/70 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-line/60 bg-white/80 shadow-[0_1px_0_rgba(16,42,67,.03)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">
         <Link href="/" aria-label="BAOBAB"><Logo /></Link>
         <nav className="flex items-center gap-1 sm:gap-2">

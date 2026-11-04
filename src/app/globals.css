@@ -2,9 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { --font-inter: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 html { -webkit-text-size-adjust: 100%; }
-body { @apply bg-canvas text-navy antialiased; }
+body { @apply bg-canvas text-navy antialiased; font-feature-settings: "cv11", "ss01"; }
+h1, h2, h3, .font-display { font-family: theme("fontFamily.display"); letter-spacing: -0.015em; }
+h1, h2 { text-wrap: balance; }
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Apparition au défilement : animation pilotée par le défilement (CSS pur).
+   Les navigateurs qui ne la gèrent pas affichent simplement le contenu, jamais de contenu bloqué invisible. */
+@supports (animation-timeline: view()) {
+  .reveal { animation: reveal-up linear both; animation-timeline: view(); animation-range: entry 0% cover 22%; }
+}
+@keyframes reveal-up { from { opacity: .35; transform: translateY(32px) scale(.985); } to { opacity: 1; transform: none; } }
+
+/* Délais en cascade pour les éléments d'une même rangée */
+.stagger > * { animation-delay: calc(var(--i, 0) * 70ms); }
+
+/* Texte en dégradé de marque */
+.text-gradient { background: linear-gradient(100deg, #5FC4A8 0%, #E3A13B 55%, #ffffff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Fond « maillage » animé */
+.mesh { position: absolute; inset: -20%; filter: blur(60px); opacity: .65; }
+.mesh span { position: absolute; border-radius: 9999px; }
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  .reveal { animation: none !important; }
 }

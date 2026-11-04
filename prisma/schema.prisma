@@ -107,6 +107,7 @@ model Organization {
   values       String?
   size         String?
   defaultCurrency String        @default("XOF")
+  isDemo          Boolean       @default(false) // espace de démonstration (données fictives)
   plan               PlanCode           @default(PROFESSIONNEL)
   subscriptionStatus SubscriptionStatus @default(TRIALING)
   billingCycle       BillingCycle       @default(MONTHLY)

@@ -16,11 +16,12 @@ type Props = {
   orgs: { id: string; name: string }[];
   allowed: string[];
   platformAdmin?: boolean;
+  isDemo?: boolean;
   subscription: { phase: "trial" | "active" | "grace" | "expired"; daysLeft: number | null; canManage: boolean };
   children: React.ReactNode;
 };
 
-export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, children }: Props) {
+export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, isDemo, children }: Props) {
   const { m } = useI18n();
   const N = m.nav;
   const [open, setOpen] = useState(false);
@@ -29,43 +30,44 @@ export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, c
 
   const sidebar = (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center justify-between px-4">
-        <Link href="/dashboard" aria-label={N.dashboard}><Logo /></Link>
-        <button className="rounded-md p-2 lg:hidden" onClick={() => setOpen(false)} aria-label={N.closeMenu}><X className="h-5 w-5" /></button>
+      <div className="flex h-16 items-center justify-between px-5">
+        <Link href="/dashboard" aria-label={N.dashboard} className="transition-opacity hover:opacity-90"><Logo light /></Link>
+        <button className="rounded-md p-2 text-white/80 hover:bg-white/10 lg:hidden" onClick={() => setOpen(false)} aria-label={N.closeMenu}><X className="h-5 w-5" /></button>
       </div>
-      <div className="px-4 pb-3">
+      <div className="mx-3 mb-2 rounded-2xl border border-white/10 bg-white/[.06] p-3">
         <form method="post" action="/api/organizations/switch" className="space-y-1">
-          <label htmlFor="organizationId" className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{N.activeOrg}</label>
+          <label htmlFor="organizationId" className="text-[10px] font-semibold uppercase tracking-[.14em] text-white/50">{N.activeOrg}</label>
           <select
             id="organizationId"
             name="organizationId"
             defaultValue={org.id}
             onChange={(e) => e.currentTarget.form?.requestSubmit()}
-            className="block h-9 w-full rounded-lg border border-line bg-white px-2 text-sm"
+            className="block h-9 w-full rounded-lg border border-white/15 bg-navy-900/40 px-2 text-sm font-medium text-white [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-brand-300/60"
           >
             {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
           </select>
-          <button className="sr-only focus:not-sr-only focus:text-xs focus:text-brand">{N.changeOrg}</button>
+          <button className="sr-only focus:not-sr-only focus:text-xs focus:text-white">{N.changeOrg}</button>
         </form>
-        <p className="mt-1 text-xs text-slate-500">{fill(N.role, { role: org.roleName })}</p>
-        <Link href="/onboarding" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"><Plus className="h-3 w-3" />{N.newOrg}</Link>
+        <p className="mt-1.5 text-xs text-white/60">{fill(N.role, { role: org.roleName })}</p>
+        {isDemo && <p className="mt-2 inline-flex rounded-full bg-ochre/90 px-2 py-0.5 text-[11px] font-semibold text-navy">{m.demo.badge}</p>}
+        <Link href="/onboarding" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand-300 hover:text-white"><Plus className="h-3 w-3" />{N.newOrg}</Link>
       </div>
-      <nav className="flex-1 overflow-y-auto px-3 pb-4" aria-label={N.pilotage}>
+      <nav className="flex-1 overflow-y-auto px-3 pb-4 [scrollbar-color:rgba(255,255,255,.2)_transparent]" aria-label={N.pilotage}>
         {NAV.map((group) => {
           const items = group.items.filter((i) => !i.permission || allowed.includes(i.permission) || i.phase);
           if (!items.length) return null;
           return (
             <div key={group.section} className="mt-4">
-              <p className="px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{N[group.section]}</p>
+              <p className="px-3 text-[10px] font-semibold uppercase tracking-[.14em] text-white/40">{N[group.section]}</p>
               <ul className="mt-1 space-y-0.5">
                 {items.map(({ href, label, icon: Icon, phase }) => {
                   if (phase) {
                     return (
                       <li key={href}>
-                        <span className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm text-slate-400" aria-disabled="true" title={fill(N.plannedPhase, { phase: phase })}>
+                        <span className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-white/35" aria-disabled="true" title={fill(N.plannedPhase, { phase: phase })}>
                           <Icon className="h-4 w-4" aria-hidden />
                           <span className="flex-1">{N[label]}</span>
-                          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium">{m.common.soon}</span>
+                          <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-medium text-white/50">{m.common.soon}</span>
                         </span>
                       </li>
                     );
@@ -76,9 +78,13 @@ export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, c
                       <Link
                         href={href}
                         aria-current={active ? "page" : undefined}
-                        className={cn("flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors", active ? "bg-brand-50 text-brand-deep" : "text-navy hover:bg-canvas")}
+                        className={cn(
+                          "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
+                          active ? "bg-white/[.12] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,.08)]" : "text-white/75 hover:translate-x-0.5 hover:bg-white/[.06] hover:text-white",
+                        )}
                       >
-                        <Icon className={cn("h-4 w-4", active ? "text-brand" : "text-slate-500")} aria-hidden />
+                        {active && <span className="absolute -left-3 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-ochre" aria-hidden />}
+                        <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", active ? "text-ochre" : "text-white/60")} aria-hidden />
                         {N[label]}
                       </Link>
                     </li>
@@ -89,13 +95,20 @@ export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, c
           );
         })}
       </nav>
-      <div className="border-t border-line p-4">
-        {platformAdmin && <Link href="/admin" className="mb-3 block text-xs font-semibold text-brand hover:underline">{m.admin.navLink}</Link>}
-        <LanguageSwitcher className="mb-3" />
-        <p className="truncate text-sm font-medium">{user.name}</p>
-        <p className="truncate text-xs text-slate-500">{user.email}</p>
+      <div className="border-t border-white/10 p-4">
+        {platformAdmin && <Link href="/admin" className="mb-3 block text-xs font-semibold text-ochre hover:text-white">{m.admin.navLink}</Link>}
+        <LanguageSwitcher className="mb-3 [&_select]:border-white/15 [&_select]:bg-navy-900/40 [&_select]:text-white [&_select]:[color-scheme:dark] [&_svg]:text-white/60" />
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-ochre to-[#F0C06E] text-sm font-bold text-navy" aria-hidden>
+            {user.name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-white">{user.name}</p>
+            <p className="truncate text-xs text-white/50">{user.email}</p>
+          </div>
+        </div>
         <form method="post" action="/api/auth/logout">
-          <button className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-danger"><LogOut className="h-3.5 w-3.5" />{m.common.logout}</button>
+          <button className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white"><LogOut className="h-3.5 w-3.5" />{m.common.logout}</button>
         </form>
       </div>
     </div>
@@ -104,20 +117,23 @@ export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, c
   return (
     <div className="min-h-screen">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:p-2">{m.common.skipToContent}</a>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line bg-white lg:block">{sidebar}</aside>
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 bg-gradient-to-b from-brand-deep via-[#0A3141] to-navy-900 lg:block">
+        <div className="pointer-events-none absolute -right-24 top-24 h-64 w-64 rounded-full bg-brand/30 blur-3xl" aria-hidden />
+        <div className="relative h-full">{sidebar}</div>
+      </aside>
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label={N.pilotage}>
-          <div className="absolute inset-0 bg-navy/40" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-white shadow-xl">{sidebar}</aside>
+          <div className="absolute inset-0 animate-fade-in bg-navy/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] animate-[fade-in_.25s_ease-out] bg-gradient-to-b from-brand-deep via-[#0A3141] to-navy-900 shadow-2xl">{sidebar}</aside>
         </div>
       )}
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-line bg-white/90 px-4 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-white/10 bg-brand-deep/95 px-4 text-white backdrop-blur lg:hidden">
           <button className="rounded-md p-2" onClick={() => setOpen(true)} aria-label={N.openMenu}><Menu className="h-5 w-5" /></button>
           <span className="truncate text-sm font-semibold">{org.name}</span>
         </header>
         <SubscriptionBanner s={subscription} />
-        <main id="main" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
+        <main id="main" key={pathname} className="mx-auto max-w-7xl animate-fade-in px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "./cn";
 
 const control =
-  "block w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-navy placeholder:text-slate-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:bg-canvas aria-[invalid=true]:border-danger";
+  "block w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-navy shadow-sm transition placeholder:text-slate-400 hover:border-brand/30 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 disabled:bg-canvas aria-[invalid=true]:border-danger";
 
 export function Field({ label, name, error, hint, required, children }: { label: string; name: string; error?: string; hint?: string; required?: boolean; children: ReactNode }) {
   return (
