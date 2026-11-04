@@ -25,7 +25,13 @@ h1, h2 { text-wrap: balance; }
 .mesh { position: absolute; inset: -20%; filter: blur(60px); opacity: .65; }
 .mesh span { position: absolute; border-radius: 9999px; }
 
+/* Éléments SVG animés autour de leur propre centre */
+.fb { transform-box: fill-box; transform-origin: center; }
+/* Texte SVG lisible sur fond sombre */
+.svg-label { paint-order: stroke; stroke: #0B2233; stroke-width: 5px; stroke-linejoin: round; }
+
 @media (prefers-reduced-motion: reduce) {
+  .motion-only { display: none !important; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
   .reveal { animation: none !important; }
 }

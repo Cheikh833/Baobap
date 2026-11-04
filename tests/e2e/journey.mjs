@@ -16,7 +16,7 @@ const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, l
 const page = await ctx.newPage();
 const consoleErrors = [];
 page.on("console", (m) => m.type() === "error" && consoleErrors.push(m.text()));
-page.on("pageerror", (e) => consoleErrors.push(e.message));
+page.on("pageerror", (e) => consoleErrors.push(`${e.message} @ ${page.url()}`));
 // Attend qu'un élément soit visible (renvoie false au lieu de lever une erreur).
 const vis = (loc, timeout = 8000) => loc.first().waitFor({ state: "visible", timeout }).then(() => true, () => false);
 const hidden = (loc) => loc.first().isVisible().then((v) => !v);
@@ -43,7 +43,7 @@ const shot = async (n) => SHOTS && page.screenshot({ path: `${SHOTS}/${n}.png`, 
 
 try {
   await go(BASE + "/");
-  check("Landing page", await vis(page.getByRole("heading", { name: /Gérez vos projets/ })));
+  check("Landing page", await vis(page.getByRole("heading", { level: 1, name: /Planifier/ })));
   await shot("01-landing");
 
   // Pages légales, santé, mot de passe oublié
