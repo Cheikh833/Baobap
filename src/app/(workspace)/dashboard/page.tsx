@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, Briefcase, CalendarClock, FolderKanban, Layers, Plus, Sparkles, Target, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, Briefcase, CalendarClock, FolderKanban, Layers, ListChecks, Plus, Sparkles, Target, Users } from "lucide-react";
 import { requireTenant } from "@/server/context";
 import { can } from "@/server/permissions/check";
 import { db } from "@/server/db";
 import { getDashboard } from "@/server/services/dashboard";
 import { recentActivity } from "@/server/services/audit-log";
 import { activePlanSummary } from "@/server/services/strategy";
+import { myTasks, planningAlerts } from "@/server/services/planning";
+import { isTaskOverdue } from "@/lib/planning";
 import { planCoverage } from "@/lib/strategy";
 import { Card, Stat } from "@/components/ui/display";
 import { ButtonLink } from "@/components/ui/button";
@@ -24,12 +26,14 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
   const ctx = await requireTenant();
-  const [d, activity, plan, { m, locale }, org] = await Promise.all([
+  const [d, activity, plan, { m, locale }, org, mine, palerts] = await Promise.all([
     getDashboard(ctx),
     recentActivity(ctx),
     activePlanSummary(ctx),
     getMessages(),
     db.organization.findUniqueOrThrow({ where: { id: ctx.organizationId }, select: { defaultCurrency: true } }),
+    myTasks(ctx),
+    planningAlerts(ctx),
   ]);
   const D = m.dashboard;
   const welcome = (await searchParams).welcome;
@@ -161,11 +165,38 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card>
+          <h2 className="flex items-center gap-2 font-display font-semibold"><ListChecks className="h-4 w-4 text-brand" aria-hidden />{m.planning.myTasks}</h2>
+          {mine.length === 0 ? <p className="mt-3 text-sm text-slate-500">{m.planning.noMyTasks}</p> : (
+            <ul className="mt-3 space-y-2 text-sm">
+              {mine.map((t, i) => {
+                const late = isTaskOverdue(t);
+                return (
+                  <li key={t.id} className="animate-fade-up" style={{ animationDelay: `${i * 50}ms` }}>
+                    <Link href={`/projects/${t.project.id}?tab=activities`} className="group block rounded-xl border border-line px-3 py-2 transition hover:border-brand/30 hover:bg-brand-50/40">
+                      <p className="font-medium group-hover:text-brand-deep">{t.title}</p>
+                      <p className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-slate-500">
+                        <span>{t.project.code}</span><span>· {m.planning.taskStatus[t.status]}</span>
+                        {t.dueDate && <span className={late ? "font-semibold text-danger" : ""}>· {fill(m.planning.due, { date: formatDate(t.dueDate, locale) })}</span>}
+                      </p>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Card>
         {d.projects && (
           <Card>
             <h2 className="flex items-center gap-2 font-display font-semibold"><AlertTriangle className="h-4 w-4 text-warning" aria-hidden />{D.alerts}</h2>
             <p className="text-xs text-slate-500">{D.alertsRule}</p>
+            {palerts && (palerts.lateActivities > 0 || palerts.overdueTasks > 0) && (
+              <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                {palerts.lateActivities > 0 && <span className="rounded-full bg-red-50 px-2.5 py-1 text-danger">{fill(m.planning.alertsActivities, { n: palerts.lateActivities })}</span>}
+                {palerts.overdueTasks > 0 && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-800">{fill(m.planning.alertsTasks, { n: palerts.overdueTasks })}</span>}
+              </div>
+            )}
             {d.projects.overdue.length === 0 && d.projects.upcoming.length === 0 ? (
               <p className="mt-3 text-sm text-slate-500">{D.noAlert}</p>
             ) : (

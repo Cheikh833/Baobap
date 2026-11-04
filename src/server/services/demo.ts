@@ -69,6 +69,34 @@ export async function createDemoOrganization(userId: string, now = new Date()) {
       ],
     });
 
+    // Planification fictive du projet PRJ-001 : phases, activités, dépendance, tâches, jalons.
+    const ph1 = await tx.projectPhase.create({ data: { organizationId: o, projectId: p1.id, name: "Lancement", position: 1 } });
+    const ph2 = await tx.projectPhase.create({ data: { organizationId: o, projectId: p1.id, name: "Mise en œuvre", position: 2 } });
+    const A = (data: Record<string, unknown>) => tx.activity.create({ data: { organizationId: o, projectId: p1.id, ownerId: userId, ...data } as never });
+    const act1 = await A({ phaseId: ph1.id, code: "A1.1", title: "Recrutement de l'équipe mobile", startDate: d(`${y - 1}-02-01`), endDate: d(`${y - 1}-04-30`), status: "DONE", position: 1 });
+    const act2 = await A({ phaseId: ph1.id, code: "A1.2", title: "Formation des relais communautaires", startDate: d(`${y - 1}-05-01`), endDate: d(`${y - 1}-08-31`), status: "DONE", position: 2 });
+    const act3 = await A({ phaseId: ph2.id, code: "A2.1", title: "Tournées de consultations prénatales", startDate: d(`${y - 1}-09-01`), endDate: d(`${y + 1}-03-31`), status: "IN_PROGRESS", position: 3 });
+    const act4 = await A({ phaseId: ph2.id, code: "A2.2", title: "Sensibilisation dans les villages", startDate: d(`${y}-01-15`), endDate: d(`${y + 1}-04-30`), status: "IN_PROGRESS", progress: 40, position: 4 });
+    await A({ phaseId: ph2.id, code: "A2.3", title: "Évaluation finale", startDate: d(`${y + 1}-04-01`), endDate: d(`${y + 1}-06-30`), status: "NOT_STARTED", position: 5 });
+    await tx.activityDependency.createMany({ data: [{ predecessorId: act1.id, successorId: act2.id }, { predecessorId: act2.id, successorId: act3.id }] });
+    const T = (data: Record<string, unknown>) => ({ organizationId: o, projectId: p1.id, assigneeId: userId, ...data }) as never;
+    await tx.task.createMany({
+      data: [
+        T({ activityId: act3.id, title: "Planifier la tournée du trimestre", status: "DONE", position: 1, priority: "HIGH", completedAt: now }),
+        T({ activityId: act3.id, title: "Commander les kits de dépistage", status: "IN_PROGRESS", position: 1, priority: "CRITICAL", dueDate: new Date(now.getTime() + 5 * 86_400_000) }),
+        T({ activityId: act3.id, title: "Mettre à jour le registre des consultations", status: "TODO", position: 1, priority: "MEDIUM", dueDate: new Date(now.getTime() + 12 * 86_400_000) }),
+        T({ activityId: act4.id, title: "Préparer les supports en wolof et pulaar", status: "REVIEW", position: 1, priority: "HIGH", dueDate: new Date(now.getTime() - 2 * 86_400_000) }),
+        T({ activityId: act4.id, title: "Former 10 nouveaux relais", status: "TODO", position: 2, priority: "MEDIUM", assigneeId: null }),
+      ],
+    });
+    await tx.milestone.createMany({
+      data: [
+        { organizationId: o, projectId: p1.id, title: "Équipe opérationnelle", dueDate: d(`${y - 1}-05-01`), achievedAt: d(`${y - 1}-04-28`) },
+        { organizationId: o, projectId: p1.id, title: "Rapport à mi-parcours", dueDate: d(`${y}-12-15`) },
+        { organizationId: o, projectId: p1.id, title: "Clôture du projet", dueDate: d(`${y + 1}-06-30`) },
+      ],
+    });
+
     await audit(tx, { organizationId: o, actorId: userId, action: "demo.create", entityType: "Organization", entityId: o, summary: "Création de l'espace de démonstration (données fictives)" });
     return { id: o };
   });

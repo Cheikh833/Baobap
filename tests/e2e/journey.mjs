@@ -31,6 +31,13 @@ const clickNav = async (selector, url) => {
   catch { warnings.push(`navigation relancée : ${selector}`); await page.click(selector); await page.waitForURL(url); }
   await page.waitForLoadState("networkidle");
 };
+// Changement de langue (formulaire natif → /api/locale → redirection) : attendre la fin réelle du rechargement.
+const setLocale = async (code) => {
+  await Promise.all([page.waitForResponse((r) => r.url().includes("/api/locale")), page.selectOption("#locale-select", code)]);
+  await page.waitForLoadState("load");
+  await page.waitForFunction((c) => document.documentElement.lang === c, code);
+  await page.waitForLoadState("networkidle");
+};
 const go = async (path) => { const r = await page.goto(path.startsWith("http") ? path : BASE + path); await page.waitForLoadState("networkidle"); return r; };
 const shot = async (n) => SHOTS && page.screenshot({ path: `${SHOTS}/${n}.png`, fullPage: true });
 
@@ -58,15 +65,11 @@ try {
   await shot("01b-tarifs");
 
   // Changement de langue (formulaire natif)
-  await page.selectOption("#locale-select", "en");
-  await page.waitForURL("**/pricing");
-  await page.waitForLoadState("networkidle");
+  await setLocale("en");
   check("Langue : anglais", await vis(page.getByRole("heading", { name: /Pricing designed for impact/ })));
-  await page.selectOption("#locale-select", "wo");
-  await page.waitForLoadState("networkidle");
+  await setLocale("wo");
   check("Langue : wolof (bêta, repli français)", await vis(page.getByRole("link", { name: "Njëg yi" })));
-  await page.selectOption("#locale-select", "fr");
-  await page.waitForLoadState("networkidle");
+  await setLocale("fr");
   check("Langue : retour au français", await vis(page.getByRole("heading", { name: /Des tarifs pensés/ })));
 
   // Validation côté serveur : erreurs affichées
@@ -181,6 +184,28 @@ try {
   await go(page.url().replace("settings", "history"));
   check("Historique du projet", await vis(page.getByText(/ACTIVE/).first()));
 
+  // Planification : activité → Gantt ; tâche → Kanban
+  await go(page.url().replace(/\?tab=.*$/, "") + "?tab=planning");
+  const actForm = page.locator("details:has(summary:has-text('Nouvelle activité')) form");
+  await actForm.locator("[name=code]").fill("A1");
+  await actForm.locator("[name=title]").fill("Activité E2E");
+  await actForm.locator("[name=startDate]").fill("2026-02-01");
+  await actForm.locator("[name=endDate]").fill("2026-06-30");
+  await actForm.locator("button[type=submit]").click();
+  check("Planification : activité créée et visible dans le Gantt", await vis(page.getByText("Activité E2E")));
+  await go(page.url().replace(/\?tab=.*$/, "") + "?tab=activities");
+  const taskForm = page.locator("details:has(summary:has-text('Nouvelle tâche')) form");
+  await taskForm.locator("[name=title]").fill("Tâche E2E");
+  await taskForm.locator("button[type=submit]").click();
+  const todoCol = page.locator("section[aria-label='À faire']");
+  check("Kanban : tâche dans « À faire »", await vis(todoCol.getByText("Tâche E2E")));
+  await page.click("button[aria-label='Avancer : Tâche E2E']");
+  const inProgCol = page.locator("section[aria-label='En cours']");
+  check("Kanban : tâche déplacée « En cours »", await vis(inProgCol.getByText("Tâche E2E")));
+  await page.waitForLoadState("networkidle"); // laisse l'enregistrement du déplacement se terminer
+  await go(page.url());
+  check("Kanban : déplacement enregistré après rechargement", await vis(page.locator("section[aria-label='En cours']").getByText("Tâche E2E")));
+
   // Tableau de bord alimenté
   await go(BASE + "/dashboard");
   const dashText = await page.textContent("main");
@@ -188,11 +213,9 @@ try {
   await shot("05-dashboard");
 
   // Espace de travail en anglais puis retour au français
-  await page.selectOption("#locale-select", "en");
-  await page.waitForLoadState("networkidle");
+  await setLocale("en");
   check("Espace de travail en anglais", await vis(page.getByRole("heading", { name: /^Hello,/ })));
-  await page.selectOption("#locale-select", "fr");
-  await page.waitForLoadState("networkidle");
+  await setLocale("fr");
   check("Espace de travail : retour au français", await vis(page.getByRole("heading", { name: /^Bonjour,/ })));
 
   // Organisation
@@ -223,8 +246,12 @@ try {
   await waitUrl("**/dashboard");
   check("Démo : espace fictif créé et ouvert", await vis(page.locator("main").getByText("[DÉMO] ONG Sahel Avenir (fictif)").first()));
   check("Démo : plan stratégique pré-rempli", await vis(page.getByText(/Plan stratégique .* \(fictif\)/).first()));
-  await page.selectOption("#organizationId", { label: `Organisation E2E ${stamp}` });
-  await waitUrl("**/dashboard");
+  await Promise.all([
+    page.waitForResponse((r) => r.url().includes("/api/organizations/switch")),
+    page.selectOption("#organizationId", { label: `Organisation E2E ${stamp}` }),
+  ]);
+  await page.locator("main").getByText(`Organisation E2E ${stamp}`).first().waitFor();
+  await page.waitForLoadState("networkidle");
 
   // Déconnexion → invité accepte
   await go(BASE + "/dashboard");

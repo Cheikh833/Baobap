@@ -18,6 +18,8 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 | Membres | Invitations par lien (expirant, à usage unique, liées à l'email), changement de rôle, suspension |
 | Rôles & permissions | 11 rôles système + rôles personnalisés, matrice de permissions `ressource:action`, vérification **côté serveur** |
 | Audit | Journal des modifications importantes (avant/après), historique par projet |
+| Planification | Phases, activités, tâches, jalons, dépendances sans boucle ; diagramme de Gantt, tableau Kanban (glisser-déposer), « Mes tâches », alertes de retard, santé « Activités » calculée |
+| Démo | Espace de démonstration fictif complet en un clic (stratégie, projets, planning) |
 | Stratégie | Plans stratégiques (un seul actif), axes, objectifs, contributions pondérées des projets (≤ 100 %), couverture des objectifs, budget aligné sans double comptage, projets non alignés |
 | Portefeuilles / Programmes | Création, fiche, modification, suppression logique, rattachements contrôlés |
 | Projets | Assistant de création en 8 étapes avec **brouillon** et reprise, fiche projet, santé du projet (règles documentées), cycle de vie (Brouillon → Préparation → Actif → Suspendu/Clôturé → Archivé), filtres |

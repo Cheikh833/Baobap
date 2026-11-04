@@ -4,6 +4,8 @@ import { can } from "@/server/permissions/check";
 import { allowedTransitions, getProject } from "@/server/services/projects";
 import { hierarchyOptions, strategyOptions } from "@/server/services/options";
 import { getProjectContributions } from "@/server/services/strategy";
+import { getPlanning } from "@/server/services/planning";
+import { isActivityLate, planningProgress } from "@/lib/planning";
 import { db } from "@/server/db";
 import { Badge, Card, DefinitionList, PageHeader, ProgressBar, Stat } from "@/components/ui/display";
 import { ActionForm } from "@/components/forms/action-form";
@@ -19,10 +21,12 @@ import { fill } from "@/i18n/translate";
 import type { Messages } from "@/i18n/messages/fr";
 import { Forbidden } from "../../forbidden";
 import { orNotFound } from "../../guard";
+import { PlanningTab } from "./planning-tab";
+import { ActivitiesTab } from "./activities-tab";
 import { deleteProjectAction, editStepAction, statusAction } from "../actions";
 
 const TABS = [
-  ["overview", 0], ["planning", 3], ["activities", 3], ["results", 4], ["meal", 4], ["finance", 5],
+  ["overview", 0], ["planning", 0], ["activities", 0], ["results", 4], ["meal", 4], ["finance", 5],
   ["risks", 5], ["team", 3], ["documents", 6], ["reports", 9], ["history", 0], ["settings", 0],
 ] as const;
 
@@ -40,7 +44,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
   const ctx = await requireTenant();
   if (!can(ctx, "project:view")) return <Forbidden />;
   const { id } = await params;
-  const [p, base, strategy, contributions, { m, locale }] = await Promise.all([orNotFound(getProject(ctx, id)), hierarchyOptions(ctx), strategyOptions(ctx, id), getProjectContributions(ctx, id), getMessages()]);
+  const [p, base, strategy, contributions, planning, { m, locale }] = await Promise.all([orNotFound(getProject(ctx, id)), hierarchyOptions(ctx), strategyOptions(ctx, id), getProjectContributions(ctx, id), getPlanning(ctx, id).catch(() => null), getMessages()]);
   const o = { ...base, strategy };
   const tab = (await searchParams).tab ?? "overview";
   const editable = can(ctx, "project:edit");
@@ -83,7 +87,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
             <h2 className="font-semibold">{P.healthTitle}</h2>
             <p className="mb-4 text-xs text-slate-500">{P.healthHint}</p>
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {projectHealth(p).map((h) => (
+              {projectHealth(p, new Date(), planning ? { actual: planningProgress(planning.activities), late: planning.activities.filter((a) => isActivityLate(a)).length } : null).map((h) => (
                 <li key={h.key} className="rounded-lg border border-line p-3">
                   <div className="flex items-center gap-2 text-sm font-medium"><span className={cn("h-2.5 w-2.5 rounded-full", levelColor[h.level])} aria-hidden />{P.health[h.key]}<span className="ml-auto text-xs text-slate-500">{P.levels[h.level]}</span></div>
                   <p className="mt-1 text-xs text-slate-600">{healthText(h, m)}</p>
@@ -91,6 +95,23 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
               ))}
             </ul>
           </Card>
+          {planning && (planning.activities.length > 0 || planning.tasks.length > 0 || planning.milestones.length > 0) && (() => {
+            const next = planning.milestones.find((x) => !x.achievedAt && x.dueDate >= new Date());
+            const done = planning.tasks.filter((t) => t.status === "DONE").length;
+            return (
+              <Card>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="font-semibold">{m.planning.summary}</h2>
+                  <Link href="?tab=planning" className="text-xs font-semibold text-brand hover:underline">{m.planning.gantt} →</Link>
+                </div>
+                <div className="mt-3 grid gap-4 sm:grid-cols-3">
+                  <div><p className="font-display text-2xl font-bold tabular">{planningProgress(planning.activities) ?? "—"}{planningProgress(planning.activities) !== null && " %"}</p><p className="text-xs text-slate-500">{m.planning.actual}</p></div>
+                  <div><p className="font-display text-2xl font-bold tabular">{done} / {planning.tasks.length}</p><p className="text-xs text-slate-500">{fill(m.planning.tasksCount, { done, total: planning.tasks.length })}</p></div>
+                  <div><p className="text-sm font-semibold">{next ? fill(m.planning.nextMilestone, { title: next.title, date: formatDate(next.dueDate, locale) }) : m.planning.noMilestones}</p></div>
+                </div>
+              </Card>
+            );
+          })()}
           <Card>
             <h2 className="mb-3 font-semibold">{m.strategy.contributionsTitle}</h2>
             {contributions.length === 0 ? (
@@ -119,6 +140,8 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
         </div>
       )}
 
+      {tab === "planning" && <PlanningTab ctx={ctx} projectId={p.id} edit={editable} members={o.members} memberNames={o.memberNames} m={m} locale={locale} />}
+      {tab === "activities" && <ActivitiesTab ctx={ctx} projectId={p.id} members={o.members} memberNames={o.memberNames} m={m} locale={locale} />}
       {tab === "history" && <History orgId={ctx.organizationId} projectId={p.id} canAudit={can(ctx, "audit:view")} m={m} locale={locale} />}
 
       {tab === "settings" && (
@@ -157,7 +180,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
         </div>
       )}
 
-      {!["overview", "history", "settings"].includes(tab) && <Card><p className="text-sm text-slate-600">{P.tabSoon} <Badge>{m.common.soon}</Badge></p></Card>}
+      {!["overview", "planning", "activities", "history", "settings"].includes(tab) && <Card><p className="text-sm text-slate-600">{P.tabSoon} <Badge>{m.common.soon}</Badge></p></Card>}
     </>
   );
 }

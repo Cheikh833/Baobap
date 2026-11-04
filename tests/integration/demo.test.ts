@@ -29,3 +29,19 @@ describe("espace de démonstration", () => {
     expect(await listProjects(a.ctx)).toHaveLength(0);
   });
 });
+
+import { getPlanning } from "@/server/services/planning";
+describe("démo : planification", () => {
+  it("le projet PRJ-001 de la démo a un planning complet", async () => {
+    const a = await ownerWithOrg("Z");
+    const demo = await createDemoOrganization(a.user.id);
+    const ctx = (await loadTenantContext(a.user.id, demo.id))!;
+    const p1 = (await listProjects(ctx)).find((p) => p.code === "PRJ-001")!;
+    const pl = await getPlanning(ctx, p1.id);
+    expect(pl.phases).toHaveLength(2);
+    expect(pl.activities).toHaveLength(5);
+    expect(pl.tasks.length).toBeGreaterThanOrEqual(5);
+    expect(pl.milestones).toHaveLength(3);
+    expect(pl.dependencies).toHaveLength(2);
+  });
+});

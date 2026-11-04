@@ -6,7 +6,7 @@
 | 0 — Audit & fondations | Dépôt initialisé (vide au départ), stack, architecture, modèle de données, design system, documentation | ✅ |
 | 1 — Fondation organisationnelle | Auth, organisation, membership, multi-tenancy, RBAC, profil, structures, tableau de bord initial, audit | ✅ |
 | 2 — Stratégie | Portefeuilles ✅, programmes ✅, plans stratégiques ✅, axes ✅, objectifs ✅, contributions pondérées des projets ✅, couverture et budget aligné ✅ ; arbitrages et scénarios 🔜 | ✅ (cœur) |
-| 3 — Projets | Création ✅, fiche ✅, cycle de vie ✅ ; activités, tâches, livrables, jalons, dépendances, équipe projet, Gantt, Kanban, calendrier 🔜 | Partielle |
+| 3 — Projets | Création ✅, fiche ✅, cycle de vie ✅, phases ✅, activités ✅, tâches ✅, jalons ✅, dépendances ✅, Gantt ✅, Kanban ✅, « Mes tâches » ✅ ; livrables, équipe projet, calendrier 🔜 | ✅ (cœur) |
 | 4 — Impact & MEAL | Cadre logique versionné, ToC visuelle, résultats, indicateurs, désagrégations, collecte, qualité, évaluations, redevabilité, apprentissage | 🔜 |
 | 5 — Finances & risques | Budgets, lignes, financements, dépenses, engagements, décaissements, variances, contrôles ; registre et matrice des risques, incidents | 🔜 |
 | 6 — Documents | Stockage privé, versions, extraction, indexation, recherche, RAG, citations | 🔜 |

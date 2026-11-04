@@ -241,3 +241,36 @@ export const contributionsSchema = z
   .array(z.object({ objectiveId: z.string().cuid("Objectif invalide."), weight: z.number({ invalid_type_error: "Pourcentage invalide." }).int("Pourcentage entier attendu.").min(1, "Chaque contribution doit être d'au moins 1 %.").max(100, "Une contribution ne peut pas dépasser 100 %.") }))
   .max(30)
   .refine((items) => items.reduce((s, i) => s + i.weight, 0) <= 100, { message: "La somme des contributions d'un projet ne peut pas dépasser 100 %." });
+
+// ───────────── Planification ─────────────
+export const phaseSchema = z.object({ name: reqText("Le nom", 120), position: optInt });
+
+export const activitySchema = dateRange(
+  z.object({
+    code: code,
+    title: reqText("L'intitulé", 200),
+    description: optText(),
+    phaseId: optId,
+    ownerId: optId,
+    startDate: optDate,
+    endDate: optDate,
+    status: z.enum(["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "DONE", "CANCELED"]).default("NOT_STARTED"),
+    progress: z.preprocess((v) => (v === "" || v === undefined ? 0 : v), z.coerce.number().int().min(0, "Entre 0 et 100.").max(100, "Entre 0 et 100.")),
+    position: optInt,
+  }),
+);
+
+export const taskSchema = z.object({
+  title: reqText("L'intitulé", 200),
+  description: optText(),
+  activityId: optId,
+  assigneeId: optId,
+  dueDate: optDate,
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).default("MEDIUM"),
+  status: z.enum(["TODO", "IN_PROGRESS", "REVIEW", "DONE"]).default("TODO"),
+});
+
+export const milestoneSchema = z.object({
+  title: reqText("L'intitulé", 200),
+  dueDate: z.coerce.date({ required_error: "La date est obligatoire.", invalid_type_error: "Date invalide." }),
+});

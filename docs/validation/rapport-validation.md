@@ -8,8 +8,8 @@ Date : 2026-11-03 · Environnement : Node 22, PostgreSQL 16, build de production
 | TypeScript strict (`npm run typecheck`) | ✅ 0 erreur |
 | ESLint (`npm run lint`) | ✅ 0 avertissement |
 | Build de production | ✅ |
-| Tests unitaires + intégration (`npm test`, PostgreSQL réel) | ✅ 90/90 |
-| Parcours navigateur Playwright (`tests/e2e/journey.mjs`) | ✅ 63/63, deux exécutions consécutives, aucune nouvelle tentative, aucune erreur console |
+| Tests unitaires + intégration (`npm test`, PostgreSQL réel) | ✅ 101/101 |
+| Parcours navigateur Playwright (`tests/e2e/journey.mjs`) | ✅ 69/69, deux exécutions consécutives, aucune nouvelle tentative, aucune erreur console |
 
 ## Couverture des tests automatisés
 - **Unitaires** : formules (avancement temporel, durée, retard, budgets par devise, pondération), santé du projet, validation (mot de passe, codes, dates, champs facultatifs, montants « 1 250 000,50 »), redirections sûres, cohérence du catalogue de permissions.
@@ -17,6 +17,7 @@ Date : 2026-11-03 · Environnement : Node 22, PostgreSQL 16, build de production
 - **Abonnement et langues** (ajout) : état d'essai/grâce/expiration, lecture seule (consultation permise, écriture refusée même au propriétaire, demande d'abonnement possible), activation après paiement, limites Essentiel (5 membres hors bailleurs, 10 projets), nom de projet unique par programme, négociation de langue, complétude de l'anglais, repli du wolof sur le français ; navigateur : page Tarifs (annuel/mensuel), changement de langue fr → en → wo → fr, page Abonnement et demande d'activation.
 - **Paiement, comptes, langues** (ajout) : CinetPay simulé (initialisation, paiement accepté, appels concurrents sans double activation, montant falsifié refusé, en attente, refusé, renouvellement prolongeant la période, prestataire indisponible, signature HMAC), mot de passe oublié (lien unique, expiration, sessions fermées, pas d'énumération, limitation), traduction des messages serveur ; navigateur : conditions d'utilisation obligatoires, pages légales, `/api/health`, mot de passe oublié sans SMTP, espace de travail en anglais.
 - **Stratégie et paiement Mobile Money** (ajout) : contributions pondérées, budget aligné sans double comptage, couverture, refus > 100 %, isolation inter-organisations, plan actif unique, codes uniques, règles de suppression, projets non alignés, permissions ; déclaration de paiement, confirmation et rejet par l'administrateur, accès réservé, tarif solidaire ; navigateur : création d'un plan, d'un axe et d'un objectif, alignement d'un projet à l'étape 2, couverture à 100 %.
+- **Refonte, démo, planification** (ajout) : espace de démonstration (une seule fois, séparé, données fictives, planning complet), activités dans la période du projet, codes uniques, dépendances sans boucle et inter-projets refusées, Kanban (ordre, assigné autorisé, lecteur refusé), isolation, jalons, alertes, formules d'avancement pondéré, santé « Activités », plage du Gantt ; navigateur : création d'activité visible dans le Gantt, tâche créée puis déplacée sur le Kanban et persistée après rechargement, démo en un clic, absence de défilement horizontal à 320 px.
 - **Navigateur** : landing, erreurs de validation affichées, inscription → onboarding → tableau de bord, contrôle des dates, portefeuille, programme, assistant complet (retour arrière sans perte, refus de saut d'étape, synthèse), fiche et santé, activation, historique, tableau de bord alimenté, structures, invitation → déconnexion → inscription de l'invité → acceptation, restrictions d'un membre d'équipe, compte bailleur de démo (audit interdit, isolation), 404, absence de défilement horizontal sur 8 tailles d'écran, menu mobile, landing en mobile.
 
 ## Routes vérifiées dans le navigateur

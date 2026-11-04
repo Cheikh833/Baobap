@@ -1,4 +1,5 @@
 import { isOverdue, timeProgress } from "./metrics";
+import { activitiesHealth } from "./planning";
 
 // Santé du projet : chaque dimension est calculée par une règle documentée, à partir des données réelles.
 // Les dimensions dont les données n'existent pas encore sont explicitement « non évaluées ».
@@ -28,15 +29,17 @@ export function completeness(p: P) {
   return { pct: Math.round(((COMPLETENESS_FIELDS.length - missing.length) / COMPLETENESS_FIELDS.length) * 100), missing };
 }
 
-export function projectHealth(p: P, now = new Date()): HealthDimension[] {
+export type PlanningInfo = { actual: number | null; late: number } | null;
+
+export function projectHealth(p: P, now = new Date(), planning: PlanningInfo = null): HealthDimension[] {
   // Planning — règle : critique si en retard ; vigilance si ≤ 30 jours restants ou ≥ 85 % du temps écoulé ; inconnu sans dates.
-  let planning: HealthDimension;
-  if (!p.startDate || !p.endDate) planning = { key: "planning", level: "unknown", detail: { k: "noDates" } };
-  else if (isOverdue(p.status, p.endDate, now)) planning = { key: "planning", level: "critical", detail: { k: "overdue" } };
+  let planning_: HealthDimension;
+  if (!p.startDate || !p.endDate) planning_ = { key: "planning", level: "unknown", detail: { k: "noDates" } };
+  else if (isOverdue(p.status, p.endDate, now)) planning_ = { key: "planning", level: "critical", detail: { k: "overdue" } };
   else {
     const t = timeProgress(p.startDate, p.endDate, now)!;
     const daysLeft = Math.ceil((p.endDate.getTime() - now.getTime()) / 86_400_000);
-    planning = ["CLOSED", "ARCHIVED"].includes(p.status)
+    planning_ = ["CLOSED", "ARCHIVED"].includes(p.status)
       ? { key: "planning", level: "good", detail: { k: "closed" } }
       : daysLeft <= 30 || t >= 85
         ? { key: "planning", level: "watch", detail: { k: "ending", vars: { pct: t, days: daysLeft } } }
@@ -51,5 +54,11 @@ export function projectHealth(p: P, now = new Date()): HealthDimension[] {
     missing: c.missing,
   };
   const pending = (key: "activities" | "budget" | "indicators" | "risks"): HealthDimension => ({ key, level: "unknown", detail: { k: "pending", vars: { module: key } } });
-  return [planning, data, pending("activities"), pending("budget"), pending("indicators"), pending("risks")];
+  // Activités — règle : écart entre temps écoulé et avancement réel (≤ 10 pts bon, ≤ 25 vigilance, au-delà critique),
+  // vigilance dès qu'une activité est en retard ; non évalué sans activité.
+  const elapsed = timeProgress(p.startDate, p.endDate, now);
+  const activities: HealthDimension = !planning || planning.actual === null
+    ? { key: "activities", level: "unknown", detail: { k: "activitiesNone" } }
+    : { key: "activities", level: activitiesHealth(planning.actual, elapsed, planning.late), detail: { k: "activitiesValue", vars: { actual: planning.actual, elapsed: elapsed ?? "—", late: planning.late } } };
+  return [planning_, data, activities, pending("budget"), pending("indicators"), pending("risks")];
 }

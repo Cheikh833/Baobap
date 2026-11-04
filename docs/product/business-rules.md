@@ -22,7 +22,8 @@ Implémentation : `src/lib/metrics.ts`, `src/lib/project-health.ts`, services `s
 |---|---|---|
 | Planning | Critique si en retard ; Vigilance si ≤ 30 jours restants ou ≥ 85 % du temps écoulé ; Bon sinon ; Non évalué sans dates | ✅ |
 | Complétude de la fiche | Part des 10 champs clés renseignés (chef de projet, description, contexte, objectif général, objectifs spécifiques, pays, bénéficiaires directs, début, fin, budget) : ≥ 80 % Bon, ≥ 50 % Vigilance, sinon Critique | ✅ |
-| Activités, Budget, Indicateurs, Risques | Affichées « Non évalué » avec le module requis — **jamais estimées** | 🔜 |
+| Activités | Écart temps écoulé / avancement réel + activités en retard (voir Planification) | ✅ |
+| Budget, Indicateurs, Risques | Affichées « Non évalué » avec le module requis — **jamais estimées** | 🔜 |
 
 ## Stratégie (phase 2)
 - Hiérarchie : **plan stratégique → axes → objectifs**. Codes d'axe et d'objectif uniques dans un plan.
@@ -32,6 +33,17 @@ Implémentation : `src/lib/metrics.ts`, `src/lib/project-health.ts`, services `s
 - **Objectif couvert** = au moins une contribution d'un projet non archivé. **Taux de couverture** = objectifs couverts / objectifs du plan.
 - **Projets non alignés** = projets en cours (ni clôturés, ni archivés) sans aucune contribution à un objectif du plan.
 - Suppression : un axe qui contient des objectifs, ou un objectif qui reçoit des contributions, ne peut pas être supprimé.
+
+## Planification (phase 3)
+- Hiérarchie : **projet → phases (facultatives) → activités → tâches** ; **jalons** datés ; **dépendances « fin → début »** entre activités du même projet, sans boucle (vérifié côté serveur).
+- Une activité s'inscrit dans la période du projet quand elle est connue ; code d'activité unique dans le projet.
+- **Avancement d'une activité** = part des tâches terminées si elle a des tâches, sinon l'avancement saisi ; « terminée » = 100 % ; « annulée » est exclue des calculs.
+- **Avancement réel du projet** = moyenne des avancements d'activités pondérée par leur durée (jours).
+- **Activité en retard** = date de fin dépassée et statut ni « terminée » ni « annulée ». **Tâche en retard** = échéance dépassée et tâche non terminée.
+- **Conflit de dépendance** (signalé, non bloquant) = l'activité suivante commence avant la fin de la précédente.
+- **Santé « Activités »** : écart (temps écoulé − avancement réel) ≤ 10 pts → bon ; ≤ 25 pts → vigilance ; au-delà → critique ; vigilance dès qu'une activité est en retard ; non évalué sans activité.
+- **Kanban** : déplacer une tâche exige `project:edit`, **ou** d'en être la personne assignée (même avec un rôle en lecture). Ordre conservé dans chaque colonne ; `completedAt` renseigné au passage à « Terminé ».
+- Une phase contenant des activités, ou une activité contenant des tâches, ne peut pas être supprimée.
 
 ## Cycle de vie du projet
 Brouillon → Préparation | Actif | Archivé ; Préparation → Brouillon | Actif | Archivé ; Actif → Suspendu | Clôturé ; Suspendu → Actif | Clôturé ; Clôturé → Archivé. Passer en **Actif** exige les dates de début et de fin et la permission `project:approve`.

@@ -378,6 +378,10 @@ model Project {
   portfolio    Portfolio?   @relation(fields: [portfolioId], references: [id])
   program      Program?     @relation(fields: [programId], references: [id])
   objectiveContributions ProjectObjectiveContribution[]
+  phases       ProjectPhase[]
+  activities   Activity[]
+  tasks        Task[]
+  milestones   Milestone[]
 
   @@unique([organizationId, code])
   @@index([organizationId, status])
@@ -540,4 +544,117 @@ model ProjectObjectiveContribution {
 
   @@id([projectId, objectiveId])
   @@index([objectiveId])
+}
+
+// ───────────── Planification (phase 3) ─────────────
+// Projet → Phases (facultatives) → Activités → Tâches ; jalons ; dépendances entre activités.
+
+enum ActivityStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  BLOCKED
+  DONE
+  CANCELED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+model ProjectPhase {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String
+  name           String
+  position       Int       @default(0)
+  createdAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  activities Activity[]
+
+  @@index([projectId])
+}
+
+model Activity {
+  id             String         @id @default(cuid())
+  organizationId String
+  projectId      String
+  phaseId        String?
+  code           String
+  title          String
+  description    String?
+  ownerId        String?
+  startDate      DateTime?
+  endDate        DateTime?
+  status         ActivityStatus @default(NOT_STARTED)
+  progress       Int            @default(0) // avancement saisi (utilisé seulement si l'activité n'a pas de tâches)
+  position       Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  createdById    String?
+  deletedAt      DateTime?
+
+  project      Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  phase        ProjectPhase?        @relation(fields: [phaseId], references: [id])
+  tasks        Task[]
+  predecessors ActivityDependency[] @relation("successor")
+  successors   ActivityDependency[] @relation("predecessor")
+
+  @@index([projectId])
+  @@index([organizationId, endDate])
+}
+
+/// Dépendance « fin → début » : l'activité successeur ne devrait pas commencer avant la fin du prédécesseur.
+model ActivityDependency {
+  predecessorId String
+  successorId   String
+
+  predecessor Activity @relation("predecessor", fields: [predecessorId], references: [id], onDelete: Cascade)
+  successor   Activity @relation("successor", fields: [successorId], references: [id], onDelete: Cascade)
+
+  @@id([predecessorId, successorId])
+}
+
+model Task {
+  id             String     @id @default(cuid())
+  organizationId String
+  projectId      String
+  activityId     String?
+  title          String
+  description    String?
+  assigneeId     String?
+  dueDate        DateTime?
+  status         TaskStatus @default(TODO)
+  priority       Priority   @default(MEDIUM)
+  position       Int        @default(0)
+  completedAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  createdById    String?
+  deletedAt      DateTime?
+
+  project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  activity Activity? @relation(fields: [activityId], references: [id])
+
+  @@index([projectId, status])
+  @@index([organizationId, assigneeId, status])
+}
+
+model Milestone {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String
+  title          String
+  dueDate        DateTime
+  achievedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
 }
