@@ -206,6 +206,46 @@ try {
   await go(page.url());
   check("Kanban : déplacement enregistré après rechargement", await vis(page.locator("section[aria-label='En cours']").getByText("Tâche E2E")));
 
+  // Suivi-évaluation : cadre logique → indicateur → valeur ventilée → validation
+  await go(page.url().replace(/\?tab=.*$/, "") + "?tab=results");
+  const itemForm = page.locator("details:has(summary:has-text('Ajouter un élément')) form");
+  await itemForm.locator("[name=level]").selectOption("IMPACT");
+  await itemForm.locator("[name=code]").fill("IMP");
+  await itemForm.locator("[name=title]").fill("Impact E2E");
+  await itemForm.locator("button[type=submit]").click();
+  check("MEAL : élément du cadre logique créé", await vis(page.getByText("Impact E2E")));
+  check("MEAL : contrôle de cohérence signale l'absence d'indicateur", await vis(page.getByText("IMP n'a aucun indicateur")));
+  await go(page.url().replace(/\?tab=.*$/, "") + "?tab=meal");
+  const indForm = page.locator("details:has(summary:has-text('Nouvel indicateur')) form");
+  await indForm.locator("[name=code]").fill("IND-E2E");
+  await indForm.locator("[name=name]").fill("Personnes formées E2E");
+  await indForm.locator("[name=definition]").fill("Nombre de personnes formées.");
+  await indForm.locator("[name=unit]").fill("personnes");
+  await indForm.locator("[name=logframeItemId]").selectOption({ label: "Impact · IMP — Impact E2E" });
+  await indForm.locator("[name=baseline]").fill("0");
+  await indForm.locator("[name=target]").fill("200");
+  await indForm.locator("[name=source]").fill("Listes de présence");
+  await indForm.locator("[name=disaggregations]").fill("Sexe : Femmes, Hommes");
+  await indForm.locator("button[type=submit]").click();
+  check("MEAL : indicateur créé", await vis(page.getByText("Personnes formées E2E")));
+  await page.click("a:has-text('Personnes formées E2E')");
+  await waitUrl("**/meal/indicators/**");
+  const valForm = page.locator("form:has([name=periodStart])").first();
+  await valForm.locator("[name=periodStart]").fill("2026-01-01");
+  await valForm.locator("[name=periodEnd]").fill("2026-03-31");
+  await valForm.locator("[name=value]").fill("50");
+  await valForm.locator("[name=source]").fill("Listes T1");
+  await valForm.locator("[name='dis__Sexe__Femmes']").fill("30");
+  await valForm.locator("[name='dis__Sexe__Hommes']").fill("10");
+  await valForm.locator("button[type=submit]").click();
+  check("MEAL : ventilation incohérente refusée", await vis(page.getByText(/Ventilation incohérente/)));
+  await valForm.locator("[name='dis__Sexe__Hommes']").fill("20");
+  await valForm.locator("button[type=submit]").click();
+  check("MEAL : valeur saisie en attente de validation", await vis(page.getByText("À valider").first()));
+  await page.click("button:has-text('Valider')");
+  check("MEAL : valeur validée, taux d'atteinte calculé (25 %)", await vis(page.getByText("25\u00A0%").first()));
+  await shot("05b-indicateur");
+
   // Tableau de bord alimenté
   await go(BASE + "/dashboard");
   const dashText = await page.textContent("main");

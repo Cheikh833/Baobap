@@ -23,7 +23,8 @@ Implémentation : `src/lib/metrics.ts`, `src/lib/project-health.ts`, services `s
 | Planning | Critique si en retard ; Vigilance si ≤ 30 jours restants ou ≥ 85 % du temps écoulé ; Bon sinon ; Non évalué sans dates | ✅ |
 | Complétude de la fiche | Part des 10 champs clés renseignés (chef de projet, description, contexte, objectif général, objectifs spécifiques, pays, bénéficiaires directs, début, fin, budget) : ≥ 80 % Bon, ≥ 50 % Vigilance, sinon Critique | ✅ |
 | Activités | Écart temps écoulé / avancement réel + activités en retard (voir Planification) | ✅ |
-| Budget, Indicateurs, Risques | Affichées « Non évalué » avec le module requis — **jamais estimées** | 🔜 |
+| Indicateurs & résultats | Seuls les indicateurs évalués (valeur validée) comptent : Critique si plus d'un quart sont en décrochage ; Vigilance si au moins un est en décrochage ou en vigilance, ou si un indicateur n'est pas actualisé ; Bon sinon ; Non évalué sans indicateur évalué | ✅ |
+| Budget, Risques | Affichées « Non évalué » avec le module requis — **jamais estimées** | 🔜 |
 
 ## Stratégie (phase 2)
 - Hiérarchie : **plan stratégique → axes → objectifs**. Codes d'axe et d'objectif uniques dans un plan.
@@ -44,6 +45,18 @@ Implémentation : `src/lib/metrics.ts`, `src/lib/project-health.ts`, services `s
 - **Santé « Activités »** : écart (temps écoulé − avancement réel) ≤ 10 pts → bon ; ≤ 25 pts → vigilance ; au-delà → critique ; vigilance dès qu'une activité est en retard ; non évalué sans activité.
 - **Kanban** : déplacer une tâche exige `project:edit`, **ou** d'en être la personne assignée (même avec un rôle en lecture). Ordre conservé dans chaque colonne ; `completedAt` renseigné au passage à « Terminé ».
 - Une phase contenant des activités, ou une activité contenant des tâches, ne peut pas être supprimée.
+
+## Suivi-évaluation — MEAL (phase 4)
+- **Cadre logique** : Impact → Effets → Extrants → Activités. Un élément se rattache **uniquement au niveau immédiatement supérieur** (vérifié côté serveur) ; code unique dans le projet ; on ne supprime pas un élément qui a des sous-éléments ou des indicateurs.
+- **Contrôles de cohérence** (signalés, non bloquants) : élément non rattaché, élément non décliné au niveau inférieur, élément (hors activités) sans indicateur, indicateur sans source de vérification, cadre sans impact.
+- **Indicateur** : code unique dans le projet, définition, unité, type (quantitatif / qualitatif), sens attendu (à augmenter / à faire baisser), référence et cible datées (la cible respecte le sens attendu), fréquence, source, méthode, responsable, ventilations (« Sexe : Femmes, Hommes »).
+- **Valeurs** : saisies « à valider » (`meal:create`) ; une seule valeur active par période. **Validation par une autre personne que celle qui a saisi** (`meal:approve`), sauf le propriétaire de l'organisation. Une valeur validée ne se modifie ni ne se supprime : on la **corrige** (nouvelle valeur liée, à valider) ; l'ancienne reste en vigueur jusqu'à la validation de la correction. Tout est journalisé.
+- **Ventilation** : facultative ; si renseignée, chaque dimension est complète et **sa somme égale la valeur totale**.
+- **Valeur actuelle** : uniquement les valeurs **validées** non remplacées — « dernière valeur » (par défaut) ou « somme des périodes » (cumul).
+- **Taux d'atteinte** = (actuelle − référence) ÷ (cible − référence) × 100, arrondi à 0,1. Valable aussi pour les indicateurs à faire baisser. Indéfini sans référence, cible ou valeur.
+- **Taux attendu** = part du temps écoulé entre date de référence et date cible (trajectoire linéaire).
+- **Situation** : atteinte ≥ 100 % → sur la trajectoire ; sinon écart (attendu − atteinte) ≤ 10 pts → sur la trajectoire, ≤ 25 → vigilance, au-delà → décrochage ; non évalué sans taux.
+- **Non actualisé** : aucune valeur validée depuis plus d'une période de collecte + 30 jours de grâce (ou depuis la date de référence s'il n'y a aucune valeur). Les indicateurs ponctuels ne sont jamais « non actualisés ».
 
 ## Cycle de vie du projet
 Brouillon → Préparation | Actif | Archivé ; Préparation → Brouillon | Actif | Archivé ; Actif → Suspendu | Clôturé ; Suspendu → Actif | Clôturé ; Clôturé → Archivé. Passer en **Actif** exige les dates de début et de fin et la permission `project:approve`.

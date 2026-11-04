@@ -97,9 +97,50 @@ export async function createDemoOrganization(userId: string, now = new Date()) {
       ],
     });
 
+    // Suivi-évaluation (fictif) : cadre logique, indicateurs et valeurs trimestrielles.
+    const L = (data: Record<string, unknown>) => tx.logframeItem.create({ data: { organizationId: o, projectId: p1.id, ...data } as never });
+    const imp = await L({ level: "IMPACT", code: "IMP", title: "La mortalité maternelle recule dans les zones d'intervention", position: 0 });
+    const e1 = await L({ level: "OUTCOME", parentId: imp.id, code: "E1", title: "Les femmes enceintes accèdent régulièrement aux soins prénatals", position: 1, assumptions: "Les routes restent praticables pendant l'hivernage." });
+    const e2 = await L({ level: "OUTCOME", parentId: imp.id, code: "E2", title: "Les accouchements sont assistés par du personnel qualifié", position: 2 });
+    const x11 = await L({ level: "OUTPUT", parentId: e1.id, code: "X1.1", title: "Des cliniques mobiles desservent 40 villages enclavés", position: 1 });
+    const x12 = await L({ level: "OUTPUT", parentId: e1.id, code: "X1.2", title: "60 relais communautaires sont formés et actifs", position: 2 });
+    const x21 = await L({ level: "OUTPUT", parentId: e2.id, code: "X2.1", title: "Les maternités de référence sont équipées", position: 3 });
+    await L({ level: "ACTIVITY", parentId: x11.id, code: "AC1", title: "Tournées mensuelles des équipes mobiles", position: 1 });
+    await L({ level: "ACTIVITY", parentId: x12.id, code: "AC2", title: "Sessions de formation des relais", position: 2 });
+    await L({ level: "ACTIVITY", parentId: x21.id, code: "AC3", title: "Achat et installation des kits d'accouchement", position: 3 });
+    const quarters: [Date, Date][] = [];
+    for (let k = 0; k < 12; k++) {
+      const end = new Date(Date.UTC(y - 1, k * 3 + 3, 0));
+      if (end >= now) break;
+      quarters.push([new Date(Date.UTC(y - 1, k * 3, 1)), end]);
+    }
+    const I = (data: Record<string, unknown>) => tx.indicator.create({ data: { organizationId: o, projectId: p1.id, createdById: userId, responsibleId: userId, ...data } as never });
+    const series = async (indicatorId: string, vals: number[], source: string, dis?: (v: number) => Record<string, Record<string, number>>, lastDraft = false) => {
+      const list = quarters.slice(0, vals.length);
+      await tx.indicatorValue.createMany({ data: list.map(([start, end], k) => {
+        const last = lastDraft && k === list.length - 1;
+        return {
+          organizationId: o, indicatorId, periodStart: start, periodEnd: end, value: vals[k], source, collectedById: userId,
+          disaggregation: dis ? dis(vals[k]) : undefined, status: last ? "DRAFT" as const : "VALIDATED" as const,
+          validatedById: last ? null : userId, validatedAt: last ? null : new Date(end.getTime() + 15 * 86_400_000),
+        };
+      }) });
+    };
+    const i1 = await I({ logframeItemId: e1.id, code: "IND-1", name: "Femmes enceintes ayant réalisé au moins 4 consultations prénatales", definition: "Part des femmes ayant accouché sur la période qui ont réalisé au moins 4 consultations prénatales.", unit: "%", baseline: 32, baselineDate: d(`${y - 1}-02-01`), target: 80, targetDate: d(`${y + 1}-06-30`), frequency: "QUARTERLY", source: "Registres des postes de santé (fictifs)", method: "Comptage trimestriel des registres", disaggregations: [] });
+    await series(i1.id, [38, 43, 48, 53, 57, 61, 64, 66], "Registres des postes de santé (fictifs)", undefined, true);
+    const i2 = await I({ logframeItemId: x12.id, code: "IND-2", name: "Relais communautaires formés", definition: "Nombre de relais ayant suivi la totalité du module de formation.", unit: "personnes", aggregation: "SUM", baseline: 0, baselineDate: d(`${y - 1}-02-01`), target: 60, targetDate: d(`${y}-12-31`), frequency: "QUARTERLY", source: "Listes de présence (fictives)", disaggregations: ["Sexe : Femmes, Hommes"] });
+    await series(i2.id, [10, 12, 9, 8, 7, 6, 4, 3], "Listes de présence (fictives)", (v) => ({ Sexe: { Femmes: Math.ceil(v * 0.6), Hommes: v - Math.ceil(v * 0.6) } }));
+    const i3 = await I({ logframeItemId: e2.id, code: "IND-3", name: "Accouchements assistés par du personnel qualifié", definition: "Part des accouchements réalisés en présence d'une sage-femme ou d'un médecin.", unit: "%", baseline: 45, baselineDate: d(`${y - 1}-02-01`), target: 75, targetDate: d(`${y + 1}-06-30`), frequency: "QUARTERLY", source: "Rapports des maternités (fictifs)", disaggregations: [] });
+    await series(i3.id, [46, 47, 47, 48, 49, 50, 50, 51], "Rapports des maternités (fictifs)");
+    const i4 = await I({ logframeItemId: x11.id, code: "IND-4", name: "Villages desservis par les cliniques mobiles", definition: "Nombre de villages ayant reçu au moins une visite mensuelle sur le trimestre.", unit: "villages", baseline: 0, baselineDate: d(`${y - 1}-02-01`), target: 40, targetDate: d(`${y}-12-31`), frequency: "QUARTERLY", source: "Feuilles de route des équipes (fictives)", disaggregations: [] });
+    await series(i4.id, [8, 15, 22, 28, 32, 35, 37, 39], "Feuilles de route des équipes (fictives)");
+    await I({ logframeItemId: imp.id, code: "IND-5", name: "Ratio de mortalité maternelle", definition: "Décès maternels pour 100 000 naissances vivantes dans les districts d'intervention.", unit: "pour 100 000", direction: "DECREASE", baseline: 320, baselineDate: d(`${y - 1}-01-01`), target: 250, targetDate: d(`${y + 1}-12-31`), frequency: "ANNUAL", source: "Enquête annuelle du district (fictive)", disaggregations: [] }).then((i5) =>
+      quarters.length >= 4 ? tx.indicatorValue.create({ data: { organizationId: o, indicatorId: i5.id, periodStart: d(`${y - 1}-01-01`), periodEnd: d(`${y - 1}-12-31`), value: 288, source: "Enquête annuelle du district (fictive)", collectedById: userId, status: "VALIDATED", validatedById: userId, validatedAt: d(`${y}-02-15`) } }) : null);
+    await I({ logframeItemId: x21.id, code: "IND-6", name: "Maternités équipées en kits d'accouchement", definition: "Nombre de maternités de référence disposant du kit complet.", unit: "maternités", baseline: 0, baselineDate: d(`${y}-07-01`), target: 12, targetDate: d(`${y + 1}-06-30`), frequency: "SEMIANNUAL", source: "Inventaires (fictifs)", disaggregations: [] });
+
     await audit(tx, { organizationId: o, actorId: userId, action: "demo.create", entityType: "Organization", entityId: o, summary: "Création de l'espace de démonstration (données fictives)" });
     return { id: o };
-  });
+  }, { timeout: 30_000, maxWait: 10_000 });
 }
 
 /** Vrai si l'utilisateur possède déjà une démo (pour l'affichage du bouton). */

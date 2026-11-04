@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  BarChart3, Bell, BookOpen, Briefcase, Building2, FileText, FolderKanban, LayoutDashboard, Layers, Settings, ShieldAlert, Sparkles, Target, Wallet,
+  BarChart3, Bell, Gauge, BookOpen, Briefcase, Building2, FileText, FolderKanban, LayoutDashboard, Layers, Settings, ShieldAlert, Sparkles, Target, Wallet,
 } from "lucide-react";
 import type { Permission } from "@/server/permissions/catalog";
 import type { Messages } from "@/i18n/messages/fr";
@@ -26,12 +26,12 @@ export const NAV: { section: NavKey; items: NavItem[] }[] = [
       { href: "/portfolios", label: "portfolios", icon: Briefcase, permission: "portfolio:view" },
       { href: "/programs", label: "programs", icon: Layers, permission: "program:view" },
       { href: "/projects", label: "projects", icon: FolderKanban, permission: "project:view" },
+      { href: "/meal", label: "meal", icon: Gauge, permission: "meal:view" },
     ],
   },
   {
     section: "upcoming",
     items: [
-      { href: "/meal", label: "meal", icon: Target, phase: 4 },
       { href: "/finance", label: "finance", icon: Wallet, phase: 5 },
       { href: "/risks", label: "risks", icon: ShieldAlert, phase: 5 },
       { href: "/knowledge", label: "knowledge", icon: BookOpen, phase: 6 },

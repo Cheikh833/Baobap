@@ -30,8 +30,23 @@ export function completeness(p: P) {
 }
 
 export type PlanningInfo = { actual: number | null; late: number } | null;
+export type IndicatorInfo = { status: "good" | "watch" | "critical" | "unknown"; stale: boolean }[] | null;
 
-export function projectHealth(p: P, now = new Date(), planning: PlanningInfo = null): HealthDimension[] {
+/**
+ * Indicateurs & résultats — règle : seuls les indicateurs évalués (avec valeur validée) comptent.
+ * Critique si plus d'un quart sont en décrochage ; vigilance s'il y en a au moins un en décrochage ou en vigilance,
+ * ou un indicateur non actualisé ; sinon bon. Non évalué sans indicateur évalué.
+ */
+export function indicatorsHealth(list: IndicatorInfo): HealthDimension {
+  const rated = (list ?? []).filter((i) => i.status !== "unknown");
+  if (!rated.length) return { key: "indicators", level: "unknown", detail: { k: "indicatorsNone" } };
+  const n = (s: string) => rated.filter((i) => i.status === s).length;
+  const stale = (list ?? []).filter((i) => i.stale).length;
+  const level: HealthLevel = n("critical") / rated.length > 0.25 ? "critical" : n("critical") || n("watch") || stale ? "watch" : "good";
+  return { key: "indicators", level, detail: { k: "indicatorsValue", vars: { good: n("good"), watch: n("watch"), critical: n("critical"), stale } } };
+}
+
+export function projectHealth(p: P, now = new Date(), planning: PlanningInfo = null, indicators: IndicatorInfo = null): HealthDimension[] {
   // Planning — règle : critique si en retard ; vigilance si ≤ 30 jours restants ou ≥ 85 % du temps écoulé ; inconnu sans dates.
   let planning_: HealthDimension;
   if (!p.startDate || !p.endDate) planning_ = { key: "planning", level: "unknown", detail: { k: "noDates" } };
@@ -60,5 +75,5 @@ export function projectHealth(p: P, now = new Date(), planning: PlanningInfo = n
   const activities: HealthDimension = !planning || planning.actual === null
     ? { key: "activities", level: "unknown", detail: { k: "activitiesNone" } }
     : { key: "activities", level: activitiesHealth(planning.actual, elapsed, planning.late), detail: { k: "activitiesValue", vars: { actual: planning.actual, elapsed: elapsed ?? "—", late: planning.late } } };
-  return [planning_, data, activities, pending("budget"), pending("indicators"), pending("risks")];
+  return [planning_, data, activities, pending("budget"), indicatorsHealth(indicators), pending("risks")];
 }

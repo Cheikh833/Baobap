@@ -65,3 +65,17 @@ describe("sécurité", () => {
     for (const r of SYSTEM_ROLES) for (const p of r.permissions) expect(ALL_PERMISSIONS).toContain(p);
   });
 });
+
+import { indicatorsHealth } from "@/lib/project-health";
+describe("santé : indicateurs", () => {
+  it("non évalué sans indicateur évalué", () => {
+    expect(indicatorsHealth(null).level).toBe("unknown");
+    expect(indicatorsHealth([{ status: "unknown", stale: false }]).level).toBe("unknown");
+  });
+  it("bon, vigilance, critique selon la part de décrochage", () => {
+    expect(indicatorsHealth([{ status: "good", stale: false }, { status: "good", stale: false }]).level).toBe("good");
+    expect(indicatorsHealth([{ status: "good", stale: true }]).level).toBe("watch");
+    expect(indicatorsHealth([{ status: "good", stale: false }, { status: "good", stale: false }, { status: "good", stale: false }, { status: "critical", stale: false }]).level).toBe("watch");
+    expect(indicatorsHealth([{ status: "good", stale: false }, { status: "critical", stale: false }]).level).toBe("critical");
+  });
+});

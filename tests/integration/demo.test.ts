@@ -45,3 +45,27 @@ describe("démo : planification", () => {
     expect(pl.dependencies).toHaveLength(2);
   });
 });
+
+import { getLogframe, mealOverview } from "@/server/services/meal";
+describe("démo : suivi-évaluation", () => {
+  it("PRJ-001 a un cadre logique cohérent et des indicateurs calculés", async () => {
+    const a = await ownerWithOrg("Y");
+    const now = new Date("2026-11-04T12:00:00Z");
+    const demo = await createDemoOrganization(a.user.id, now);
+    const ctx = (await loadTenantContext(a.user.id, demo.id))!;
+    const p1 = (await listProjects(ctx)).find((p) => p.code === "PRJ-001")!;
+    const lf = await getLogframe(ctx, p1.id);
+    expect(lf.items).toHaveLength(9);
+    expect(lf.checks).toEqual([]);
+    expect(lf.indicators).toHaveLength(6);
+    const ind1 = lf.indicators.find((i) => i.code === "IND-1")!;
+    // 7 trimestres écoulés : 6 validés, le dernier (64 %) en attente → valeur actuelle 61
+    expect(ind1.calc.current).toBe(61);
+    expect(ind1.calc.pending).toBe(1);
+    expect(ind1.calc.rate).toBe(60.4);
+    const { pending, rows } = await mealOverview(ctx, now);
+    expect(pending.length).toBe(1);
+    const st = Object.fromEntries(rows.map((r) => [r.code, r.calc.status]));
+    expect(st).toMatchObject({ "IND-2": "good", "IND-3": "critical", "IND-4": "good" });
+  });
+});
