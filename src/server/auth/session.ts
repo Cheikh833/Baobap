@@ -5,7 +5,11 @@ import { generateToken, hashToken } from "./tokens";
 
 export const SESSION_COOKIE = "baobab_session";
 export const ORG_COOKIE = "baobab_org";
-const SESSION_DAYS = 14;
+const SESSION_DAYS = 30;
+/** Appareil déjà utilisé pour se connecter : la page d'inscription renvoie alors vers la connexion. */
+export const KNOWN_COOKIE = "baobab_known";
+/** Dernière méthode de connexion utilisée sur cet appareil (« password », « google », « apple »). */
+export const METHOD_COOKIE = "baobab_method";
 
 const cookieBase = () => ({
   httpOnly: true,
@@ -19,7 +23,18 @@ export async function createSession(userId: string) {
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 86_400_000);
   const ua = (await headers()).get("user-agent")?.slice(0, 255);
   await db.session.create({ data: { id: hashToken(token), userId, expiresAt, userAgent: ua } });
-  (await cookies()).set(SESSION_COOKIE, token, { ...cookieBase(), expires: expiresAt });
+  const jar = await cookies();
+  jar.set(SESSION_COOKIE, token, { ...cookieBase(), expires: expiresAt });
+  jar.set(KNOWN_COOKIE, "1", { ...cookieBase(), maxAge: 60 * 60 * 24 * 400 });
+}
+
+export async function rememberMethod(method: "password" | "google" | "apple") {
+  (await cookies()).set(METHOD_COOKIE, method, { ...cookieBase(), maxAge: 60 * 60 * 24 * 400 });
+}
+
+export async function deviceHints() {
+  const jar = await cookies();
+  return { known: jar.get(KNOWN_COOKIE)?.value === "1", method: jar.get(METHOD_COOKIE)?.value ?? null };
 }
 
 export async function getSessionUser() {

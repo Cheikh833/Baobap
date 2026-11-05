@@ -37,3 +37,37 @@ export async function authenticate(input: z.infer<typeof loginSchema>, clientKey
   await db.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
   return user;
 }
+
+/**
+ * Connexion via Google / Apple. Un seul bouton pour tout le monde :
+ *  1. compte externe déjà connu (même fournisseur, même identifiant « sub ») → connexion ;
+ *  2. sinon, un compte BAOBAB existe avec le même email **vérifié par le fournisseur** → rattachement puis connexion ;
+ *  3. sinon → création du compte (première fois), puis connexion. Les fois suivantes, on retombe dans le cas 1.
+ * L'acceptation des conditions est indiquée à côté du bouton ; elle est enregistrée à la création.
+ */
+export async function signInWithOAuth(provider: string, claims: { sub: string; email?: string; email_verified?: boolean | string; name?: string; given_name?: string; family_name?: string }, fallbackName?: string) {
+  const known = await db.oAuthAccount.findUnique({ where: { provider_providerAccountId: { provider, providerAccountId: claims.sub } }, include: { user: true } });
+  if (known) {
+    await db.$transaction([
+      db.oAuthAccount.update({ where: { id: known.id }, data: { lastUsedAt: new Date() } }),
+      db.user.update({ where: { id: known.userId }, data: { lastLoginAt: new Date() } }),
+    ]);
+    return { user: known.user, created: false };
+  }
+  const verified = claims.email_verified === true || claims.email_verified === "true";
+  const email = claims.email?.trim().toLowerCase();
+  if (!email || !verified) throw new AppError("VALIDATION", "Votre compte ne fournit pas d'adresse email vérifiée : utilisez un autre moyen de connexion.");
+  return db.$transaction(async (tx) => {
+    const existing = await tx.user.findUnique({ where: { email } });
+    if (existing) {
+      await tx.oAuthAccount.create({ data: { userId: existing.id, provider, providerAccountId: claims.sub, email } });
+      const user = await tx.user.update({ where: { id: existing.id }, data: { lastLoginAt: new Date() } });
+      await audit(tx, { organizationId: null, actorId: user.id, action: "user.oauth.link", entityType: "User", entityId: user.id, summary: `Compte ${provider} rattaché` });
+      return { user, created: false };
+    }
+    const name = (claims.name || [claims.given_name, claims.family_name].filter(Boolean).join(" ") || fallbackName || email.split("@")[0]).trim().slice(0, 120);
+    const user = await tx.user.create({ data: { email, name, passwordHash: null, termsAcceptedAt: new Date(), lastLoginAt: new Date(), oauthAccounts: { create: { provider, providerAccountId: claims.sub, email } } } });
+    await audit(tx, { organizationId: null, actorId: user.id, action: "user.signup", entityType: "User", entityId: user.id, summary: `Création du compte via ${provider}` });
+    return { user, created: true };
+  });
+}

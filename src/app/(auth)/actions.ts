@@ -1,7 +1,7 @@
 "use server";
 import { headers } from "next/headers";
 import { navigateTo, runAction, type ActionState } from "@/server/action";
-import { createSession } from "@/server/auth/session";
+import { createSession, rememberMethod } from "@/server/auth/session";
 import { authenticate, registerUser } from "@/server/services/auth";
 import { formToObject } from "@/lib/validation/common";
 import { safeNext } from "@/lib/safe-next";
@@ -13,6 +13,7 @@ export async function signupAction(_: ActionState, fd: FormData): Promise<Action
     const data = signupFormSchema.parse(formToObject(fd));
     const user = await registerUser(data, { termsAccepted: true });
     await createSession(user.id);
+    await rememberMethod("password");
     return navigateTo(next ?? "/onboarding");
   });
 }
@@ -23,6 +24,7 @@ export async function loginAction(_: ActionState, fd: FormData): Promise<ActionS
   return runAction(async () => {
     const user = await authenticate(formToObject(fd) as never, ip);
     await createSession(user.id);
+    await rememberMethod("password");
     return navigateTo(next ?? "/dashboard");
   });
 }

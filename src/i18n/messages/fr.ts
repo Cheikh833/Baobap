@@ -217,6 +217,23 @@ const fr = {
     },
   },
   auth: {
+    oauth: {
+      google: "Continuer avec Google",
+      apple: "Continuer avec Apple",
+      or: "ou avec votre email",
+      firstTime: "Première fois ? Votre compte est créé automatiquement. Les fois suivantes, le même bouton vous connecte directement.",
+      terms: "En continuant avec Google ou Apple, vous acceptez les conditions d'utilisation et la politique de confidentialité.",
+      lastUsed: "Utilisé la dernière fois",
+      welcomeBack: "Bon retour ! Vous avez déjà un compte sur cet appareil : connectez-vous simplement.",
+      newAccount: "Créer un autre compte",
+      errors: {
+        denied: "Connexion annulée.",
+        state: "La connexion a expiré ou a été interrompue. Réessayez.",
+        verify: "Impossible de vérifier votre identité auprès du fournisseur. Réessayez.",
+        email: "Votre compte ne fournit pas d'adresse email vérifiée : utilisez un autre moyen de connexion.",
+        provider: "Ce moyen de connexion n'est pas activé.",
+      },
+    },
     loginTitle: "Connexion",
     loginSubtitle: "Accédez à votre espace de pilotage.",
     signupTitle: "Créer un compte",

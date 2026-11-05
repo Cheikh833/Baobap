@@ -12,7 +12,7 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 
 | Domaine | Fonctionnalités |
 |---|---|
-| Authentification | Inscription, connexion, déconnexion, sessions serveur (cookie httpOnly, jeton haché), limitation des échecs de connexion |
+| Authentification | Connexion « Continuer avec Google / Apple » (compte créé automatiquement la première fois, rattaché si l'email existe déjà), appareil reconnu (renvoi vers la connexion au lieu de l'inscription), inscription, connexion, déconnexion, sessions serveur (cookie httpOnly, jeton haché), limitation des échecs de connexion |
 | Organisations | Création (onboarding), profil institutionnel, multi-organisation avec changement d'organisation active |
 | Structure interne | Directions, départements, bureaux régionaux, équipes… en arbre (cycles refusés), rattachement des membres |
 | Membres | Invitations par lien (expirant, à usage unique, liées à l'email), changement de rôle, suspension |
@@ -71,6 +71,8 @@ Préparer la base de test : `createdb baobab_test` puis `DATABASE_URL=postgresql
 | `APP_URL` | URL publique (liens d'emails, paiements, SEO) |
 | `COOKIE_SECURE` | `true` en production (cookies `Secure`, HTTPS obligatoire) |
 | `CINETPAY_API_KEY`, `CINETPAY_SITE_ID`, `CINETPAY_SECRET_KEY` | Paiement en ligne (optionnel) |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Connexion avec Google (optionnel) |
+| `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | Connexion avec Apple (optionnel) |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Envoi d'emails (optionnel) |
 | `TEST_DATABASE_URL` | Base utilisée par les tests (optionnel) |
 

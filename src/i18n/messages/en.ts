@@ -217,6 +217,23 @@ const en: DeepPartial<Messages> = {
     },
   },
   auth: {
+    oauth: {
+      google: "Continue with Google",
+      apple: "Continue with Apple",
+      or: "or with your email",
+      firstTime: "First time? Your account is created automatically. Next time, the same button signs you in directly.",
+      terms: "By continuing with Google or Apple, you accept the terms of use and the privacy policy.",
+      lastUsed: "Last used",
+      welcomeBack: "Welcome back! You already have an account on this device: just sign in.",
+      newAccount: "Create another account",
+      errors: {
+        denied: "Sign-in canceled.",
+        state: "The sign-in expired or was interrupted. Please try again.",
+        verify: "Your identity could not be verified with the provider. Please try again.",
+        email: "Your account does not provide a verified email address: use another sign-in method.",
+        provider: "This sign-in method is not enabled.",
+      },
+    },
     loginTitle: "Sign in",
     loginSubtitle: "Access your steering workspace.",
     signupTitle: "Create an account",

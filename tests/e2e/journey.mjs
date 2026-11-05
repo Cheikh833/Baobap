@@ -357,6 +357,8 @@ try {
   await go(BASE + "/dashboard");
   await page.click("text=Se déconnecter");
   await waitUrl("**/login");
+  await go(BASE + "/signup");
+  check("Appareil reconnu : l'inscription renvoie vers la connexion", page.url().includes("/login?known=1") && await vis(page.getByText("Bon retour")));
   await go(link);
   await clickNav("text=Créer mon compte", /\/signup/);
   await page.fill("[name=name]", "Invité E2E");

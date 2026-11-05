@@ -18,7 +18,7 @@ model User {
   id           String    @id @default(cuid())
   email        String    @unique
   name         String
-  passwordHash String
+  passwordHash String? // absent pour un compte créé via Google / Apple (un mot de passe peut être ajouté ensuite)
   jobTitle     String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -28,6 +28,23 @@ model User {
   sessions    Session[]
   memberships Membership[]
   resetTokens PasswordResetToken[]
+  oauthAccounts OAuthAccount[]
+}
+
+/// Compte externe (Google, Apple) rattaché à un utilisateur : identifiant stable du fournisseur (« sub »).
+model OAuthAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String // "google" | "apple"
+  providerAccountId String
+  email             String?
+  createdAt         DateTime @default(now())
+  lastUsedAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {

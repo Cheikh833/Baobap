@@ -2,11 +2,11 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { ButtonLink } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { getSessionUser } from "@/server/auth/session";
+import { deviceHints, getSessionUser } from "@/server/auth/session";
 import { getMessages } from "@/i18n/server";
 
 export async function PublicHeader() {
-  const [user, { m }] = await Promise.all([getSessionUser(), getMessages()]);
+  const [user, { m }, hints] = await Promise.all([getSessionUser(), getMessages(), deviceHints()]);
   return (
     <header className="sticky top-0 z-30 border-b border-line/60 bg-white/80 shadow-[0_1px_0_rgba(16,42,67,.03)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">
@@ -18,8 +18,9 @@ export async function PublicHeader() {
             <ButtonLink href="/dashboard" size="sm">{m.common.openWorkspace}</ButtonLink>
           ) : (
             <>
-              <ButtonLink href="/login" variant="ghost" size="sm">{m.common.signIn}</ButtonLink>
-              <ButtonLink href="/signup" size="sm">{m.common.signUp}</ButtonLink>
+              {/* Appareil déjà utilisé : la connexion passe au premier plan. */}
+              <ButtonLink href="/login" variant={hints.known ? "primary" : "ghost"} size="sm">{m.common.signIn}</ButtonLink>
+              {!hints.known && <ButtonLink href="/signup" size="sm">{m.common.signUp}</ButtonLink>}
             </>
           )}
         </nav>

@@ -24,7 +24,7 @@ export function LoginForm({ next }: { next?: string }) {
       <p className="-mt-2 text-right text-xs"><Link className="text-brand hover:underline" href="/forgot-password">{A.forgotLink}</Link></p>
       <SubmitButton className="w-full" pendingLabel={A.loginPending}>{A.loginSubmit}</SubmitButton>
       <p className="text-center text-sm text-slate-600">
-        {A.noAccount} <Link className="font-medium text-brand hover:underline" href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"}>{A.createAccount}</Link>
+        {A.noAccount} <Link className="font-medium text-brand hover:underline" href={next ? `/signup?new=1&next=${encodeURIComponent(next)}` : "/signup?new=1"}>{A.createAccount}</Link>
       </p>
     </form>
     </FormPendingContext.Provider>

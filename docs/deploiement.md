@@ -27,9 +27,10 @@ Placer un reverse proxy HTTPS (Caddy ou Nginx + Let's Encrypt) devant le port 30
 | `CINETPAY_API_KEY`, `CINETPAY_SITE_ID` | Pour le paiement en ligne | Identifiants CinetPay |
 | `CINETPAY_SECRET_KEY` | Fortement recommandé | Vérification de la signature des notifications |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Pour les emails | Invitations et mot de passe oublié |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Pour « Continuer avec Google » | Voir plus bas |
+| `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | Pour « Continuer avec Apple » | Voir plus bas |
 
 Sans les variables CinetPay ou SMTP, l'application fonctionne : le paiement passe par la demande manuelle et les liens d'invitation sont à transmettre à la main. L'interface l'indique.
-
 ## Activer CinetPay
 1. Créer un compte marchand sur cinetpay.com (pièces de l'entreprise requises) et attendre la validation.
 2. Récupérer l'**API Key**, le **Site ID** et la **Secret Key** dans le back-office.
@@ -38,6 +39,23 @@ Sans les variables CinetPay ou SMTP, l'application fonctionne : le paiement pass
 5. **Premier test réel** : payer un plan mensuel Essentiel (15 000 FCFA) avec Wave ou Orange Money. Vérifier que l'abonnement passe à « Actif » et que le paiement apparaît dans l'historique et le journal d'audit.
 
 Sécurité : une notification ne suffit jamais. Chaque paiement est revérifié auprès de CinetPay (statut, montant, devise) avant activation, et une même transaction ne peut activer l'abonnement qu'une fois.
+
+## Activer « Continuer avec Google »
+1. Ouvrir [console.cloud.google.com](https://console.cloud.google.com) avec le compte Google de l'organisation → créer un projet « BAOBAB ».
+2. **API et services → Écran de consentement OAuth** : type « Externe », nom de l'application « BAOBAB », email d'assistance, logo (facultatif), domaines autorisés (ex. `baobab.sn` ou `vercel.app`), liens vers `/legal/privacy` et `/legal/terms`. Champs d'accès : `openid`, `email`, `profile` (aucune vérification Google n'est requise pour ces trois-là). Publier l'application (« En production »).
+3. **API et services → Identifiants → Créer des identifiants → ID client OAuth** : type « Application Web ».
+   - Origines JavaScript autorisées : `https://votre-domaine` (ex. `https://baobap.vercel.app`).
+   - **URI de redirection autorisés** : `https://votre-domaine/api/auth/oauth/google/callback` (exactement, sans barre finale).
+4. Copier l'**ID client** et le **code secret** dans Vercel → Settings → Environment Variables : `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Vérifier que `APP_URL` vaut bien `https://votre-domaine` et que `COOKIE_SECURE=true`. Redéployer.
+5. Le bouton apparaît automatiquement sur les pages Connexion et Inscription. Ne jamais coller le code secret dans une conversation ou un fichier du dépôt.
+
+## Activer « Continuer avec Apple » (facultatif)
+Nécessite un compte **Apple Developer** (99 $/an).
+1. [developer.apple.com](https://developer.apple.com/account) → Certificates, Identifiers & Profiles → **Identifiers** : créer un *App ID* avec « Sign In with Apple », puis un **Services ID** (ex. `sn.baobab.web`) ; dans sa configuration « Sign In with Apple », déclarer le domaine et l'URL de retour `https://votre-domaine/api/auth/oauth/apple/callback`.
+2. **Keys** : créer une clé avec « Sign In with Apple », télécharger le fichier `.p8` (une seule fois possible), noter son **Key ID** et votre **Team ID** (en haut à droite du compte).
+3. Variables Vercel : `APPLE_CLIENT_ID` (le Services ID), `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` (contenu complet du `.p8`). `COOKIE_SECURE=true` est indispensable (Apple renvoie la réponse par un formulaire inter-sites).
+
+**Fonctionnement** : la première fois, le compte BAOBAB est créé automatiquement à partir de l'email vérifié par Google / Apple ; si un compte existe déjà avec ce même email, il est rattaché (pas de doublon). Ensuite, le même bouton connecte directement. Un appareil déjà utilisé est reconnu : la page d'inscription renvoie vers la connexion, qui rappelle la méthode utilisée la dernière fois. Les sessions durent 30 jours.
 
 ## Activer les emails
 N'importe quel service SMTP convient. Exemples : Brevo (offre gratuite de 300 emails par jour), Mailjet, un compte Gmail ou Google Workspace (mot de passe d'application), ou le SMTP de votre hébergeur. Utiliser une adresse d'expéditeur sur votre domaine et configurer SPF/DKIM pour éviter les spams.

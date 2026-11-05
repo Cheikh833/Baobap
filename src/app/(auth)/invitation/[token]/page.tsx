@@ -39,7 +39,7 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
           )
         ) : (
           <div className="flex flex-col gap-2 sm:flex-row">
-            <ButtonLink href={`/signup?next=${encodeURIComponent(next)}`}>{I.createAccount}</ButtonLink>
+            <ButtonLink href={`/signup?new=1&next=${encodeURIComponent(next)}`}>{I.createAccount}</ButtonLink>
             <ButtonLink href={`/login?next=${encodeURIComponent(next)}`} variant="secondary">{I.haveAccount}</ButtonLink>
           </div>
         )}
