@@ -26,12 +26,17 @@ import { PlanningTab } from "./planning-tab";
 import { ActivitiesTab } from "./activities-tab";
 import { LogframeTab } from "./logframe-tab";
 import { IndicatorsTab } from "./indicators-tab";
+import { FinanceTab } from "./finance-tab";
+import { RisksTab } from "./risks-tab";
+import { getProjectFinance } from "@/server/services/finance";
+import { listProjectRisks } from "@/server/services/risks";
+import { risksHealth } from "@/lib/risk";
 import { getLogframe } from "@/server/services/meal";
 import { deleteProjectAction, editStepAction, statusAction } from "../actions";
 
 const TABS = [
-  ["overview", 0], ["planning", 0], ["activities", 0], ["results", 0], ["meal", 0], ["finance", 5],
-  ["risks", 5], ["team", 3], ["documents", 6], ["reports", 9], ["history", 0], ["settings", 0],
+  ["overview", 0], ["planning", 0], ["activities", 0], ["results", 0], ["meal", 0], ["finance", 0],
+  ["risks", 0], ["team", 3], ["documents", 6], ["reports", 9], ["history", 0], ["settings", 0],
 ] as const;
 
 const levelColor: Record<HealthLevel, string> = { good: "bg-success", watch: "bg-warning", critical: "bg-danger", unknown: "bg-slate-300" };
@@ -49,7 +54,11 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
   if (!can(ctx, "project:view")) return <Forbidden />;
   const { id } = await params;
   const [p, base, strategy, contributions, planning, { m, locale }] = await Promise.all([orNotFound(getProject(ctx, id)), hierarchyOptions(ctx), strategyOptions(ctx, id), getProjectContributions(ctx, id), getPlanning(ctx, id).catch(() => null), getMessages()]);
-  const meal = can(ctx, "meal:view") ? await getLogframe(ctx, id).catch(() => null) : null;
+  const [meal, fin, risks] = await Promise.all([
+    can(ctx, "meal:view") ? getLogframe(ctx, id).catch(() => null) : null,
+    can(ctx, "finance:view") ? getProjectFinance(ctx, id).catch(() => null) : null,
+    can(ctx, "risk:view") ? listProjectRisks(ctx, id).catch(() => null) : null,
+  ]);
   const o = { ...base, strategy };
   const tab = (await searchParams).tab ?? "overview";
   const editable = can(ctx, "project:edit");
@@ -92,7 +101,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
             <h2 className="font-semibold">{P.healthTitle}</h2>
             <p className="mb-4 text-xs text-slate-500">{P.healthHint}</p>
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {projectHealth(p, new Date(), planning ? { actual: planningProgress(planning.activities), late: planning.activities.filter((a) => isActivityLate(a)).length } : null, meal ? meal.indicators.map((i) => ({ status: i.calc.status, stale: i.calc.stale })) : null).map((h) => (
+              {projectHealth(p, new Date(), planning ? { actual: planningProgress(planning.activities), late: planning.activities.filter((a) => isActivityLate(a)).length } : null, meal ? meal.indicators.map((i) => ({ status: i.calc.status, stale: i.calc.stale })) : null, fin && fin.lines.length ? { execution: fin.totals.execution, overspentLines: fin.totals.overspentLines } : null, risks ? risksHealth(risks) : null).map((h) => (
                 <li key={h.key} className="rounded-lg border border-line p-3">
                   <div className="flex items-center gap-2 text-sm font-medium"><span className={cn("h-2.5 w-2.5 rounded-full", levelColor[h.level])} aria-hidden />{P.health[h.key]}<span className="ml-auto text-xs text-slate-500">{P.levels[h.level]}</span></div>
                   <p className="mt-1 text-xs text-slate-600">{healthText(h, m)}</p>
@@ -131,7 +140,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
                   {meal.indicators.slice(0, 5).map((x) => (
                     <li key={x.id} className="grid grid-cols-[1fr_auto] items-center gap-x-3 text-sm">
                       <Link href={`/meal/indicators/${x.id}`} className="truncate hover:underline"><span className="font-mono text-xs text-slate-500">{x.code}</span> {x.name}</Link>
-                      <span className="font-semibold tabular">{x.calc.rate === null ? "—" : `${x.calc.rate} %`}</span>
+                      <span className="font-semibold tabular">{x.calc.rate === null ? "—" : `${new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits: 1 }).format(x.calc.rate)}\u00A0%`}</span>
                       <div className="col-span-2 mt-1"><Meter value={x.calc.rate ?? 0} label={x.name} color={x.calc.status === "critical" ? "#DC2626" : x.calc.status === "watch" ? "#D97706" : undefined} /></div>
                     </li>
                   ))}
@@ -172,6 +181,8 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
       {(tab === "results" || tab === "meal") && !can(ctx, "meal:view") && <Card><p className="text-sm text-slate-600">{m.ui.readOnlyRole}</p></Card>}
       {tab === "results" && can(ctx, "meal:view") && <LogframeTab ctx={ctx} projectId={p.id} m={m} locale={locale} />}
       {tab === "meal" && can(ctx, "meal:view") && <IndicatorsTab ctx={ctx} projectId={p.id} members={o.members} memberNames={o.memberNames} m={m} locale={locale} />}
+      {tab === "finance" && (can(ctx, "finance:view") ? <FinanceTab ctx={ctx} projectId={p.id} m={m} locale={locale} /> : <Card><p className="text-sm text-slate-600">{m.ui.readOnlyRole}</p></Card>)}
+      {tab === "risks" && (can(ctx, "risk:view") ? <RisksTab ctx={ctx} projectId={p.id} members={o.members} memberNames={o.memberNames} m={m} locale={locale} /> : <Card><p className="text-sm text-slate-600">{m.ui.readOnlyRole}</p></Card>)}
       {tab === "history" && <History orgId={ctx.organizationId} projectId={p.id} canAudit={can(ctx, "audit:view")} m={m} locale={locale} />}
 
       {tab === "settings" && (
@@ -210,7 +221,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
         </div>
       )}
 
-      {!["overview", "planning", "activities", "results", "meal", "history", "settings"].includes(tab) && <Card><p className="text-sm text-slate-600">{P.tabSoon} <Badge>{m.common.soon}</Badge></p></Card>}
+      {!["overview", "planning", "activities", "results", "meal", "finance", "risks", "history", "settings"].includes(tab) && <Card><p className="text-sm text-slate-600">{P.tabSoon} <Badge>{m.common.soon}</Badge></p></Card>}
     </>
   );
 }

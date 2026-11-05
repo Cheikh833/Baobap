@@ -59,7 +59,7 @@ export const PLANS: Plan[] = [
       ...CORE,
       yes("planning"),
       yes("meal_full"),
-      soon("fin_risk_docs"),
+      yes("fin_risk_docs"),
       yes("analytics"),
       soon("ai_1000"),
       soon("studio"),

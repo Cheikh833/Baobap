@@ -385,6 +385,10 @@ model Project {
   logframe     LogframeItem[]
   indicators   Indicator[]
   datasets     Dataset[]
+  fundings     Funding[]
+  budgetLines  BudgetLine[]
+  expenses     Expense[]
+  risks        Risk[]
 
   @@unique([organizationId, code])
   @@index([organizationId, status])
@@ -810,4 +814,143 @@ model Dataset {
 
   @@index([organizationId])
   @@index([projectId])
+}
+
+// ───────────── Finances (phase 5) ─────────────
+// Tous les montants d'un projet sont dans la devise du projet : aucune conversion implicite.
+
+/// Financement (convention avec un bailleur ou fonds propres) d'un projet.
+model Funding {
+  id             String       @id @default(cuid())
+  organizationId String
+  projectId      String
+  donor          String
+  reference      String?
+  amount         Decimal      @db.Decimal(18, 2)
+  startDate      DateTime?
+  endDate        DateTime?
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  budgetLines BudgetLine[]
+
+  @@index([projectId])
+  @@index([organizationId])
+}
+
+enum BudgetCategory {
+  HR
+  TRAVEL
+  EQUIPMENT
+  SUPPLIES
+  SERVICES
+  ACTIVITIES
+  OPERATING
+  INDIRECT
+  OTHER
+}
+
+model BudgetLine {
+  id             String         @id @default(cuid())
+  organizationId String
+  projectId      String
+  fundingId      String?
+  code           String
+  label          String
+  category       BudgetCategory @default(ACTIVITIES)
+  plannedAmount  Decimal        @db.Decimal(18, 2)
+  notes          String?
+  position       Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+
+  project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  funding  Funding?  @relation(fields: [fundingId], references: [id])
+  expenses Expense[]
+
+  @@index([projectId])
+  @@index([organizationId])
+}
+
+enum ExpenseStatus {
+  DRAFT
+  VALIDATED
+  REJECTED
+  CANCELED
+}
+
+/// Dépense. Saisie en brouillon ; validée par une autre personne ; une dépense validée ne se modifie pas
+/// (elle peut seulement être annulée, avec motif, ce qui reste tracé).
+model Expense {
+  id             String        @id @default(cuid())
+  organizationId String
+  projectId      String
+  budgetLineId   String
+  date           DateTime
+  amount         Decimal       @db.Decimal(18, 2)
+  description    String
+  supplier       String?
+  reference      String? // n° de pièce justificative
+  status         ExpenseStatus @default(DRAFT)
+  createdById    String?
+  validatedById  String?
+  validatedAt    DateTime?
+  reviewComment  String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  budgetLine BudgetLine @relation(fields: [budgetLineId], references: [id])
+
+  @@index([projectId])
+  @@index([organizationId, status])
+}
+
+// ───────────── Risques (phase 5) ─────────────
+
+enum RiskCategory {
+  STRATEGIC
+  OPERATIONAL
+  FINANCIAL
+  SECURITY
+  COMPLIANCE
+  REPUTATION
+  ENVIRONMENTAL
+  OTHER
+}
+
+enum RiskStatus {
+  OPEN
+  MITIGATING
+  CLOSED
+}
+
+model Risk {
+  id             String       @id @default(cuid())
+  organizationId String
+  projectId      String
+  code           String
+  title          String
+  description    String?
+  category       RiskCategory @default(OPERATIONAL)
+  probability    Int // 1 à 5
+  impact         Int // 1 à 5
+  ownerId        String?
+  mitigation     String?
+  contingency    String?
+  status         RiskStatus   @default(OPEN)
+  reviewDate     DateTime?
+  createdById    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([organizationId])
 }

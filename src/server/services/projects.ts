@@ -110,6 +110,11 @@ export async function saveProjectStep(ctx: TenantContext, id: string, step: Proj
         await assertMember(tx, ctx.organizationId, data.managerId as string | undefined, "Le chef de projet");
         await assertDistinctName(tx, ctx, data.name as string, h.programId, id);
       }
+      // Devise : figée dès qu'un budget détaillé ou un financement existe (aucune conversion implicite des montants).
+      if ("currency" in full && full.currency && full.currency !== before.currency
+        && ((await tx.budgetLine.count({ where: { projectId: id, deletedAt: null } })) || (await tx.funding.count({ where: { projectId: id, deletedAt: null } })))) {
+        throw new AppError("CONFLICT", "La devise ne peut plus être modifiée : le projet a déjà un budget détaillé ou des financements.");
+      }
       // Étape 2 : contributions aux objectifs stratégiques (plusieurs-à-plusieurs, pondérées).
       const contributionChanges = step === 2 ? await setProjectContributions(tx, ctx, id, parseContributions(input as Record<string, unknown>)) : null;
       const nextStep = Math.max(before.wizardStep, Math.min(step + 1, PROJECT_LAST_EDIT_STEP + 1));

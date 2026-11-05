@@ -5,8 +5,8 @@ _Planifier. Exécuter. Impacter._
 
 BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, agences de développement, bailleurs et cabinets : stratégie, projets, suivi-évaluation (MEAL), finances, risques, données, IA et reporting dans un même modèle de données.
 
-> **État actuel : Phase 0 (fondations) + Phase 1 (fondation organisationnelle) + phases 2–4 et 7 (stratégie, projets, planification, suivi-évaluation, analyse de données) + abonnement et multilingue.**
-> Les autres modules (Finances, Risques, Documents, IA, Studio…) sont **affichés comme « Bientôt » et non cliquables** : aucune fonctionnalité n'est présentée comme opérationnelle si elle ne l'est pas.
+> **État actuel : Phase 0 (fondations) + Phase 1 (fondation organisationnelle) + phases 2 à 5 et 7 (stratégie, projets, planification, suivi-évaluation, finances, risques, analyse de données) + abonnement et multilingue.**
+> Les autres modules (Documents, IA, Studio…) sont **affichés comme « Bientôt » et non cliquables** : aucune fonctionnalité n'est présentée comme opérationnelle si elle ne l'est pas.
 
 ## Ce qui fonctionne aujourd'hui
 
@@ -20,6 +20,8 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 | Audit | Journal des modifications importantes (avant/après), historique par projet |
 | Planification | Phases, activités, tâches, jalons, dépendances sans boucle ; diagramme de Gantt, tableau Kanban (glisser-déposer), « Mes tâches », alertes de retard, santé « Activités » calculée |
 | Suivi-évaluation (MEAL) | Cadre logique (Impact → Effets → Extrants → Activités) avec contrôles de cohérence, indicateurs (référence, cible, sens, fréquence, ventilations), saisie des valeurs, validation par une autre personne, corrections tracées, taux d'atteinte et trajectoire, alertes « non actualisé », courbes d'évolution |
+| Finances | Financements par bailleur, budget détaillé par lignes, dépenses saisies puis validées par une autre personne, blocage des dépassements, annulations tracées, taux d'exécution vs temps écoulé, totaux par devise (jamais de conversion implicite) |
+| Risques | Registre (probabilité × impact, mitigation, contingence, responsable), matrice 5×5, alertes de revue en retard |
 | Analyse de données | Import CSV (Excel compris), dictionnaire des variables, contrôle qualité (manquants, doublons, valeurs non conformes), statistiques descriptives, histogrammes, fréquences, tableaux croisés avec test du khi² et conditions d'application, comparaison de moyennes (ANOVA) |
 | Démo | Espace de démonstration fictif complet en un clic (stratégie, projets, planning, suivi-évaluation, enquête fictive) |
 | Stratégie | Plans stratégiques (un seul actif), axes, objectifs, contributions pondérées des projets (≤ 100 %), couverture des objectifs, budget aligné sans double comptage, projets non alignés |

@@ -24,7 +24,8 @@ Implémentation : `src/lib/metrics.ts`, `src/lib/project-health.ts`, services `s
 | Complétude de la fiche | Part des 10 champs clés renseignés (chef de projet, description, contexte, objectif général, objectifs spécifiques, pays, bénéficiaires directs, début, fin, budget) : ≥ 80 % Bon, ≥ 50 % Vigilance, sinon Critique | ✅ |
 | Activités | Écart temps écoulé / avancement réel + activités en retard (voir Planification) | ✅ |
 | Indicateurs & résultats | Seuls les indicateurs évalués (valeur validée) comptent : Critique si plus d'un quart sont en décrochage ; Vigilance si au moins un est en décrochage ou en vigilance, ou si un indicateur n'est pas actualisé ; Bon sinon ; Non évalué sans indicateur évalué | ✅ |
-| Budget, Risques | Affichées « Non évalué » avec le module requis — **jamais estimées** | 🔜 |
+| Budget | Critique si une ligne est en dépassement ; Vigilance si l'exécution devance le temps écoulé de plus de 15 pts ou accuse plus de 25 pts de retard ; Bon sinon ; Non évalué sans budget détaillé | ✅ |
+| Risques | Critique si un risque non clôturé est critique ; Vigilance si un risque élevé est ouvert ou une revue en retard ; Bon sinon ; Non évalué sans risque enregistré | ✅ |
 
 ## Stratégie (phase 2)
 - Hiérarchie : **plan stratégique → axes → objectifs**. Codes d'axe et d'objectif uniques dans un plan.
@@ -57,6 +58,18 @@ Implémentation : `src/lib/metrics.ts`, `src/lib/project-health.ts`, services `s
 - **Taux attendu** = part du temps écoulé entre date de référence et date cible (trajectoire linéaire).
 - **Situation** : atteinte ≥ 100 % → sur la trajectoire ; sinon écart (attendu − atteinte) ≤ 10 pts → sur la trajectoire, ≤ 25 → vigilance, au-delà → décrochage ; non évalué sans taux.
 - **Non actualisé** : aucune valeur validée depuis plus d'une période de collecte + 30 jours de grâce (ou depuis la date de référence s'il n'y a aucune valeur). Les indicateurs ponctuels ne sont jamais « non actualisés ».
+
+## Finances (phase 5)
+- **Une devise par projet** : tous les montants (financements, lignes, dépenses) sont dans la devise du projet ; **aucune conversion implicite**. La devise est figée dès qu'un budget détaillé ou un financement existe. Les vues d'ensemble totalisent **par devise**, jamais entre devises.
+- **Financements** : bailleur / source, référence de convention, montant, période. **Écart de financement** = budget détaillé − financements (positif : financement manquant ; négatif : excédent).
+- **Lignes budgétaires** : code unique dans le projet, catégorie, montant prévu, financement rattaché (facultatif). **Révision** : le montant prévu ne descend jamais sous le montant déjà dépensé. Suppression impossible s'il existe des dépenses.
+- **Dépenses** : saisies « à valider » (`finance:create`), date non future, montant > 0, pièce justificative facultative. **Validation par une autre personne que la saisie** (`finance:approve`), sauf le propriétaire. **Une validation qui ferait dépasser la ligne est refusée** : il faut d'abord réviser le budget. Une dépense validée ne se modifie ni ne se supprime ; elle peut être **annulée avec motif obligatoire** (elle reste visible et journalisée).
+- **Dépensé** = Σ dépenses validées ; **à valider** = Σ brouillons ; rejetées et annulées exclues. **Disponible** = prévu − dépensé. **Taux d'exécution** = dépensé ÷ prévu × 100 (0,1 près).
+
+## Risques (phase 5)
+- Registre par projet : code unique, catégorie, **probabilité et impact de 1 à 5**, responsable, mesures de mitigation, plan de contingence, statut (ouvert, en traitement, clôturé), date de prochaine revue.
+- **Score** = probabilité × impact (1 à 25) ; niveaux : ≤ 4 faible, ≤ 9 modéré, ≤ 15 élevé, au-delà critique. **Matrice 5×5** des risques non clôturés.
+- **Revue en retard** : date de revue dépassée (jour J non compris) et risque non clôturé.
 
 ## Analyse de données (phase 7, cœur)
 - **Import** : CSV uniquement (virgule, point-virgule ou tabulation détectés automatiquement ; UTF-8, ou Windows-1252 pour les exports Excel), 4 Mo, 50 000 lignes et 200 colonnes maximum, première ligne = en-têtes (rendus uniques). Une ligne avec trop de valeurs est refusée avec son numéro ; une ligne incomplète est complétée par des cellules vides (et comptée).

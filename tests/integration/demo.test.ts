@@ -90,3 +90,21 @@ describe("démo : analyse de données", () => {
     expect(!g.tooMany && g.p! < 0.05).toBe(true);
   });
 });
+
+import { getProjectFinance } from "@/server/services/finance";
+import { listProjectRisks } from "@/server/services/risks";
+import { risksHealth } from "@/lib/risk";
+describe("démo : finances et risques", () => {
+  it("PRJ-001 a un budget cohérent (aucun dépassement) et un registre des risques", async () => {
+    const a = await ownerWithOrg("W");
+    const demo = await createDemoOrganization(a.user.id);
+    const ctx = (await loadTenantContext(a.user.id, demo.id))!;
+    const p1 = (await listProjects(ctx)).find((p) => p.code === "PRJ-001")!;
+    const f = await getProjectFinance(ctx, p1.id);
+    expect(f.totals).toMatchObject({ planned: 150_000_000, spent: 106_000_000, pending: 2_300_000, funded: 130_000_000, fundingGap: 20_000_000, overspentLines: 0 });
+    expect(f.expenses.every((e) => e.date.getTime() < Date.now())).toBe(true);
+    const r = await listProjectRisks(ctx, p1.id);
+    expect(r).toHaveLength(5);
+    expect(risksHealth(r)).toMatchObject({ level: "critical", open: 4, overdue: 1 });
+  });
+});

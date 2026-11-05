@@ -206,8 +206,49 @@ try {
   await go(page.url());
   check("Kanban : déplacement enregistré après rechargement", await vis(page.locator("section[aria-label='En cours']").getByText("Tâche E2E")));
 
+  const projectBase = page.url().replace(/\?tab=.*$/, "");
+
+  // Finances : ligne budgétaire → dépense → validation → blocage du dépassement
+  await go(projectBase + "?tab=finance");
+  const lineForm = page.locator("details:has(summary:has-text('Nouvelle ligne budgétaire')) form");
+  await lineForm.locator("[name=code]").fill("B1");
+  await lineForm.locator("[name=label]").fill("Formations E2E");
+  await lineForm.locator("[name=plannedAmount]").fill("1 000 000");
+  await lineForm.locator("button[type=submit]").click();
+  check("Finances : ligne budgétaire créée", await vis(page.getByText("Formations E2E").first()));
+  const expForm = page.locator("form:has([name=budgetLineId])");
+  await expForm.locator("[name=budgetLineId]").selectOption({ index: 0 });
+  await expForm.locator("[name=date]").fill("2026-02-15");
+  await expForm.locator("[name=amount]").fill("400000");
+  await expForm.locator("[name=description]").fill("Atelier E2E");
+  await expForm.locator("button[type=submit]").click();
+  check("Finances : dépense saisie « à valider »", await vis(page.getByText("Atelier E2E")));
+  await page.click("button:has-text('Valider')");
+  check("Finances : dépense validée, exécution 40 %", await vis(page.getByText(/40 % exécuté/)));
+  await expForm.locator("[name=budgetLineId]").selectOption({ index: 0 });
+  await expForm.locator("[name=date]").fill("2026-02-16");
+  await expForm.locator("[name=amount]").fill("700000");
+  await expForm.locator("[name=description]").fill("Dépassement E2E");
+  await expForm.locator("button[type=submit]").click();
+  await vis(page.getByText("Dépassement E2E"));
+  await page.click("button:has-text('Valider')");
+  check("Finances : validation refusée si dépassement de ligne", await vis(page.getByText(/Validation refusée/)));
+  await shot("05a-finances");
+
+  // Risques : enregistrement → matrice
+  await go(projectBase + "?tab=risks");
+  const riskForm = page.locator("details:has(summary:has-text('Nouveau risque')) form");
+  await riskForm.locator("[name=code]").fill("R1");
+  await riskForm.locator("[name=title]").fill("Risque E2E");
+  await riskForm.locator("[name=probability]").selectOption("5");
+  await riskForm.locator("[name=impact]").selectOption("4");
+  await riskForm.locator("button[type=submit]").click();
+  check("Risques : risque enregistré avec score 20 (critique)", await vis(page.getByText("Risque E2E")) && await vis(page.locator("span[title='Critique']").filter({ hasText: "20" })));
+  await go(BASE + "/risks");
+  check("Risques : vue d'ensemble", await vis(page.getByText("Risque E2E")));
+
   // Suivi-évaluation : cadre logique → indicateur → valeur ventilée → validation
-  await go(page.url().replace(/\?tab=.*$/, "") + "?tab=results");
+  await go(projectBase + "?tab=results");
   const itemForm = page.locator("details:has(summary:has-text('Ajouter un élément')) form");
   await itemForm.locator("[name=level]").selectOption("IMPACT");
   await itemForm.locator("[name=code]").fill("IMP");

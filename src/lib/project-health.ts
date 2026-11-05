@@ -1,5 +1,6 @@
 import { isOverdue, timeProgress } from "./metrics";
 import { activitiesHealth } from "./planning";
+import { budgetHealth } from "./finance";
 
 // Santé du projet : chaque dimension est calculée par une règle documentée, à partir des données réelles.
 // Les dimensions dont les données n'existent pas encore sont explicitement « non évaluées ».
@@ -46,7 +47,10 @@ export function indicatorsHealth(list: IndicatorInfo): HealthDimension {
   return { key: "indicators", level, detail: { k: "indicatorsValue", vars: { good: n("good"), watch: n("watch"), critical: n("critical"), stale } } };
 }
 
-export function projectHealth(p: P, now = new Date(), planning: PlanningInfo = null, indicators: IndicatorInfo = null): HealthDimension[] {
+export type BudgetInfo = { execution: number | null; overspentLines: number } | null;
+export type RiskInfo = { level: HealthLevel; open: number; critical: number; high: number; overdue: number } | null;
+
+export function projectHealth(p: P, now = new Date(), planning: PlanningInfo = null, indicators: IndicatorInfo = null, budget: BudgetInfo = null, risks: RiskInfo = null): HealthDimension[] {
   // Planning — règle : critique si en retard ; vigilance si ≤ 30 jours restants ou ≥ 85 % du temps écoulé ; inconnu sans dates.
   let planning_: HealthDimension;
   if (!p.startDate || !p.endDate) planning_ = { key: "planning", level: "unknown", detail: { k: "noDates" } };
@@ -68,12 +72,19 @@ export function projectHealth(p: P, now = new Date(), planning: PlanningInfo = n
     detail: c.missing.length ? { k: "completeMissing", vars: { pct: c.pct } } : { k: "completeAll" },
     missing: c.missing,
   };
-  const pending = (key: "activities" | "budget" | "indicators" | "risks"): HealthDimension => ({ key, level: "unknown", detail: { k: "pending", vars: { module: key } } });
   // Activités — règle : écart entre temps écoulé et avancement réel (≤ 10 pts bon, ≤ 25 vigilance, au-delà critique),
   // vigilance dès qu'une activité est en retard ; non évalué sans activité.
   const elapsed = timeProgress(p.startDate, p.endDate, now);
   const activities: HealthDimension = !planning || planning.actual === null
     ? { key: "activities", level: "unknown", detail: { k: "activitiesNone" } }
     : { key: "activities", level: activitiesHealth(planning.actual, elapsed, planning.late), detail: { k: "activitiesValue", vars: { actual: planning.actual, elapsed: elapsed ?? "—", late: planning.late } } };
-  return [planning_, data, activities, pending("budget"), indicatorsHealth(indicators), pending("risks")];
+    // Budget — règle : voir budgetHealth (lib/finance.ts).
+  const budget_: HealthDimension = !budget || budget.execution === null
+    ? { key: "budget", level: "unknown", detail: { k: "budgetNone" } }
+    : { key: "budget", level: budgetHealth(budget.execution, elapsed, budget.overspentLines), detail: { k: "budgetValue", vars: { exec: budget.execution, elapsed: elapsed ?? "—", over: budget.overspentLines } } };
+  // Risques — règle : voir risksHealth (lib/risk.ts).
+  const risks_: HealthDimension = !risks || risks.level === "unknown"
+    ? { key: "risks", level: "unknown", detail: { k: "risksNone" } }
+    : { key: "risks", level: risks.level, detail: { k: "risksValue", vars: { open: risks.open, critical: risks.critical, high: risks.high, overdue: risks.overdue } } };
+  return [planning_, data, activities, budget_, indicatorsHealth(indicators), risks_];
 }

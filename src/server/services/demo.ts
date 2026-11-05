@@ -138,6 +138,39 @@ export async function createDemoOrganization(userId: string, now = new Date()) {
       quarters.length >= 4 ? tx.indicatorValue.create({ data: { organizationId: o, indicatorId: i5.id, periodStart: d(`${y - 1}-01-01`), periodEnd: d(`${y - 1}-12-31`), value: 288, source: "Enquête annuelle du district (fictive)", collectedById: userId, status: "VALIDATED", validatedById: userId, validatedAt: d(`${y}-02-15`) } }) : null);
     await I({ logframeItemId: x21.id, code: "IND-6", name: "Maternités équipées en kits d'accouchement", definition: "Nombre de maternités de référence disposant du kit complet.", unit: "maternités", baseline: 0, baselineDate: d(`${y}-07-01`), target: 12, targetDate: d(`${y + 1}-06-30`), frequency: "SEMIANNUAL", source: "Inventaires (fictifs)", disaggregations: [] });
 
+    // Finances (fictif) : financements, budget détaillé et dépenses de PRJ-001, en XOF.
+    const daysAgo = (k: number) => new Date(now.getTime() - k * 86_400_000);
+    const fd1 = await tx.funding.create({ data: { organizationId: o, projectId: p1.id, donor: "Fondation Sahel Santé (fictive)", reference: "CONV-2025-014", amount: 100_000_000, startDate: d(`${y - 1}-02-01`), endDate: d(`${y + 1}-06-30`) } });
+    const fd2 = await tx.funding.create({ data: { organizationId: o, projectId: p1.id, donor: "Fonds propres (fictif)", amount: 30_000_000 } });
+    const BL = (code: string, label: string, category: string, plannedAmount: number, fundingId: string) => tx.budgetLine.create({ data: { organizationId: o, projectId: p1.id, code, label, category, plannedAmount, fundingId } as never });
+    const lines = [
+      [await BL("B1", "Salaires de l'équipe mobile", "HR", 48_000_000, fd1.id), [12_000_000, 11_000_000, 11_000_000, 10_000_000]],
+      [await BL("B2", "Carburant et déplacements", "TRAVEL", 22_000_000, fd1.id), [5_000_000, 4_500_000, 4_500_000]],
+      [await BL("B3", "Équipement des cliniques mobiles", "EQUIPMENT", 40_000_000, fd1.id), [25_000_000, 6_000_000]],
+      [await BL("B4", "Formation des relais communautaires", "ACTIVITIES", 18_000_000, fd2.id), [3_500_000, 2_500_000]],
+      [await BL("B5", "Fournitures médicales", "SUPPLIES", 15_000_000, fd2.id), [4_000_000, 3_000_000]],
+      [await BL("B6", "Coûts indirects", "INDIRECT", 7_000_000, fd1.id), [2_000_000, 2_000_000]],
+    ] as const;
+    let k = 0;
+    await tx.expense.createMany({ data: lines.flatMap(([line, amounts]) => amounts.map((amount, i) => {
+      const date = daysAgo(40 + (amounts.length - i) * 75 + (k++ % 3) * 9);
+      return { organizationId: o, projectId: p1.id, budgetLineId: line.id, date, amount, description: `${line.label} — tranche ${i + 1} (fictif)`, reference: `PJ-${String(k).padStart(4, "0")}`, status: "VALIDATED" as const, createdById: userId, validatedById: userId, validatedAt: new Date(date.getTime() + 5 * 86_400_000) };
+    })) });
+    await tx.expense.createMany({ data: [
+      { organizationId: o, projectId: p1.id, budgetLineId: lines[3][0].id, date: daysAgo(6), amount: 1_500_000, description: "Session de formation de Mbour (fictif)", supplier: "Centre de formation fictif", reference: "PJ-0099", createdById: userId },
+      { organizationId: o, projectId: p1.id, budgetLineId: lines[4][0].id, date: daysAgo(3), amount: 800_000, description: "Kits de dépistage (fictif)", supplier: "Pharmacie fictive", reference: "PJ-0100", createdById: userId },
+    ] });
+
+    // Risques (fictif)
+    const RK = (data: Record<string, unknown>) => ({ organizationId: o, projectId: p1.id, ownerId: userId, createdById: userId, ...data }) as never;
+    await tx.risk.createMany({ data: [
+      RK({ code: "R1", title: "Routes impraticables pendant l'hivernage", category: "OPERATIONAL", probability: 4, impact: 4, status: "MITIGATING", mitigation: "Calendrier de tournées adapté, véhicules 4×4, stocks avancés dans les postes de santé.", reviewDate: daysAgo(-20) }),
+      RK({ code: "R2", title: "Retard de décaissement du bailleur", category: "FINANCIAL", probability: 3, impact: 5, status: "OPEN", mitigation: "Suivi mensuel de la trésorerie, avance sur fonds propres plafonnée.", contingency: "Report des achats non critiques.", reviewDate: daysAgo(12) }),
+      RK({ code: "R3", title: "Rupture de stock de kits de dépistage", category: "OPERATIONAL", probability: 2, impact: 4, status: "OPEN", mitigation: "Deux fournisseurs référencés, stock de sécurité de 2 mois.", reviewDate: daysAgo(-45) }),
+      RK({ code: "R4", title: "Départ de sages-femmes formées", category: "STRATEGIC", probability: 3, impact: 3, status: "OPEN", reviewDate: daysAgo(-60) }),
+      RK({ code: "R5", title: "Insécurité sur un axe de tournée", category: "SECURITY", probability: 2, impact: 5, status: "CLOSED", mitigation: "Axe remplacé par un itinéraire alternatif." }),
+    ] });
+
     // Analyse de données (fictif) : enquête ménages générée de façon déterministe.
     const survey = demoSurvey();
     await tx.dataset.create({ data: {

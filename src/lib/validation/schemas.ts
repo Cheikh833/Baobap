@@ -343,3 +343,54 @@ export function parseDisaggregation(form: Record<string, unknown>) {
   }
   return Object.keys(out).length ? out : undefined;
 }
+
+// ───────────── Finances & risques ─────────────
+
+const reqAmount = (label: string) => z.preprocess(
+  (v) => (typeof v === "string" ? (v.replace(/[\s  ]/g, "").replace(",", ".") || undefined) : v),
+  z.coerce.number({ required_error: `${label} est obligatoire.`, invalid_type_error: "Montant invalide." }).finite("Montant invalide.").min(0, "Le montant doit être positif.").max(1e15),
+);
+
+export const fundingSchema = dateRange(z.object({
+  donor: reqText("Le bailleur", 200),
+  reference: optText(120),
+  amount: reqAmount("Le montant"),
+  startDate: optDate,
+  endDate: optDate,
+  notes: optText(1000),
+}));
+
+export const BUDGET_CATEGORIES = ["HR", "TRAVEL", "EQUIPMENT", "SUPPLIES", "SERVICES", "ACTIVITIES", "OPERATING", "INDIRECT", "OTHER"] as const;
+export const budgetLineSchema = z.object({
+  code: code,
+  label: reqText("L'intitulé", 200),
+  category: z.enum(BUDGET_CATEGORIES).default("ACTIVITIES"),
+  plannedAmount: reqAmount("Le montant prévu"),
+  fundingId: optId,
+  notes: optText(1000),
+});
+
+export const expenseSchema = z.object({
+  budgetLineId: z.string({ required_error: "La ligne budgétaire est obligatoire." }).cuid("La ligne budgétaire est obligatoire."),
+  date: z.coerce.date({ required_error: "La date est obligatoire.", invalid_type_error: "Date invalide." }),
+  amount: reqAmount("Le montant").refine((x) => x > 0, "Le montant doit être supérieur à zéro."),
+  description: reqText("La description", 300),
+  supplier: optText(200),
+  reference: optText(100),
+});
+
+export const RISK_CATEGORIES = ["STRATEGIC", "OPERATIONAL", "FINANCIAL", "SECURITY", "COMPLIANCE", "REPUTATION", "ENVIRONMENTAL", "OTHER"] as const;
+const scale = (label: string) => z.coerce.number({ invalid_type_error: `${label} : choisissez une valeur de 1 à 5.` }).int().min(1, `${label} : choisissez une valeur de 1 à 5.`).max(5, `${label} : choisissez une valeur de 1 à 5.`);
+export const riskSchema = z.object({
+  code: code,
+  title: reqText("L'intitulé", 200),
+  description: optText(2000),
+  category: z.enum(RISK_CATEGORIES).default("OPERATIONAL"),
+  probability: scale("Probabilité"),
+  impact: scale("Impact"),
+  ownerId: optId,
+  mitigation: optText(2000),
+  contingency: optText(2000),
+  status: z.enum(["OPEN", "MITIGATING", "CLOSED"]).default("OPEN"),
+  reviewDate: optDate,
+});

@@ -17,9 +17,10 @@ import { getMessages } from "@/i18n/server";
 // Page d'accueil publique. Aucun client, témoignage ou logo partenaire n'est inventé ;
 // l'aperçu du produit est explicitement présenté comme une illustration de l'interface.
 const MODULE_ICONS = [Target, FolderTree, Layers, Wallet, ShieldCheck, BarChart3, Sparkles, FileText];
-const READY = [true, true, true, false, false, true, false, false];
-// Modules utilisables aujourd'hui : organisation, stratégie, portefeuilles-programmes-projets, planification, suivi-évaluation, analyse de données.
-const OPERATIONAL_MODULES = 6;
+const READY = [true, true, true, true, true, true, false, false];
+// Modules utilisables aujourd'hui : organisation, stratégie, portefeuilles-programmes-projets, planification,
+// suivi-évaluation, finances, risques, analyse de données.
+const OPERATIONAL_MODULES = 8;
 const CYCLE_ICONS = [Target, Layers, FolderTree, Rocket, ClipboardCheck, Gauge, LineChart, CheckCircle2, Sparkles];
 
 export default async function LandingPage() {

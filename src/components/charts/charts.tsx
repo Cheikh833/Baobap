@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 export type Slice = { label: string; value: number; color: string };
 
 /** Anneau (répartition). Les segments se dessinent à l'affichage. */
-export function Donut({ data, size = 148, thickness = 18, center, label }: { data: Slice[]; size?: number; thickness?: number; center?: ReactNode; label: string }) {
+export function Donut({ data, size = 148, thickness = 18, center, label, format }: { data: Slice[]; size?: number; thickness?: number; center?: ReactNode; label: string; format?: (v: number) => string }) {
   const total = data.reduce((s, d) => s + d.value, 0);
   const r = (size - thickness) / 2;
   const c = 2 * Math.PI * r;
@@ -37,7 +37,7 @@ export function Donut({ data, size = 148, thickness = 18, center, label }: { dat
           <li key={d.label} className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: d.color }} aria-hidden />
             <span className="text-slate-600">{d.label}</span>
-            <span className="ml-auto pl-3 font-semibold tabular">{d.value}</span>
+            <span className="ml-auto whitespace-nowrap pl-3 font-semibold tabular">{format ? format(d.value) : d.value}</span>
           </li>
         ))}
       </ul>

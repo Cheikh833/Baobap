@@ -8,7 +8,7 @@
 | 2 — Stratégie | Portefeuilles ✅, programmes ✅, plans stratégiques ✅, axes ✅, objectifs ✅, contributions pondérées des projets ✅, couverture et budget aligné ✅ ; arbitrages et scénarios 🔜 | ✅ (cœur) |
 | 3 — Projets | Création ✅, fiche ✅, cycle de vie ✅, phases ✅, activités ✅, tâches ✅, jalons ✅, dépendances ✅, Gantt ✅, Kanban ✅, « Mes tâches » ✅ ; livrables, équipe projet, calendrier 🔜 | ✅ (cœur) |
 | 4 — Impact & MEAL | Cadre logique ✅ avec contrôles de cohérence ✅, indicateurs ✅, ventilations ✅, collecte et validation à quatre yeux ✅, corrections tracées ✅, trajectoire et alertes d'actualisation ✅, santé du projet ✅ ; versions du cadre, ToC visuelle, évaluations, redevabilité, apprentissage 🔜 | ✅ (cœur) |
-| 5 — Finances & risques | Budgets, lignes, financements, dépenses, engagements, décaissements, variances, contrôles ; registre et matrice des risques, incidents | 🔜 |
+| 5 — Finances & risques | Financements ✅, lignes budgétaires ✅, dépenses validées à quatre yeux ✅, blocage des dépassements ✅, annulations tracées ✅, exécution vs temps ✅ ; registre des risques ✅, matrice 5×5 ✅, revues ✅ ; engagements, décaissements, rapports financiers bailleurs, incidents 🔜 | ✅ (cœur) |
 | 6 — Documents | Stockage privé, versions, extraction, indexation, recherche, RAG, citations | 🔜 |
 | 7 — Analyse de données | Import CSV ✅, dictionnaire et types corrigeables ✅, contrôle qualité ✅, statistiques descriptives ✅, fréquences ✅, tableau croisé + khi² avec conditions ✅, ANOVA ✅, histogrammes ✅ ; import XLSX, nettoyage traçable, régressions, insights IA 🔜 | ✅ (cœur) |
 | 8 — BAOBAB AI | Assistant général + Expert, Intent Router, Context Engine, outils sécurisés, confirmations, streaming, citations, garde-fous | 🔜 |
