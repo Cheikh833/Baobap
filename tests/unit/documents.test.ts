@@ -39,3 +39,21 @@ describe("extraction de texte", () => {
     expect(snippet("Le taux de couverture progresse dans la région.", ["couverture"])).toContain("couverture");
   });
 });
+
+import { buildDocx, buildXlsx } from "@/lib/office";
+describe("Office", () => {
+  it("Excel : feuilles, nombres et textes échappés ; relisible", () => {
+    const x = buildXlsx([{ name: "Lignes / budget", rows: [["Code", "Montant"], ["B1 <&>", 1500000.5], [null, 2]] }]);
+    const z = readZip(x);
+    expect(z.get("xl/workbook.xml")!.toString()).toContain('name="Lignes   budget"');
+    const s = z.get("xl/worksheets/sheet1.xml")!.toString();
+    expect(s).toContain("<v>1500000.5</v>");
+    expect(s).toContain("B1 &lt;&amp;&gt;");
+    expect(extractText("t.xlsx", x)).toBeNull(); // chaînes en ligne : pas de sharedStrings (attendu)
+  });
+  it("Word : texte retrouvable", () => {
+    const d = buildDocx([{ kind: "title", text: "Rapport d'avancement" }, { kind: "table", head: ["Indicateur", "Valeur"], rows: [["IND-1", 61]] }]);
+    expect(extractText("r.docx", d)).toContain("Rapport d'avancement");
+    expect(extractText("r.docx", d)).toContain("IND-1");
+  });
+});

@@ -255,6 +255,13 @@ const EXACT_EN: Record<string, string> = {
   "Document supprimé.": "Document deleted.",
   "Fiche enregistrée.": "Article saved.",
   "Fiche supprimée.": "Article deleted.",
+  "Choisissez le projet du rapport.": "Choose the report's project.",
+  "Rapport introuvable.": "Report not found.",
+  "Un rapport validé ne se modifie plus.": "A validated report can no longer be edited.",
+  "Ce rapport est déjà validé.": "This report is already validated.",
+  "Texte enregistré.": "Text saved.",
+  "Rapport validé : les données sont figées.": "Report validated: data is frozen.",
+  "Rapport supprimé.": "Report deleted.",
 };
 
 const LABELS_EN: Record<string, string> = {

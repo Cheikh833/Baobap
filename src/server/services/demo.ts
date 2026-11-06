@@ -186,6 +186,10 @@ export async function createDemoOrganization(userId: string, now = new Date()) {
       { organizationId: o, title: "Procédure : validation d'une dépense", category: "PROCEDURE", body: "1. La personne qui engage la dépense la saisit avec la pièce justificative.\n2. Une autre personne habilitée la valide.\n3. Toute dépense qui ferait dépasser la ligne budgétaire est refusée : réviser d'abord le budget.\n4. Une dépense validée ne se modifie pas ; en cas d'erreur, elle est annulée avec un motif.", tags: ["finances", "contrôle interne"], authorId: userId },
     ] as never });
 
+    // Studio (fictif) : un rapport d'avancement en brouillon, prêt à être complété puis validé.
+    await tx.report.create({ data: { organizationId: o, projectId: p1.id, type: "PROJECT_PROGRESS", title: `Rapport d'avancement — ${y} (fictif)`, periodStart: d(`${y}-01-01`), periodEnd: d(`${y}-09-30`), createdById: userId,
+      narrative: { summary: "Exemple fictif : le projet progresse conformément au calendrier ; les consultations prénatales augmentent régulièrement.", highlights: "39 villages desservis par les cliniques mobiles ; 56 relais formés.", challenges: "Retard de décaissement du bailleur au 2e trimestre ; accès difficile pendant l'hivernage.", nextSteps: "Évaluation à mi-parcours ; équipement des maternités de référence." } } });
+
     // Risques (fictif)
     const RK = (data: Record<string, unknown>) => ({ organizationId: o, projectId: p1.id, ownerId: userId, createdById: userId, ...data }) as never;
     await tx.risk.createMany({ data: [

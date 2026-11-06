@@ -30,6 +30,7 @@ import { FinanceTab } from "./finance-tab";
 import { RisksTab } from "./risks-tab";
 import { TeamTab } from "./team-tab";
 import { DocumentsTab } from "./documents-tab";
+import { ReportsTab } from "./reports-tab";
 import { getProjectFinance } from "@/server/services/finance";
 import { listProjectRisks } from "@/server/services/risks";
 import { risksHealth } from "@/lib/risk";
@@ -38,7 +39,7 @@ import { deleteProjectAction, editStepAction, statusAction } from "../actions";
 
 const TABS = [
   ["overview", 0], ["planning", 0], ["activities", 0], ["results", 0], ["meal", 0], ["finance", 0],
-  ["risks", 0], ["team", 0], ["documents", 0], ["reports", 9], ["history", 0], ["settings", 0],
+  ["risks", 0], ["team", 0], ["documents", 0], ["reports", 0], ["history", 0], ["settings", 0],
 ] as const;
 
 const levelColor: Record<HealthLevel, string> = { good: "bg-success", watch: "bg-warning", critical: "bg-danger", unknown: "bg-slate-300" };
@@ -187,6 +188,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
       {tab === "risks" && (can(ctx, "risk:view") ? <RisksTab ctx={ctx} projectId={p.id} members={o.members} memberNames={o.memberNames} m={m} locale={locale} /> : <Card><p className="text-sm text-slate-600">{m.ui.readOnlyRole}</p></Card>)}
       {tab === "team" && <TeamTab ctx={ctx} projectId={p.id} members={o.members} m={m} locale={locale} />}
       {tab === "documents" && <DocumentsTab ctx={ctx} projectId={p.id} m={m} locale={locale} />}
+      {tab === "reports" && <ReportsTab ctx={ctx} projectId={p.id} m={m} locale={locale} />}
       {tab === "history" && <History orgId={ctx.organizationId} projectId={p.id} canAudit={can(ctx, "audit:view")} m={m} locale={locale} />}
 
       {tab === "settings" && (
@@ -225,7 +227,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
         </div>
       )}
 
-      {!["overview", "planning", "activities", "results", "meal", "finance", "risks", "team", "documents", "history", "settings"].includes(tab) && <Card><p className="text-sm text-slate-600">{P.tabSoon} <Badge>{m.common.soon}</Badge></p></Card>}
+      {!["overview", "planning", "activities", "results", "meal", "finance", "risks", "team", "documents", "reports", "history", "settings"].includes(tab) && <Card><p className="text-sm text-slate-600">{P.tabSoon} <Badge>{m.common.soon}</Badge></p></Card>}
     </>
   );
 }

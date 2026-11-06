@@ -31,13 +31,13 @@ export const NAV: { section: NavKey; items: NavItem[] }[] = [
       { href: "/risks", label: "risks", icon: ShieldAlert, permission: "risk:view" },
       { href: "/analytics", label: "analytics", icon: BarChart3, permission: "analytics:view" },
       { href: "/documents", label: "knowledge", icon: BookOpen, permission: "documents:view" },
+      { href: "/studio", label: "studio", icon: FileText, permission: "reports:view" },
     ],
   },
   {
     section: "upcoming",
     items: [
       { href: "/ai", label: "ai", icon: Sparkles, phase: 8 },
-      { href: "/studio", label: "studio", icon: FileText, phase: 9 },
       { href: "/administration", label: "administration", icon: Settings, phase: 11 },
     ],
   },
