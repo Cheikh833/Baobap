@@ -262,6 +262,9 @@ const EXACT_EN: Record<string, string> = {
   "Texte enregistré.": "Text saved.",
   "Rapport validé : les données sont figées.": "Report validated: data is frozen.",
   "Rapport supprimé.": "Report deleted.",
+  "Compte introuvable.": "Account not found.",
+  "C'est votre seul moyen de connexion : définissez d'abord un mot de passe (« Mot de passe oublié »).": "This is your only sign-in method: set a password first (“Forgot password”).",
+  "Compte détaché.": "Account unlinked.",
 };
 
 const LABELS_EN: Record<string, string> = {
@@ -290,6 +293,7 @@ const RULES_EN: [RegExp, (...g: string[]) => string][] = [
   [/^(Influence|Intérêt) : choisissez une valeur de 1 à 3\.$/, (k) => `${k === "Influence" ? "Influence" : "Interest"}: choose a value from 1 to 3.`],
   [/^(Probabilité|Impact) : choisissez une valeur de 1 à 5\.$/, (k) => `${k === "Impact" ? "Impact" : "Probability"}: choose a value from 1 to 5.`],
   [/^Espace de stockage du plan atteint \((\d+) Go\)\..*$/, (n) => `Plan storage limit reached (${n} GB). Delete files or change plan.`],
+  [/^Déconnexion de (\d+) autre\(s\) appareil\(s\)\.$/, (n) => `${n} other device(s) signed out.`],
   [/^Permission inconnue : (.+)$/, (p) => `Unknown permission: ${p}`],
 ];
 

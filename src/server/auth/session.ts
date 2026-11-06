@@ -45,6 +45,12 @@ export async function getSessionUser() {
   return session.user;
 }
 
+/** Identifiant (haché) de la session courante, pour la distinguer dans la liste des appareils. */
+export async function currentSessionId() {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  return token ? hashToken(token) : null;
+}
+
 export async function destroySession() {
   const jar = await cookies();
   const token = jar.get(SESSION_COOKIE)?.value;
