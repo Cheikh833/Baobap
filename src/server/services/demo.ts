@@ -172,6 +172,20 @@ export async function createDemoOrganization(userId: string, now = new Date()) {
       SH({ name: "Mairie de Mbour (fictive)", type: "LOCAL_AUTHORITY", influence: 2, interest: 1 }),
     ] });
 
+    // Documents et connaissances (fictifs) : fichiers texte générés, consultables et recherchables.
+    const { createHash } = await import("node:crypto");
+    const DOC = async (title: string, category: string, fileName: string, text: string, tags: string[]) => {
+      const content = Buffer.from(text, "utf8");
+      const doc = await tx.document.create({ data: { organizationId: o, projectId: p1.id, title, category, tags, createdById: userId } as never });
+      await tx.documentVersion.create({ data: { organizationId: o, documentId: doc.id, version: 1, fileName, mimeType: fileName.endsWith(".csv") ? "text/csv" : "text/plain", size: content.length, sha256: createHash("sha256").update(content).digest("hex"), content, text, createdById: userId } });
+    };
+    await DOC("Termes de référence — évaluation à mi-parcours (fictif)", "TERMS_OF_REFERENCE", "tdr-evaluation-mi-parcours.txt", "Termes de référence (exemple fictif)\nObjet : évaluation à mi-parcours du projet Cliniques mobiles prénatales.\nQuestions évaluatives : pertinence, efficacité, efficience, durabilité.\nMéthodes : revue documentaire, entretiens avec les relais communautaires, enquête ménages.", ["évaluation", "mi-parcours"]);
+    await DOC("Procès-verbal du comité de pilotage (fictif)", "MINUTES", "pv-comite-pilotage.txt", "Procès-verbal (exemple fictif)\nLe comité de pilotage valide le calendrier des tournées pendant l'hivernage et demande un point mensuel sur les décaissements.", ["comité", "pilotage"]);
+    await tx.knowledgeArticle.createMany({ data: [
+      { organizationId: o, projectId: p1.id, title: "Leçon apprise : préparer l'hivernage dès mai", category: "LESSON", body: "Constat (fictif) : les tournées de juillet-août ont été réduites de 30 % à cause des routes impraticables.\n\nCe qui a marché : véhicules 4×4 loués à l'avance, stocks avancés dans les postes de santé.\n\nÀ retenir : planifier dès mai et prévoir une ligne budgétaire « logistique hivernage ».", tags: ["logistique", "hivernage"], authorId: userId },
+      { organizationId: o, title: "Procédure : validation d'une dépense", category: "PROCEDURE", body: "1. La personne qui engage la dépense la saisit avec la pièce justificative.\n2. Une autre personne habilitée la valide.\n3. Toute dépense qui ferait dépasser la ligne budgétaire est refusée : réviser d'abord le budget.\n4. Une dépense validée ne se modifie pas ; en cas d'erreur, elle est annulée avec un motif.", tags: ["finances", "contrôle interne"], authorId: userId },
+    ] as never });
+
     // Risques (fictif)
     const RK = (data: Record<string, unknown>) => ({ organizationId: o, projectId: p1.id, ownerId: userId, createdById: userId, ...data }) as never;
     await tx.risk.createMany({ data: [

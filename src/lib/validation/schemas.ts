@@ -418,3 +418,23 @@ export const stakeholderSchema = z.object({
   phone: optText(40),
   engagement: optText(2000),
 });
+
+// ───────────── Documents & connaissances ─────────────
+
+export const DOCUMENT_CATEGORIES = ["REPORT", "CONTRACT", "AGREEMENT", "TERMS_OF_REFERENCE", "MINUTES", "PROCEDURE", "DATA", "PHOTO", "OTHER"] as const;
+export const documentSchema = z.object({
+  title: reqText("Le titre", 200),
+  description: optText(2000),
+  category: z.enum(DOCUMENT_CATEGORIES).default("OTHER"),
+  tags: list,
+  projectId: optId,
+});
+
+export const KNOWLEDGE_CATEGORIES = ["LESSON", "PROCEDURE", "GUIDE", "FAQ", "OTHER"] as const;
+export const knowledgeSchema = z.object({
+  title: reqText("Le titre", 200),
+  category: z.enum(KNOWLEDGE_CATEGORIES).default("LESSON"),
+  body: reqText("Le contenu", 20000),
+  tags: list,
+  projectId: optId,
+});

@@ -244,12 +244,23 @@ const EXACT_EN: Record<string, string> = {
   "Membre retiré.": "Member removed.",
   "Partie prenante enregistrée.": "Stakeholder saved.",
   "Partie prenante supprimée.": "Stakeholder deleted.",
+  "Choisissez un fichier.": "Choose a file.",
+  "Type de fichier non accepté (PDF, Word, Excel, PowerPoint, OpenDocument, CSV, texte, PNG, JPEG, WebP), ou contenu qui ne correspond pas à l'extension.": "File type not accepted (PDF, Word, Excel, PowerPoint, OpenDocument, CSV, text, PNG, JPEG, WebP), or content that does not match the extension.",
+  "Document introuvable.": "Document not found.",
+  "Ce fichier est identique à la version actuelle.": "This file is identical to the current version.",
+  "Fiche introuvable.": "Article not found.",
+  "Document déposé.": "Document uploaded.",
+  "Nouvelle version déposée.": "New version uploaded.",
+  "Document enregistré.": "Document saved.",
+  "Document supprimé.": "Document deleted.",
+  "Fiche enregistrée.": "Article saved.",
+  "Fiche supprimée.": "Article deleted.",
 };
 
 const LABELS_EN: Record<string, string> = {
   "Le nom": "Name", "Le pays": "Country", "Le nom de l'organisation": "Organization name", "Le nom du projet": "Project name",
   "Le nom du rôle": "Role name", "Le titre": "Title", "L'intitulé": "Title", "Le responsable": "The manager", "Le coordinateur": "The coordinator", "Le chef de projet": "The project manager",
-  "Le nom de l'indicateur": "Indicator name", "La définition": "Definition", "L'unité": "Unit", "La source": "Source", "Le bailleur": "Donor", "Le rôle dans le projet": "Project role", "Le montant": "Amount", "Le montant prévu": "Planned amount", "La description": "Description",
+  "Le nom de l'indicateur": "Indicator name", "La définition": "Definition", "L'unité": "Unit", "La source": "Source", "Le bailleur": "Donor", "Le contenu": "Content", "Le rôle dans le projet": "Project role", "Le montant": "Amount", "Le montant prévu": "Planned amount", "La description": "Description",
 };
 
 const RULES_EN: [RegExp, (...g: string[]) => string][] = [
@@ -271,6 +282,7 @@ const RULES_EN: [RegExp, (...g: string[]) => string][] = [
   [/^Validation refusée : la ligne (.+) serait dépassée \(disponible : (.+)\)\..*$/, (l, n) => `Validation refused: line ${l} would be overspent (available: ${n}). Revise the budget first.`],
   [/^(Influence|Intérêt) : choisissez une valeur de 1 à 3\.$/, (k) => `${k === "Influence" ? "Influence" : "Interest"}: choose a value from 1 to 3.`],
   [/^(Probabilité|Impact) : choisissez une valeur de 1 à 5\.$/, (k) => `${k === "Impact" ? "Impact" : "Probability"}: choose a value from 1 to 5.`],
+  [/^Espace de stockage du plan atteint \((\d+) Go\)\..*$/, (n) => `Plan storage limit reached (${n} GB). Delete files or change plan.`],
   [/^Permission inconnue : (.+)$/, (p) => `Unknown permission: ${p}`],
 ];
 

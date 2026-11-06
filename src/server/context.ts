@@ -31,3 +31,16 @@ export async function requireTenant(): Promise<TenantContext> {
   if (!ctx) redirect("/onboarding");
   return ctx;
 }
+
+/** Variante sans redirection (routes d'API) : contexte de l'organisation active, ou null. */
+export async function getTenantContext(): Promise<TenantContext | null> {
+  const user = await getSessionUser();
+  if (!user) return null;
+  const activeId = await getActiveOrganizationId();
+  if (activeId) {
+    const ctx = await loadTenantContext(user.id, activeId);
+    if (ctx) return ctx;
+  }
+  const first = await db.membership.findFirst({ where: { userId: user.id, status: "ACTIVE" }, orderBy: { createdAt: "asc" } });
+  return first ? loadTenantContext(user.id, first.organizationId) : null;
+}

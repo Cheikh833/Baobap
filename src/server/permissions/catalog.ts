@@ -13,6 +13,10 @@ export const RESOURCES = [
   "analytics",
   "finance",
   "risk",
+  "documents",
+  "reports",
+  "ai",
+  "administration",
   "portfolio",
   "program",
   "project",
@@ -38,6 +42,12 @@ export const RESOURCE_ACTIONS: Record<Resource, readonly Action[]> = {
   // finance:create = saisir des dépenses ; edit = budget et financements ; approve = valider / annuler des dépenses
   finance: ["view", "create", "edit", "delete", "approve"],
   risk: ["view", "create", "edit", "delete"],
+  documents: ["view", "create", "edit", "delete"],
+  // reports:approve = valider un rapport (les chiffres sont alors figés)
+  reports: ["view", "create", "edit", "delete", "approve"],
+  ai: ["view"],
+  // administration:export = export complet des données de l'organisation
+  administration: ["view", "export"],
   portfolio: ["view", "create", "edit", "delete"],
   program: ["view", "create", "edit", "delete"],
   project: ["view", "create", "edit", "delete", "approve"],
@@ -51,7 +61,7 @@ export function isPermission(value: string): value is Permission {
   return (ALL_PERMISSIONS as string[]).includes(value);
 }
 
-const VIEW_ALL: Permission[] = RESOURCES.filter((r) => r !== "audit" && r !== "billing").map((r) => `${r}:view` as Permission);
+const VIEW_ALL: Permission[] = RESOURCES.filter((r) => r !== "audit" && r !== "billing" && r !== "administration").map((r) => `${r}:view` as Permission);
 
 type SystemRole = { key: string; name: string; description: string; permissions: Permission[] };
 
@@ -68,35 +78,35 @@ export const SYSTEM_ROLES: SystemRole[] = [
     key: "EXECUTIVE_DIRECTOR",
     name: "Directeur exécutif",
     description: "Vision globale, validation des projets, consultation de l'audit.",
-    permissions: [...VIEW_ALL, "audit:view", "billing:view", "project:approve", "portfolio:edit", "program:edit", "strategy:create", "strategy:edit", "meal:approve", "finance:approve", "risk:edit"],
+    permissions: [...VIEW_ALL, "audit:view", "billing:view", "project:approve", "portfolio:edit", "program:edit", "strategy:create", "strategy:edit", "meal:approve", "finance:approve", "risk:edit", "reports:create", "reports:edit", "reports:approve", "administration:view"],
   },
   {
     key: "PORTFOLIO_MANAGER",
     name: "Responsable de portefeuille",
     description: "Gère portefeuilles, programmes et projets.",
-    permissions: [...VIEW_ALL, "strategy:edit", "portfolio:create", "portfolio:edit", "program:create", "program:edit", "project:create", "project:edit", "meal:create", "meal:edit", "risk:create", "risk:edit"],
+    permissions: [...VIEW_ALL, "strategy:edit", "portfolio:create", "portfolio:edit", "program:create", "program:edit", "project:create", "project:edit", "meal:create", "meal:edit", "risk:create", "risk:edit", "documents:create", "documents:edit", "reports:create", "reports:edit"],
   },
   {
     key: "PROGRAM_MANAGER",
     name: "Responsable de programme",
     description: "Gère programmes et projets.",
-    permissions: [...VIEW_ALL, "program:create", "program:edit", "project:create", "project:edit", "meal:create", "meal:edit", "risk:create", "risk:edit"],
+    permissions: [...VIEW_ALL, "program:create", "program:edit", "project:create", "project:edit", "meal:create", "meal:edit", "risk:create", "risk:edit", "documents:create", "documents:edit", "reports:create", "reports:edit"],
   },
   {
     key: "PROJECT_MANAGER",
     name: "Chef de projet",
     description: "Crée et pilote des projets.",
-    permissions: [...VIEW_ALL, "project:create", "project:edit", "meal:create", "meal:edit", "analytics:create", "finance:create", "finance:edit", "risk:create", "risk:edit"],
+    permissions: [...VIEW_ALL, "project:create", "project:edit", "meal:create", "meal:edit", "analytics:create", "finance:create", "finance:edit", "risk:create", "risk:edit", "documents:create", "documents:edit", "reports:create", "reports:edit"],
   },
-  { key: "MEAL_MANAGER", name: "Responsable MEAL", description: "Cadres logiques, indicateurs, validation des données, analyses.", permissions: [...VIEW_ALL, "meal:create", "meal:edit", "meal:delete", "meal:approve", "analytics:create", "analytics:delete"] },
-  { key: "FINANCE_MANAGER", name: "Responsable financier", description: "Budgets, financements, saisie et validation des dépenses.", permissions: [...VIEW_ALL, "finance:create", "finance:edit", "finance:delete", "finance:approve", "risk:create"] },
-  { key: "TEAM_MEMBER", name: "Membre d'équipe", description: "Consultation, saisie des données de suivi.", permissions: [...VIEW_ALL, "meal:create", "finance:create", "risk:create"] },
+  { key: "MEAL_MANAGER", name: "Responsable MEAL", description: "Cadres logiques, indicateurs, validation des données, analyses.", permissions: [...VIEW_ALL, "meal:create", "meal:edit", "meal:delete", "meal:approve", "analytics:create", "analytics:delete", "documents:create", "documents:edit", "reports:create", "reports:edit"] },
+  { key: "FINANCE_MANAGER", name: "Responsable financier", description: "Budgets, financements, saisie et validation des dépenses.", permissions: [...VIEW_ALL, "finance:create", "finance:edit", "finance:delete", "finance:approve", "risk:create", "documents:create", "reports:create", "reports:edit"] },
+  { key: "TEAM_MEMBER", name: "Membre d'équipe", description: "Consultation, saisie des données de suivi.", permissions: [...VIEW_ALL, "meal:create", "finance:create", "risk:create", "documents:create"] },
   { key: "VIEWER", name: "Lecteur", description: "Consultation seule.", permissions: [...VIEW_ALL] },
   {
     key: "DONOR_VIEWER",
     name: "Bailleur (lecture)",
     description: "Consultation des portefeuilles, programmes et projets.",
-    permissions: ["organization:view", "strategy:view", "meal:view", "finance:view", "portfolio:view", "program:view", "project:view"],
+    permissions: ["organization:view", "strategy:view", "meal:view", "finance:view", "portfolio:view", "program:view", "project:view", "reports:view"],
   },
 ];
 
@@ -114,6 +124,10 @@ export const PERMISSION_LABELS: Record<Resource, string> = {
   analytics: "Analyse de données",
   finance: "Finances",
   risk: "Risques",
+  documents: "Documents",
+  reports: "Rapports (Studio)",
+  ai: "BAOBAB AI",
+  administration: "Administration",
   portfolio: "Portefeuilles",
   program: "Programmes",
   project: "Projets",
