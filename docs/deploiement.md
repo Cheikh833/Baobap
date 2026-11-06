@@ -28,6 +28,7 @@ Placer un reverse proxy HTTPS (Caddy ou Nginx + Let's Encrypt) devant le port 30
 | `CINETPAY_SECRET_KEY` | Fortement recommandé | Vérification de la signature des notifications |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Pour les emails | Invitations et mot de passe oublié |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Pour « Continuer avec Google » | Voir plus bas |
+| `ANTHROPIC_API_KEY`, `BAOBAB_AI_MODEL` | Pour BAOBAB AI | Voir plus bas |
 | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` | Pour « Continuer avec Microsoft » | Voir plus bas |
 | `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | Pour « Continuer avec Apple » | Voir plus bas |
 
@@ -63,6 +64,12 @@ Nécessite un compte **Apple Developer** (99 $/an).
 3. Variables Vercel : `APPLE_CLIENT_ID` (le Services ID), `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` (contenu complet du `.p8`). `COOKIE_SECURE=true` est indispensable (Apple renvoie la réponse par un formulaire inter-sites).
 
 **Fonctionnement** : la première fois, le compte BAOBAB est créé automatiquement à partir de l'email vérifié par Google / Apple ; si un compte existe déjà avec ce même email, il est rattaché (pas de doublon). Ensuite, le même bouton connecte directement. Un appareil déjà utilisé est reconnu : la page d'inscription renvoie vers la connexion, qui rappelle la méthode utilisée la dernière fois. Les sessions durent 30 jours.
+
+## Activer BAOBAB AI
+1. Créer un compte sur [console.anthropic.com](https://console.anthropic.com), ajouter un moyen de paiement (facturation à l'usage), créer une **clé d'API**.
+2. Variable Vercel : `ANTHROPIC_API_KEY` (la clé). Facultatif : `BAOBAB_AI_MODEL` pour choisir le modèle. Redéployer.
+3. **Coût** : par défaut `claude-opus-5-5` (le plus capable de la gamme Opus ; 4 $ / 20 $ par million de jetons en entrée / sortie). Une question qui consulte plusieurs pages de données coûte en général quelques centimes de dollar. Pour réduire la facture : `claude-sonnet-5-5` (2 $ / 10 $) ou `claude-haiku-5-5` (0,10 $ / 0,50 $), au prix d'analyses moins fines. Les quotas mensuels par plan (100 / 1 000 / 5 000 requêtes) plafonnent la dépense ; suivez-la dans la console Anthropic et dans **Administration** (requêtes du mois).
+4. Fonctionnement : l'assistant n'accède aux données qu'à travers des outils en lecture seule qui appliquent les droits de la personne ; il cite ses sources (liens vers les pages) ; en cas de refus du modèle, un modèle de repli est utilisé automatiquement côté serveur.
 
 ## Activer les emails
 N'importe quel service SMTP convient. Exemples : Brevo (offre gratuite de 300 emails par jour), Mailjet, un compte Gmail ou Google Workspace (mot de passe d'application), ou le SMTP de votre hébergeur. Utiliser une adresse d'expéditeur sur votre domaine et configurer SPF/DKIM pour éviter les spams.

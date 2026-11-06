@@ -265,6 +265,13 @@ const EXACT_EN: Record<string, string> = {
   "Compte introuvable.": "Account not found.",
   "C'est votre seul moyen de connexion : définissez d'abord un mot de passe (« Mot de passe oublié »).": "This is your only sign-in method: set a password first (“Forgot password”).",
   "Compte détaché.": "Account unlinked.",
+  "Écrivez votre question.": "Write your question.",
+  "BAOBAB AI n'est pas encore activé sur cette plateforme (clé d'API manquante).": "BAOBAB AI is not enabled on this platform yet (missing API key).",
+  "L'espace est en lecture seule : BAOBAB AI est disponible avec un abonnement actif.": "The workspace is read-only: BAOBAB AI is available with an active subscription.",
+  "BAOBAB AI est très sollicité : réessayez dans un instant.": "BAOBAB AI is very busy: please try again in a moment.",
+  "BAOBAB AI est mal configuré (clé d'API refusée). Prévenez l'administrateur de la plateforme.": "BAOBAB AI is misconfigured (API key refused). Notify the platform administrator.",
+  "BAOBAB AI n'a pas pu répondre (service indisponible). Réessayez plus tard.": "BAOBAB AI could not answer (service unavailable). Please try again later.",
+  "Conversation introuvable.": "Conversation not found.",
 };
 
 const LABELS_EN: Record<string, string> = {
@@ -294,6 +301,7 @@ const RULES_EN: [RegExp, (...g: string[]) => string][] = [
   [/^(Probabilité|Impact) : choisissez une valeur de 1 à 5\.$/, (k) => `${k === "Impact" ? "Impact" : "Probability"}: choose a value from 1 to 5.`],
   [/^Espace de stockage du plan atteint \((\d+) Go\)\..*$/, (n) => `Plan storage limit reached (${n} GB). Delete files or change plan.`],
   [/^Déconnexion de (\d+) autre\(s\) appareil\(s\)\.$/, (n) => `${n} other device(s) signed out.`],
+  [/^Quota mensuel de BAOBAB AI atteint \((\d+) requêtes\)\..*$/, (n) => `Monthly BAOBAB AI quota reached (${n} requests). It renews on the 1st of the month; you can also change plan.`],
   [/^Permission inconnue : (.+)$/, (p) => `Unknown permission: ${p}`],
 ];
 

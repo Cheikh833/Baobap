@@ -12,7 +12,7 @@ type NavKey = keyof Messages["nav"];
 export type NavItem = { href: string; label: NavKey; icon: LucideIcon; permission?: Permission; phase?: number };
 
 export const NAV: { section: NavKey; items: NavItem[] }[] = [
-  { section: "pilotage", items: [{ href: "/dashboard", label: "dashboard", icon: LayoutDashboard }, { href: "/actions", label: "notifications", icon: Bell }] },
+  { section: "pilotage", items: [{ href: "/dashboard", label: "dashboard", icon: LayoutDashboard }, { href: "/actions", label: "notifications", icon: Bell }, { href: "/ai", label: "ai", icon: Sparkles, permission: "ai:view" }] },
   {
     section: "organizationSection",
     items: [
@@ -38,7 +38,6 @@ export const NAV: { section: NavKey; items: NavItem[] }[] = [
   {
     section: "upcoming",
     items: [
-      { href: "/ai", label: "ai", icon: Sparkles, phase: 8 },
     ],
   },
 ];

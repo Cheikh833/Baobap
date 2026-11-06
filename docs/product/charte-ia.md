@@ -13,5 +13,13 @@
 8. **Respect et inclusion.** Ton professionnel et respectueux, attention aux biais (genre, territoires, groupes vulnérables), pas de contenu discriminatoire. Une théorie du changement proposée par l'IA n'est jamais présentée comme validée scientifiquement.
 9. **Maîtrise des coûts et sobriété.** Quotas par plan, mise en cache, modèle adapté à la tâche.
 
-## Mise en œuvre prévue (phase 8)
-Couche fournisseurs interchangeables (Anthropic, OpenAI, Gemini), registre d'outils sécurisés appelant les services existants (`getProject`, `listProjects`…) avec le `TenantContext`, RAG respectant les droits documentaires, journal des appels, quotas par plan, tests de garde-fous (refus d'inventer, refus d'accès inter-organisation).
+## Mise en œuvre (phase 8, novembre 2026)
+- **Lecture seule** : l'assistant n'a que des outils de consultation (vue d'ensemble, projets, fiche projet, indicateurs, documents et connaissances, « Mes actions »). Il ne crée ni ne modifie rien : l'engagement 5 est respecté par construction.
+- **Mêmes droits** : chaque outil appelle les services métier avec le contexte de la personne (`TenantContext`) ; un accès refusé est renvoyé au modèle comme tel, et il le dit.
+- **Pas de chiffres inventés** : consigne système explicite ; tous les chiffres proviennent des outils (calculs déterministes déjà documentés) ; pas d'addition entre devises.
+- **Sources** : les liens des pages consultées sont affichés sous chaque réponse ; le modèle cite avec des liens internes uniquement (les liens externes ne sont pas rendus cliquables).
+- **Documents** : leur contenu est signalé au modèle comme une donnée à analyser, jamais comme une instruction (protection contre l'injection d'instructions).
+- **Conversations privées** (visibles par leur seul auteur), **quotas mensuels par plan**, jetons consommés enregistrés, désactivé en lecture seule et tant que la clé n'est pas configurée.
+- **Refus** : géré proprement ; repli automatique côté serveur vers un autre modèle quand c'est pertinent.
+- Fournisseur : Anthropic (Claude), modèle configurable (`BAOBAB_AI_MODEL`). Les données envoyées au fournisseur ne servent pas à entraîner ses modèles (conditions commerciales de l'API).
+- Testé avec un modèle simulé : boucle d'outils, droits, conversations privées, refus, quota (`tests/integration/ai.test.ts`).

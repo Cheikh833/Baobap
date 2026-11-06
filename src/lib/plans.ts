@@ -48,7 +48,7 @@ export const PLANS: Plan[] = [
     monthlyXof: 15_000,
     yearlyXof: 150_000,
     limits: { members: 5, projects: 10, storageGb: 5, aiRequestsPerMonth: 100 },
-    features: [...CORE, yes("planning"), yes("meal_basic"), soon("ai_100")],
+    features: [...CORE, yes("planning"), yes("meal_basic"), yes("ai_100")],
   },
   {
     code: "PROFESSIONNEL",
@@ -61,8 +61,8 @@ export const PLANS: Plan[] = [
       yes("meal_full"),
       yes("fin_risk_docs"),
       yes("analytics"),
-      soon("ai_1000"),
-      soon("studio"),
+      yes("ai_1000"),
+      yes("studio"),
     ],
     highlighted: true,
   },
@@ -77,7 +77,7 @@ export const PLANS: Plan[] = [
       soon("consolidation"),
       yes("sharing"),
       soon("sso"),
-      soon("ai_5000"),
+      yes("ai_5000"),
     ],
   },
   {
