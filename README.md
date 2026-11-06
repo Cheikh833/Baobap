@@ -12,7 +12,7 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 
 | Domaine | Fonctionnalités |
 |---|---|
-| Authentification | Connexion « Continuer avec Google / Apple » (compte créé automatiquement la première fois, rattaché si l'email existe déjà), appareil reconnu (renvoi vers la connexion au lieu de l'inscription), inscription, connexion, déconnexion, sessions serveur (cookie httpOnly, jeton haché), limitation des échecs de connexion |
+| Authentification | Connexion « Continuer avec Google / Microsoft / Apple » (compte créé automatiquement la première fois, rattaché si l'email existe déjà), appareil reconnu (renvoi vers la connexion au lieu de l'inscription), inscription, connexion, déconnexion, sessions serveur (cookie httpOnly, jeton haché), limitation des échecs de connexion |
 | Organisations | Création (onboarding), profil institutionnel, multi-organisation avec changement d'organisation active |
 | Structure interne | Directions, départements, bureaux régionaux, équipes… en arbre (cycles refusés), rattachement des membres |
 | Membres | Invitations par lien (expirant, à usage unique, liées à l'email), changement de rôle, suspension |
@@ -23,6 +23,8 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 | Finances | Financements par bailleur, budget détaillé par lignes, dépenses saisies puis validées par une autre personne, blocage des dépassements, annulations tracées, taux d'exécution vs temps écoulé, totaux par devise (jamais de conversion implicite) |
 | Risques | Registre (probabilité × impact, mitigation, contingence, responsable), matrice 5×5, alertes de revue en retard |
 | Analyse de données | Import CSV (Excel compris), dictionnaire des variables, contrôle qualité (manquants, doublons, valeurs non conformes), statistiques descriptives, histogrammes, fréquences, tableaux croisés avec test du khi² et conditions d'application, comparaison de moyennes (ANOVA) |
+| Équipe & parties prenantes | Affectation des membres aux projets (rôle, %, période), registre des parties prenantes avec grille influence × intérêt (coordonnées réservées aux éditeurs) |
+| Mes actions | Ce que chacun doit faire maintenant selon ses droits : validations, échéances, retards, revues, indicateurs à actualiser ; compteur dans le menu et synthèse au tableau de bord |
 | Démo | Espace de démonstration fictif complet en un clic (stratégie, projets, planning, suivi-évaluation, enquête fictive) |
 | Stratégie | Plans stratégiques (un seul actif), axes, objectifs, contributions pondérées des projets (≤ 100 %), couverture des objectifs, budget aligné sans double comptage, projets non alignés |
 | Portefeuilles / Programmes | Création, fiche, modification, suppression logique, rattachements contrôlés |
@@ -59,6 +61,7 @@ Comptes de démonstration (après `db:seed`, mot de passe `demo-baobab-2026`) �
 | `npm run typecheck` · `npm run lint` | Vérification TypeScript · ESLint |
 | `npm test` | Tests unitaires + intégration (PostgreSQL réel, base `baobab_test` ou `TEST_DATABASE_URL`) |
 | `node tests/e2e/journey.mjs [dossier]` | Parcours navigateur Playwright complet (`BASE_URL`, par défaut `http://localhost:3000`) |
+| `node tests/e2e/audit.mjs …` | Robot d'audit : toutes les pages par rôle, erreurs, débordements mobile, traductions |
 | `npm run db:migrate` · `db:deploy` · `db:seed` · `db:studio` | Base de données |
 
 Préparer la base de test : `createdb baobab_test` puis `DATABASE_URL=postgresql://…/baobab_test npx prisma migrate deploy`.
@@ -72,6 +75,7 @@ Préparer la base de test : `createdb baobab_test` puis `DATABASE_URL=postgresql
 | `COOKIE_SECURE` | `true` en production (cookies `Secure`, HTTPS obligatoire) |
 | `CINETPAY_API_KEY`, `CINETPAY_SITE_ID`, `CINETPAY_SECRET_KEY` | Paiement en ligne (optionnel) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Connexion avec Google (optionnel) |
+| `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` | Connexion avec Microsoft (optionnel) |
 | `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | Connexion avec Apple (optionnel) |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Envoi d'emails (optionnel) |
 | `TEST_DATABASE_URL` | Base utilisée par les tests (optionnel) |
@@ -80,7 +84,7 @@ Mise en ligne : voir [`docs/deploiement.md`](docs/deploiement.md).
 
 ## Documentation
 
-Tout est dans [`docs/`](docs/README.md) : analyse et arbitrages, PRD, architectures fonctionnelle et technique, modèle de données, matrice des rôles, parcours, plan par phases, backlog, critères d'acceptation, design system, décisions (ADR) et rapport de validation.
+Audit et checklist à jour : [`docs/validation/audit-checklist.md`](docs/validation/audit-checklist.md). Tout est dans [`docs/`](docs/README.md) : analyse et arbitrages, PRD, architectures fonctionnelle et technique, modèle de données, matrice des rôles, parcours, plan par phases, backlog, critères d'acceptation, design system, décisions (ADR) et rapport de validation.
 
 ## Structure du code
 

@@ -59,3 +59,21 @@ describe("PKCE et secret Apple", () => {
     expect(createVerify("SHA256").update(`${h}.${p}`).verify({ key: k.publicKey, dsaEncoding: "ieee-p1363" }, Buffer.from(s, "base64url"))).toBe(true);
   });
 });
+
+import { normalizeClaims } from "@/server/auth/oauth";
+describe("Microsoft", () => {
+  const msUrl = "https://jwks.test/ms";
+  const ms = { iss: "https://login.microsoftonline.com/tenant-a/v2.0", tid: "tenant-a", aud: "client-123", sub: "m-1", email: "a@contoso.example", nonce: "n1", exp: now / 1000 + 600 };
+  const o = { ...opts(msUrl), issuer: "https://login.microsoftonline.com/{tid}/v2.0" };
+  it("émetteur propre au locataire du compte", async () => {
+    expect((await verifyIdToken(sign(ms), o)).sub).toBe("m-1");
+    await expect(verifyIdToken(sign({ ...ms, iss: "https://login.microsoftonline.com/autre/v2.0" }), o)).rejects.toThrow(/OAuth/);
+    await expect(verifyIdToken(sign({ ...ms, tid: undefined }), o)).rejects.toThrow(/OAuth/);
+  });
+  it("email retenu seulement s'il est garanti (compte personnel ou domaine vérifié)", () => {
+    expect(normalizeClaims("microsoft", ms).email_verified).toBe(false);
+    expect(normalizeClaims("microsoft", { ...ms, xms_edov: true }).email_verified).toBe(true);
+    expect(normalizeClaims("microsoft", { ...ms, tid: "9188040d-6c67-4c5b-b112-36a304b66dad" }).email_verified).toBe(true);
+    expect(normalizeClaims("google", { sub: "g", email_verified: false }).email_verified).toBe(false);
+  });
+});

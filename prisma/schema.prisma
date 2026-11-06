@@ -406,6 +406,8 @@ model Project {
   budgetLines  BudgetLine[]
   expenses     Expense[]
   risks        Risk[]
+  team         ProjectMember[]
+  stakeholders Stakeholder[]
 
   @@unique([organizationId, code])
   @@index([organizationId, status])
@@ -964,6 +966,62 @@ model Risk {
   createdById    String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([organizationId])
+}
+
+// ───────────── Équipe projet et parties prenantes ─────────────
+
+/// Membre de l'organisation affecté à un projet.
+model ProjectMember {
+  id         String    @id @default(cuid())
+  organizationId String
+  projectId  String
+  userId     String
+  role       String // rôle dans le projet (ex. « Coordinatrice terrain »)
+  allocation Int? // taux d'affectation en %
+  startDate  DateTime?
+  endDate    DateTime?
+  createdAt  DateTime  @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([organizationId])
+}
+
+enum StakeholderType {
+  DONOR
+  GOVERNMENT
+  LOCAL_AUTHORITY
+  COMMUNITY
+  BENEFICIARY
+  PARTNER
+  PRIVATE
+  MEDIA
+  OTHER
+}
+
+/// Partie prenante externe. Influence et intérêt de 1 (faible) à 3 (fort) : grille de Mendelow.
+model Stakeholder {
+  id             String          @id @default(cuid())
+  organizationId String
+  projectId      String
+  name           String
+  type           StakeholderType @default(PARTNER)
+  organization   String?
+  influence      Int
+  interest       Int
+  contactName    String?
+  email          String?
+  phone          String?
+  engagement     String? // stratégie d'implication / communication
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   deletedAt      DateTime?
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)

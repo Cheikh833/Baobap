@@ -28,6 +28,7 @@ Placer un reverse proxy HTTPS (Caddy ou Nginx + Let's Encrypt) devant le port 30
 | `CINETPAY_SECRET_KEY` | Fortement recommandé | Vérification de la signature des notifications |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Pour les emails | Invitations et mot de passe oublié |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Pour « Continuer avec Google » | Voir plus bas |
+| `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` | Pour « Continuer avec Microsoft » | Voir plus bas |
 | `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | Pour « Continuer avec Apple » | Voir plus bas |
 
 Sans les variables CinetPay ou SMTP, l'application fonctionne : le paiement passe par la demande manuelle et les liens d'invitation sont à transmettre à la main. L'interface l'indique.
@@ -48,6 +49,12 @@ Sécurité : une notification ne suffit jamais. Chaque paiement est revérifié 
    - **URI de redirection autorisés** : `https://votre-domaine/api/auth/oauth/google/callback` (exactement, sans barre finale).
 4. Copier l'**ID client** et le **code secret** dans Vercel → Settings → Environment Variables : `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Vérifier que `APP_URL` vaut bien `https://votre-domaine` et que `COOKIE_SECURE=true`. Redéployer.
 5. Le bouton apparaît automatiquement sur les pages Connexion et Inscription. Ne jamais coller le code secret dans une conversation ou un fichier du dépôt.
+
+## Activer « Continuer avec Microsoft » (gratuit)
+1. [portal.azure.com](https://portal.azure.com) → **Microsoft Entra ID → Inscriptions d'applications → Nouvelle inscription** : nom « BAOBAB » ; types de comptes : « Comptes dans un annuaire organisationnel et comptes Microsoft personnels » ; URI de redirection (Web) : `https://votre-domaine/api/auth/oauth/microsoft/callback`.
+2. **Certificats et secrets → Nouveau secret client** : copier la *valeur* (affichée une seule fois).
+3. **Configuration du jeton → Ajouter une revendication facultative** (type ID) : cocher `email` et **`xms_edov`** (indique que Microsoft certifie le domaine de l'email ; sans elle, les comptes professionnels sont refusés par sécurité, seuls les comptes personnels Outlook/Hotmail passent).
+4. Variables Vercel : `MICROSOFT_CLIENT_ID` (« ID d'application (client) ») et `MICROSOFT_CLIENT_SECRET`. Redéployer.
 
 ## Activer « Continuer avec Apple » (facultatif)
 Nécessite un compte **Apple Developer** (99 $/an).

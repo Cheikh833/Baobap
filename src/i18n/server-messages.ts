@@ -233,12 +233,23 @@ const EXACT_EN: Record<string, string> = {
   "Dépense supprimée.": "Expense deleted.",
   "Risque enregistré.": "Risk saved.",
   "Risque supprimé.": "Risk deleted.",
+  "Choisissez un membre.": "Choose a member.",
+  "Affectation entre 1 et 100 %.": "Allocation between 1 and 100%.",
+  "Le membre doit être un membre actif de l'organisation.": "The member must be an active member of the organization.",
+  "Cette personne fait déjà partie de l'équipe du projet.": "This person is already on the project team.",
+  "Membre de l'équipe introuvable.": "Team member not found.",
+  "Partie prenante introuvable.": "Stakeholder not found.",
+  "Membre affecté.": "Member assigned.",
+  "Affectation enregistrée.": "Assignment saved.",
+  "Membre retiré.": "Member removed.",
+  "Partie prenante enregistrée.": "Stakeholder saved.",
+  "Partie prenante supprimée.": "Stakeholder deleted.",
 };
 
 const LABELS_EN: Record<string, string> = {
   "Le nom": "Name", "Le pays": "Country", "Le nom de l'organisation": "Organization name", "Le nom du projet": "Project name",
   "Le nom du rôle": "Role name", "Le titre": "Title", "L'intitulé": "Title", "Le responsable": "The manager", "Le coordinateur": "The coordinator", "Le chef de projet": "The project manager",
-  "Le nom de l'indicateur": "Indicator name", "La définition": "Definition", "L'unité": "Unit", "La source": "Source", "Le bailleur": "Donor", "Le montant": "Amount", "Le montant prévu": "Planned amount", "La description": "Description",
+  "Le nom de l'indicateur": "Indicator name", "La définition": "Definition", "L'unité": "Unit", "La source": "Source", "Le bailleur": "Donor", "Le rôle dans le projet": "Project role", "Le montant": "Amount", "Le montant prévu": "Planned amount", "La description": "Description",
 };
 
 const RULES_EN: [RegExp, (...g: string[]) => string][] = [
@@ -258,6 +269,7 @@ const RULES_EN: [RegExp, (...g: string[]) => string][] = [
   [/^Trop de (lignes|colonnes) \((\d+)\) : maximum (\d+)\.$/, (k, n, m) => `Too many ${k === "lignes" ? "rows" : "columns"} (${n}): maximum ${m}.`],
   [/^Le montant prévu ne peut pas être inférieur au montant déjà dépensé \((.+)\)\.$/, (n) => `The planned amount cannot be lower than the amount already spent (${n}).`],
   [/^Validation refusée : la ligne (.+) serait dépassée \(disponible : (.+)\)\..*$/, (l, n) => `Validation refused: line ${l} would be overspent (available: ${n}). Revise the budget first.`],
+  [/^(Influence|Intérêt) : choisissez une valeur de 1 à 3\.$/, (k) => `${k === "Influence" ? "Influence" : "Interest"}: choose a value from 1 to 3.`],
   [/^(Probabilité|Impact) : choisissez une valeur de 1 à 5\.$/, (k) => `${k === "Impact" ? "Impact" : "Probability"}: choose a value from 1 to 5.`],
   [/^Permission inconnue : (.+)$/, (p) => `Unknown permission: ${p}`],
 ];

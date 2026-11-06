@@ -394,3 +394,27 @@ export const riskSchema = z.object({
   status: z.enum(["OPEN", "MITIGATING", "CLOSED"]).default("OPEN"),
   reviewDate: optDate,
 });
+
+// ───────────── Équipe projet et parties prenantes ─────────────
+
+export const projectMemberSchema = dateRange(z.object({
+  userId: z.string({ required_error: "Choisissez un membre." }).cuid("Choisissez un membre."),
+  role: reqText("Le rôle dans le projet", 120),
+  allocation: z.preprocess((v) => (v === "" || v === undefined ? undefined : v), z.coerce.number().int("Nombre entier attendu.").min(1, "Affectation entre 1 et 100 %.").max(100, "Affectation entre 1 et 100 %.").optional()),
+  startDate: optDate,
+  endDate: optDate,
+}));
+
+export const STAKEHOLDER_TYPES = ["DONOR", "GOVERNMENT", "LOCAL_AUTHORITY", "COMMUNITY", "BENEFICIARY", "PARTNER", "PRIVATE", "MEDIA", "OTHER"] as const;
+const level3 = (label: string) => z.coerce.number({ invalid_type_error: `${label} : choisissez une valeur de 1 à 3.` }).int().min(1, `${label} : choisissez une valeur de 1 à 3.`).max(3, `${label} : choisissez une valeur de 1 à 3.`);
+export const stakeholderSchema = z.object({
+  name: reqText("Le nom", 200),
+  type: z.enum(STAKEHOLDER_TYPES).default("PARTNER"),
+  organization: optText(200),
+  influence: level3("Influence"),
+  interest: level3("Intérêt"),
+  contactName: optText(120),
+  email: z.preprocess((v) => (typeof v === "string" && v.trim() === "" ? undefined : v), z.string().trim().email("Adresse email invalide.").max(200).optional()),
+  phone: optText(40),
+  engagement: optText(2000),
+});

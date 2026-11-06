@@ -161,6 +161,17 @@ export async function createDemoOrganization(userId: string, now = new Date()) {
       { organizationId: o, projectId: p1.id, budgetLineId: lines[4][0].id, date: daysAgo(3), amount: 800_000, description: "Kits de dépistage (fictif)", supplier: "Pharmacie fictive", reference: "PJ-0100", createdById: userId },
     ] });
 
+    // Équipe et parties prenantes (fictif)
+    await tx.projectMember.create({ data: { organizationId: o, projectId: p1.id, userId, role: "Coordination du projet", allocation: 60, startDate: d(`${y - 1}-02-01`) } });
+    const SH = (data: Record<string, unknown>) => ({ organizationId: o, projectId: p1.id, ...data }) as never;
+    await tx.stakeholder.createMany({ data: [
+      SH({ name: "Fondation Sahel Santé (fictive)", type: "DONOR", influence: 3, interest: 3, engagement: "Rapport trimestriel, visite de terrain annuelle." }),
+      SH({ name: "District sanitaire de Tivaouane (fictif)", type: "GOVERNMENT", influence: 3, interest: 2, engagement: "Réunion de coordination mensuelle." }),
+      SH({ name: "Comités de santé villageois (fictifs)", type: "COMMUNITY", influence: 1, interest: 3, engagement: "Restitution des résultats à chaque tournée." }),
+      SH({ name: "Radios communautaires (fictives)", type: "MEDIA", influence: 1, interest: 1 }),
+      SH({ name: "Mairie de Mbour (fictive)", type: "LOCAL_AUTHORITY", influence: 2, interest: 1 }),
+    ] });
+
     // Risques (fictif)
     const RK = (data: Record<string, unknown>) => ({ organizationId: o, projectId: p1.id, ownerId: userId, createdById: userId, ...data }) as never;
     await tx.risk.createMany({ data: [

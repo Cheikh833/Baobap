@@ -7,12 +7,14 @@ import { db } from "@/server/db";
 import { getMessages } from "@/i18n/server";
 import { roleLabel } from "@/i18n/roles";
 import { isPlatformAdmin } from "@/server/services/mobile-payments";
+import { myActionsCount } from "@/server/services/inbox";
 
 export default async function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
   const ctx = await requireTenant();
   const memberships = await listUserOrganizations(user.id);
   const { m } = await getMessages();
+  const actionsCount = await myActionsCount(ctx).catch(() => 0);
   const isDemo = (await db.organization.findUniqueOrThrow({ where: { id: ctx.organizationId }, select: { isDemo: true } })).isDemo;
   return (
     <Shell
@@ -22,6 +24,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
       allowed={ALL_PERMISSIONS.filter((p) => can(ctx, p))}
       platformAdmin={isPlatformAdmin(user.email)}
       isDemo={isDemo}
+      actionsCount={actionsCount}
       subscription={{ ...ctx.subscription, canManage: can({ ...ctx, readOnly: false }, "billing:manage") }}
     >
       {children}

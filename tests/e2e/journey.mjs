@@ -247,6 +247,19 @@ try {
   await go(BASE + "/risks");
   check("Risques : vue d'ensemble", await vis(page.getByText("Risque E2E")));
 
+  // Équipe & parties prenantes
+  await go(projectBase + "?tab=team");
+  const shForm = page.locator("details:has(summary:has-text('Nouvelle partie prenante')) form");
+  await shForm.locator("[name=name]").fill("Mairie E2E");
+  await shForm.locator("[name=influence]").selectOption("3");
+  await shForm.locator("[name=interest]").selectOption("3");
+  await shForm.locator("button[type=submit]").click();
+  check("Équipe : partie prenante classée « Gérer de près »", await vis(page.getByText("Mairie E2E").first()) && await vis(page.getByText("Gérer de près").first()));
+
+  // Mes actions (centre des actions en attente)
+  await go(BASE + "/actions");
+  check("Mes actions : page et dépense à valider listée", await vis(page.getByRole("heading", { name: "Mes actions" })) && await vis(page.getByText("Dépassement E2E")));
+
   // Suivi-évaluation : cadre logique → indicateur → valeur ventilée → validation
   await go(projectBase + "?tab=results");
   const itemForm = page.locator("details:has(summary:has-text('Ajouter un élément')) form");

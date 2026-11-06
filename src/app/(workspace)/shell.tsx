@@ -17,11 +17,13 @@ type Props = {
   allowed: string[];
   platformAdmin?: boolean;
   isDemo?: boolean;
+  /** Nombre d'actions en attente (page « Mes actions »). */
+  actionsCount?: number;
   subscription: { phase: "trial" | "active" | "grace" | "expired"; daysLeft: number | null; canManage: boolean };
   children: React.ReactNode;
 };
 
-export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, isDemo, children }: Props) {
+export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, isDemo, actionsCount = 0, children }: Props) {
   const { m } = useI18n();
   const N = m.nav;
   const [open, setOpen] = useState(false);
@@ -85,7 +87,8 @@ export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, i
                       >
                         {active && <span className="absolute -left-3 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-ochre" aria-hidden />}
                         <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", active ? "text-ochre" : "text-white/60")} aria-hidden />
-                        {N[label]}
+                        <span className="flex-1">{N[label]}</span>
+                        {href === "/actions" && actionsCount > 0 && <span className="min-w-5 rounded-full bg-ochre px-1.5 py-0.5 text-center text-[10px] font-bold text-navy tabular" aria-label={fill(N.actionsBadge, { n: actionsCount })}>{actionsCount > 99 ? "99+" : actionsCount}</span>}
                       </Link>
                     </li>
                   );

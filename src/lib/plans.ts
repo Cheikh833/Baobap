@@ -73,9 +73,9 @@ export const PLANS: Plan[] = [
     limits: { members: 100, projects: null, storageGb: 250, aiRequestsPerMonth: 5_000 },
     features: [
       ...CORE,
-      soon("all_pro"),
+      yes("all_pro"),
       soon("consolidation"),
-      soon("sharing"),
+      yes("sharing"),
       soon("sso"),
       soon("ai_5000"),
     ],
@@ -87,7 +87,7 @@ export const PLANS: Plan[] = [
     limits: { members: null, projects: null, storageGb: null, aiRequestsPerMonth: null },
     features: [
       ...CORE,
-      soon("unlimited"),
+      yes("unlimited"),
       soon("sovereign"),
       soon("integrations"),
       soon("support"),

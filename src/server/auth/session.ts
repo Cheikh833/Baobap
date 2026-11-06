@@ -28,7 +28,7 @@ export async function createSession(userId: string) {
   jar.set(KNOWN_COOKIE, "1", { ...cookieBase(), maxAge: 60 * 60 * 24 * 400 });
 }
 
-export async function rememberMethod(method: "password" | "google" | "apple") {
+export async function rememberMethod(method: "password" | "google" | "microsoft" | "apple") {
   (await cookies()).set(METHOD_COOKIE, method, { ...cookieBase(), maxAge: 60 * 60 * 24 * 400 });
 }
 

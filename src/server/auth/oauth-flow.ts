@@ -1,7 +1,7 @@
 import "server-only";
 import { NextResponse, type NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { authorizeUrl, exchangeCode, issuersFor, OAuthError, providerConfig, randomToken, verifyIdToken, type ProviderId } from "./oauth";
+import { authorizeUrl, exchangeCode, issuersFor, normalizeClaims, OAuthError, providerConfig, randomToken, verifyIdToken, type ProviderId } from "./oauth";
 import { createSession, rememberMethod } from "./session";
 import { signInWithOAuth } from "@/server/services/auth";
 import { AppError } from "@/server/errors";
@@ -44,7 +44,7 @@ export async function finishOAuth(req: NextRequest, provider: string, params: UR
   if (!flow || flow.p !== cfg.id || !params.get("state") || params.get("state") !== flow.state || !params.get("code")) return toLogin(req, "state", next);
   try {
     const idToken = await exchangeCode(cfg, params.get("code")!, redirectUri(req, cfg.id), flow.verifier);
-    const claims = await verifyIdToken(idToken, { jwksUrl: cfg.jwksUrl, issuer: issuersFor(cfg), audience: cfg.clientId, nonce: flow.nonce });
+    const claims = normalizeClaims(cfg.id, await verifyIdToken(idToken, { jwksUrl: cfg.jwksUrl, issuer: issuersFor(cfg), audience: cfg.clientId, nonce: flow.nonce }));
     // Apple ne transmet le nom qu'à la première connexion, dans le champ « user ».
     let fallbackName: string | undefined;
     try {

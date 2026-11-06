@@ -5,7 +5,7 @@ import { createHash, createPrivateKey, createPublicKey, createSign, createVerify
 // Le jeton d'identité est vérifié localement : signature (clés publiques JWKS du fournisseur), émetteur,
 // audience, expiration et nonce. Un fournisseur sans configuration n'apparaît pas dans l'interface.
 
-export type ProviderId = "google" | "apple";
+export type ProviderId = "google" | "microsoft" | "apple";
 
 type ProviderConfig = {
   id: ProviderId;
@@ -30,6 +30,14 @@ export function providerConfig(id: string): ProviderConfig | null {
       clientId: env("GOOGLE_CLIENT_ID"), scope: "openid email profile", clientSecret: () => env("GOOGLE_CLIENT_SECRET"),
     };
   }
+  if (id === "microsoft" && env("MICROSOFT_CLIENT_ID") && env("MICROSOFT_CLIENT_SECRET")) {
+    // Point d'entrée « common » : comptes personnels (Outlook, Hotmail) et professionnels (Microsoft 365).
+    return {
+      id, authorizeUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize", tokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+      jwksUrl: "https://login.microsoftonline.com/common/discovery/v2.0/keys", issuer: "https://login.microsoftonline.com/{tid}/v2.0",
+      clientId: env("MICROSOFT_CLIENT_ID"), scope: "openid email profile", clientSecret: () => env("MICROSOFT_CLIENT_SECRET"),
+    };
+  }
   if (id === "apple" && env("APPLE_CLIENT_ID") && env("APPLE_TEAM_ID") && env("APPLE_KEY_ID") && env("APPLE_PRIVATE_KEY")) {
     return {
       id, authorizeUrl: "https://appleid.apple.com/auth/authorize", tokenUrl: "https://appleid.apple.com/auth/token",
@@ -42,7 +50,7 @@ export function providerConfig(id: string): ProviderConfig | null {
 }
 
 /** Fournisseurs configurés (dans l'ordre d'affichage). */
-export const enabledProviders = (): ProviderId[] => (["google", "apple"] as const).filter((p) => providerConfig(p));
+export const enabledProviders = (): ProviderId[] => (["google", "microsoft", "apple"] as const).filter((p) => providerConfig(p));
 
 // ───────────── Outils JWT / PKCE ─────────────
 
@@ -103,7 +111,7 @@ async function getKeys(url: string, fetcher: typeof fetch, force = false) {
   return keys;
 }
 
-export type IdClaims = { sub: string; email?: string; email_verified?: boolean | string; name?: string; given_name?: string; family_name?: string; nonce?: string };
+export type IdClaims = { sub: string; email?: string; email_verified?: boolean | string; name?: string; given_name?: string; family_name?: string; nonce?: string; tid?: string; xms_edov?: boolean | string };
 
 /** Vérifie un jeton d'identité RS256 : signature, émetteur, audience, expiration, nonce. */
 export async function verifyIdToken(idToken: string, opts: { jwksUrl: string; issuer: string | string[]; audience: string; nonce: string; now?: number; fetcher?: typeof fetch }): Promise<IdClaims> {
@@ -125,7 +133,8 @@ export async function verifyIdToken(idToken: string, opts: { jwksUrl: string; is
   const ok = createVerify("RSA-SHA256").update(`${h}.${pl}`).verify(createPublicKey({ key: jwk, format: "jwk" }), Buffer.from(sig, "base64url"));
   if (!ok) throw new OAuthError("id_token");
   const now = Math.floor((opts.now ?? Date.now()) / 1000);
-  const issuers = Array.isArray(opts.issuer) ? opts.issuer : [opts.issuer];
+  // Microsoft (multi-locataire) : l'émetteur contient l'identifiant du locataire du compte.
+  const issuers = (Array.isArray(opts.issuer) ? opts.issuer : [opts.issuer]).map((i) => i.replace("{tid}", claims.tid ?? "\u0000"));
   const aud = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
   if (!claims.iss || !issuers.includes(claims.iss)) throw new OAuthError("id_token");
   if (!aud.includes(opts.audience)) throw new OAuthError("id_token");
@@ -133,6 +142,20 @@ export async function verifyIdToken(idToken: string, opts: { jwksUrl: string; is
   if (claims.nonce !== opts.nonce) throw new OAuthError("id_token");
   if (!claims.sub) throw new OAuthError("id_token");
   return claims;
+}
+
+const MS_CONSUMERS_TENANT = "9188040d-6c67-4c5b-b112-36a304b66dad";
+
+/**
+ * Normalise la vérification de l'email selon le fournisseur.
+ * Microsoft n'émet pas « email_verified » : l'email n'est retenu que pour un compte personnel Microsoft
+ * (locataire « consumers ») ou si Microsoft certifie la propriété du domaine (revendication facultative xms_edov).
+ * Sans cela, un locataire mal configuré pourrait présenter l'email de quelqu'un d'autre.
+ */
+export function normalizeClaims(provider: ProviderId, c: IdClaims): IdClaims {
+  if (provider !== "microsoft") return c;
+  const verified = c.tid === MS_CONSUMERS_TENANT || c.xms_edov === true || c.xms_edov === "true" || c.xms_edov === "1";
+  return { ...c, email_verified: verified && !!c.email };
 }
 
 /** Google accepte les deux formes d'émetteur. */

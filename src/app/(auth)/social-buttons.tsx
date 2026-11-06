@@ -16,6 +16,13 @@ const AppleIcon = () => (
   </svg>
 );
 
+const MicrosoftIcon = () => (
+  <svg viewBox="0 0 21 21" className="h-5 w-5" aria-hidden>
+    <rect x="1" y="1" width="9" height="9" fill="#F25022" /><rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+    <rect x="1" y="11" width="9" height="9" fill="#00A4EF" /><rect x="11" y="11" width="9" height="9" fill="#FFB900" />
+  </svg>
+);
+
 /** Boutons « Continuer avec Google / Apple » : n'apparaissent que si le fournisseur est configuré. */
 export function SocialButtons({ m, next, lastMethod }: { m: Messages; next?: string; lastMethod: string | null }) {
   const providers = enabledProviders();
@@ -30,7 +37,7 @@ export function SocialButtons({ m, next, lastMethod }: { m: Messages; next?: str
           href={href(p)}
           className={`relative flex w-full items-center justify-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand/40 ${p === "apple" ? "bg-black text-white hover:bg-neutral-800" : "border border-line bg-white text-navy hover:border-slate-300"}`}
         >
-          {p === "google" ? <GoogleIcon /> : <AppleIcon />}
+          {p === "google" ? <GoogleIcon /> : p === "microsoft" ? <MicrosoftIcon /> : <AppleIcon />}
           {O[p]}
           {lastMethod === p && <span className="absolute -top-2 right-3 rounded-full bg-ochre px-2 py-0.5 text-[10px] font-bold text-navy shadow">{O.lastUsed}</span>}
         </a>

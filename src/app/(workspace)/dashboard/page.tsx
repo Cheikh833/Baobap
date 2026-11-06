@@ -17,6 +17,11 @@ import { formatDate, formatMoney, intlLocale } from "@/lib/metrics";
 import { getMessages } from "@/i18n/server";
 import { fill } from "@/i18n/translate";
 import { DemoCard } from "./demo-card";
+import { financeOverview } from "@/server/services/finance";
+import { mealOverview } from "@/server/services/meal";
+import { risksOverview } from "@/server/services/risks";
+import { myActions } from "@/server/services/inbox";
+import { Bell, Gauge, ShieldAlert, Wallet } from "lucide-react";
 
 export const metadata = { title: "Tableau de bord" };
 
@@ -34,6 +39,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     db.organization.findUniqueOrThrow({ where: { id: ctx.organizationId }, select: { defaultCurrency: true } }),
     myTasks(ctx),
     planningAlerts(ctx),
+  ]);
+  const [fin, meal, risks, actions] = await Promise.all([
+    can(ctx, "finance:view") ? financeOverview(ctx) : null,
+    can(ctx, "meal:view") ? mealOverview(ctx) : null,
+    can(ctx, "risk:view") ? risksOverview(ctx) : null,
+    myActions(ctx),
   ]);
   const D = m.dashboard;
   const welcome = (await searchParams).welcome;
@@ -91,6 +102,40 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         {d.projects && <Stat index={2} tone="brand" label={D.projects} value={<CountUp value={d.projects.total} locale={loc} />} hint={fill(D.projectsHint, { active: d.projects.runningCount, drafts: d.projects.drafts.length })} icon={FolderKanban} />}
         {d.members !== null && <Stat index={3} tone="ochre" label={D.members} value={<CountUp value={d.members} locale={loc} />} icon={Users} />}
       </div>
+
+      {/* Synthèse des modules : chaque chiffre renvoie à sa page détaillée */}
+      {(() => {
+        const cur = fin?.byCurrency.find((c) => c.currency === org.defaultCurrency) ?? fin?.byCurrency[0];
+        const exec = cur && cur.planned > 0 ? Math.round((cur.spent / cur.planned) * 1000) / 10 : null;
+        const openRisks = risks?.filter((r) => r.status !== "CLOSED") ?? [];
+        const M = m.modules;
+        const pct = (x: number) => `${new Intl.NumberFormat(loc, { maximumFractionDigits: 1 }).format(x)}\u00A0%`;
+        const tiles = [
+          fin && { href: "/finance", icon: Wallet, title: M.finance, value: exec === null ? "—" : pct(exec), hint: cur ? fill(M.financeHint, { spent: formatMoney(cur.spent, cur.currency, locale), planned: formatMoney(cur.planned, cur.currency, locale), currency: cur.currency }) : M.none, alert: fin.pending.length ? fill(M.toValidate, { n: fin.pending.length }) : null, meter: exec },
+          meal && { href: "/meal", icon: Gauge, title: M.meal, value: String(meal.rows.length), hint: meal.rows.length ? fill(M.mealHint, { good: meal.rows.filter((r) => r.calc.status === "good").length, critical: meal.rows.filter((r) => r.calc.status === "critical").length }) : M.none, alert: meal.pending.length ? fill(M.toValidate, { n: meal.pending.length }) : null, meter: null },
+          risks && { href: "/risks", icon: ShieldAlert, title: M.risks, value: String(openRisks.length), hint: risks.length ? fill(M.risksHint, { critical: openRisks.filter((r) => r.level === "critical").length, overdue: risks.filter((r) => r.overdue).length }) : M.none, alert: null, meter: null },
+        ].filter(Boolean) as { href: string; icon: typeof Wallet; title: string; value: string; hint: string; alert: string | null; meter: number | null }[];
+        return (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {tiles.map((t, i) => (
+              <Link key={t.href} href={t.href} className="group block min-w-0 animate-fade-up rounded-2xl border border-line bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-lift" style={{ animationDelay: `${i * 70}ms` }}>
+                <p className="flex items-center gap-2 text-sm font-medium text-slate-600"><t.icon className="h-4 w-4 text-brand" aria-hidden />{t.title}<ArrowRight className="ml-auto h-3.5 w-3.5 opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" /></p>
+                <p className="mt-2 font-display text-3xl font-bold tabular">{t.value}</p>
+                {t.meter !== null && <div className="mt-2"><Meter value={t.meter} label={t.title} /></div>}
+                <p className="mt-2 text-xs text-slate-500">{t.hint}</p>
+                {t.alert && <p className="mt-2 inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">{t.alert}</p>}
+              </Link>
+            ))}
+            <Link href="/actions" className="group block min-w-0 animate-fade-up rounded-2xl bg-gradient-to-br from-navy to-[#1E4A6E] p-5 text-white shadow-lift transition hover:-translate-y-0.5" style={{ animationDelay: `${tiles.length * 70}ms` }}>
+              <p className="flex items-center gap-2 text-sm font-medium text-white/80"><Bell className="h-4 w-4 text-ochre" aria-hidden />{m.actions.dashboardTitle}<ArrowRight className="ml-auto h-3.5 w-3.5 transition group-hover:translate-x-0.5" /></p>
+              <p className="mt-2 font-display text-3xl font-bold tabular">{actions.length}</p>
+              <ul className="mt-2 space-y-1 text-xs text-white/75">
+                {actions.length === 0 ? <li>{m.actions.empty}</li> : actions.slice(0, 3).map((a) => <li key={a.kind + a.id} className="truncate">• {a.title}</li>)}
+              </ul>
+            </Link>
+          </div>
+        );
+      })()}
 
       {can(ctx, "strategy:view") && (
         <Card interactive>
