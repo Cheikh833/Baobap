@@ -44,19 +44,23 @@ Mise au point complète : ce qui est livré et vérifié, ce qui a été corrig�
 
 | Élément | Nature | Priorité proposée |
 |---|---|---|
-| Studio de rapports (rapports bailleurs générés depuis les données, exports PDF / Word / Excel), onglet « Rapports » | Développement | 1 |
-| Documents (stockage, versions, recherche) et base de connaissances, onglet « Documents » | Développement (nécessite un stockage de fichiers) | 2 |
-| BAOBAB AI (assistant sourcé, sans invention de chiffres, selon la charte IA) | Développement (nécessite une clé d'API d'IA) | 3 |
+| Stockage des fichiers hors base de données (pour de gros volumes), aperçu en ligne des documents | Développement | 3 |
+| BAOBAB AI : mode Expert, propositions d'actions avec confirmation | Développement | 3 |
 | Notifications par email (rappels d'échéance, validations en attente) | Développement (la base « Mes actions » existe) | 2 |
 | Consolidation multi-organisations / multi-pays, SSO d'entreprise (SAML), intégrations (KoboToolbox, ODK) | Développement — offres Institution / Entreprise | 4 |
 | Finances avancées : engagements, décaissements, rapports financiers par bailleur | Développement | 2 |
 | Pagination des longues listes (dépenses, journal) | Amélioration | 3 |
+
+## 4 bis. Livré après l'audit (7 novembre 2026)
+- **Documents & connaissances**, **BAOBAB Studio**, **Administration**, **BAOBAB AI** : plus aucun module « Bientôt » dans le menu ni dans les onglets de projet.
+- Parcours navigateur porté à 97 vérifications ; 165 tests automatiques.
 
 ## 5. Actions à faire de votre côté (hors code)
 
 | Action | Où | Effet |
 |---|---|---|
 | Créer les clés **Google** (gratuit) | Google Cloud Console → `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` dans Vercel | Bouton « Continuer avec Google » |
+| Clé **Anthropic** pour BAOBAB AI (facturation à l'usage) | console.anthropic.com → `ANTHROPIC_API_KEY` dans Vercel | Assistant BAOBAB AI actif |
 | Créer les clés **Microsoft** (gratuit) | Portail Azure → `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` | Bouton « Continuer avec Microsoft » |
 | Clés **Apple** (99 $/an, facultatif) | Apple Developer | Bouton « Continuer avec Apple » |
 | Email d'envoi (Brevo ou Gmail) | Variables `SMTP_*` | Invitations et mots de passe oubliés envoyés automatiquement |

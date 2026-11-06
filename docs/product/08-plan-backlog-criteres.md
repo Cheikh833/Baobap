@@ -9,11 +9,11 @@
 | 3 — Projets | Création ✅, fiche ✅, cycle de vie ✅, phases ✅, activités ✅, tâches ✅, jalons ✅, dépendances ✅, Gantt ✅, Kanban ✅, « Mes tâches » ✅ ; équipe projet et parties prenantes ✅ ; livrables, calendrier 🔜 | ✅ (cœur) |
 | 4 — Impact & MEAL | Cadre logique ✅ avec contrôles de cohérence ✅, indicateurs ✅, ventilations ✅, collecte et validation à quatre yeux ✅, corrections tracées ✅, trajectoire et alertes d'actualisation ✅, santé du projet ✅ ; versions du cadre, ToC visuelle, évaluations, redevabilité, apprentissage 🔜 | ✅ (cœur) |
 | 5 — Finances & risques | Financements ✅, lignes budgétaires ✅, dépenses validées à quatre yeux ✅, blocage des dépassements ✅, annulations tracées ✅, exécution vs temps ✅ ; registre des risques ✅, matrice 5×5 ✅, revues ✅ ; engagements, décaissements, rapports financiers bailleurs, incidents 🔜 | ✅ (cœur) |
-| 6 — Documents | Stockage privé, versions, extraction, indexation, recherche, RAG, citations | 🔜 |
+| 6 — Documents | Stockage privé ✅, versions ✅, contrôle du type réel des fichiers ✅, extraction de texte (Word, Excel, PowerPoint, OpenDocument, PDF) ✅, recherche dans le contenu ✅, fiches de connaissances ✅ ; stockage objet externe, aperçu en ligne 🔜 | ✅ (cœur) |
 | 7 — Analyse de données | Import CSV ✅, dictionnaire et types corrigeables ✅, contrôle qualité ✅, statistiques descriptives ✅, fréquences ✅, tableau croisé + khi² avec conditions ✅, ANOVA ✅, histogrammes ✅ ; import XLSX, nettoyage traçable, régressions, insights IA 🔜 | ✅ (cœur) |
-| 8 — BAOBAB AI | Assistant général + Expert, Intent Router, Context Engine, outils sécurisés, confirmations, streaming, citations, garde-fous | 🔜 |
-| 9 — Studio | Dashboards, présentations, rapports, exports, partages, versions | 🔜 |
-| 10 — Pilotage exécutif | Vues par rôle, notifications, recherche globale, workflows | 🔜 |
+| 8 — BAOBAB AI | Assistant sourcé ✅, outils sécurisés en lecture seule appliquant les droits ✅, conversations privées ✅, quotas par plan ✅, repli en cas de refus ✅ ; mode Expert, actions avec confirmation, recherche sémantique 🔜 | ✅ (cœur) |
+| 9 — Studio | Rapports d'avancement, financiers et de synthèse ✅, analyse rédigée ✅, validation qui fige les chiffres ✅, exports PDF / Word / Excel ✅ ; présentations, tableaux de bord partagés 🔜 | ✅ (cœur) |
+| 10 — Pilotage exécutif | « Mes actions » (validations, échéances, retards) ✅, synthèse des modules au tableau de bord ✅ ; notifications par email, recherche globale 🔜 | 🟡 |
 | 11 — Entreprise & production | Administration plateforme, RLS, CSP, 2FA, monitoring, sauvegardes, déploiement | 🔜 |
 
 ## Backlog initial priorisé (prochaines itérations)

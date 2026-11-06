@@ -17,10 +17,10 @@ import { getMessages } from "@/i18n/server";
 // Page d'accueil publique. Aucun client, témoignage ou logo partenaire n'est inventé ;
 // l'aperçu du produit est explicitement présenté comme une illustration de l'interface.
 const MODULE_ICONS = [Target, FolderTree, Layers, Wallet, ShieldCheck, BarChart3, Sparkles, FileText];
-const READY = [true, true, true, true, true, true, false, false];
+const READY = [true, true, true, true, true, true, true, true];
 // Modules utilisables aujourd'hui : organisation, stratégie, portefeuilles-programmes-projets, planification,
-// suivi-évaluation, finances, risques, analyse de données.
-const OPERATIONAL_MODULES = 8;
+// suivi-évaluation, finances, risques, analyse de données, documents, Studio, BAOBAB AI, administration.
+const OPERATIONAL_MODULES = 12;
 const CYCLE_ICONS = [Target, Layers, FolderTree, Rocket, ClipboardCheck, Gauge, LineChart, CheckCircle2, Sparkles];
 
 export default async function LandingPage() {
@@ -266,6 +266,56 @@ export default async function LandingPage() {
             <h2 className="font-display text-3xl font-bold tracking-tight">{L.spotDataTitle}</h2>
             <p className="mt-4 text-slate-600">{L.spotDataText}</p>
             <ul className="mt-6 space-y-3">{L.spotDataPoints.map((p) => <li key={p} className="flex items-center gap-3 font-medium"><CheckCircle2 className="h-5 w-5 text-brand" aria-hidden />{p}</li>)}</ul>
+          </div>
+        </section>
+
+        {/* ───── Focus BAOBAB AI ───── */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-navy via-[#0F3B4A] to-brand-deep py-20 text-white">
+          <div className="pointer-events-none absolute -right-24 top-0 h-96 w-96 animate-drift rounded-full bg-brand-400/25 blur-3xl" aria-hidden />
+          <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 lg:grid-cols-2">
+            <div className="reveal">
+              <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-ochre ring-1 ring-white/15"><Sparkles className="h-3.5 w-3.5" />BAOBAB AI</p>
+              <h2 className="mt-4 font-display text-3xl font-bold tracking-tight sm:text-4xl">{L.spotAiTitle}</h2>
+              <p className="mt-4 text-white/75">{L.spotAiText}</p>
+              <ul className="mt-6 space-y-3">{L.spotAiPoints.map((p) => <li key={p} className="flex items-center gap-3 font-medium"><CheckCircle2 className="h-5 w-5 text-brand-300" aria-hidden />{p}</li>)}</ul>
+            </div>
+            <div className="reveal space-y-3 rounded-3xl bg-white/[.06] p-5 ring-1 ring-white/10 backdrop-blur" aria-hidden>
+              <div className="ml-auto w-fit max-w-[85%] animate-fade-up rounded-2xl rounded-br-md bg-ochre px-4 py-2.5 text-sm font-medium text-navy">{L.mockAiQ}</div>
+              <div className="flex gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-400"><Sparkles className="h-4 w-4" /></span>
+                <div className="max-w-[85%] animate-fade-up rounded-2xl rounded-tl-md bg-white px-4 py-3 text-sm text-slate-800 shadow-lift [animation-delay:500ms]">
+                  <p>{L.mockAiA.split("**").map((t, i) => (i % 2 ? <strong key={i} className="text-navy">{t}</strong> : t))}</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5 border-t border-line pt-2">{["IND-3", "PRJ-001", m.nav.meal].map((s) => <span key={s} className="rounded-full bg-canvas px-2 py-0.5 text-[11px] font-medium text-brand ring-1 ring-line">{s}</span>)}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 pl-11" aria-hidden>{[0, 1, 2].map((i) => <span key={i} className="h-1.5 w-1.5 animate-pulse2 rounded-full bg-white/60" style={{ animationDelay: `${i * 200}ms` }} />)}</div>
+              <p className="text-right text-[10px] text-white/40">{L.illustration}</p>
+            </div>
+          </div>
+        </section>
+
+        {/* ───── Focus Studio ───── */}
+        <section className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 lg:grid-cols-2">
+          <div className="reveal order-2 lg:order-1" aria-hidden>
+            <div className="relative mx-auto h-72 max-w-md [perspective:1200px]">
+              {[2, 1, 0].map((k) => (
+                <div key={k} className="absolute inset-x-6 top-0 h-64 rounded-2xl border border-line bg-white p-5 shadow-lift transition-transform duration-700 hover:-translate-y-2" style={{ transform: `translateY(${k * 18}px) rotate(${(k - 1) * -3}deg) scale(${1 - k * 0.04})`, zIndex: 3 - k }}>
+                  {k === 0 && <>
+                    <div className="flex items-center gap-2 border-b-2 border-brand pb-2 text-[10px] font-bold uppercase tracking-[.2em] text-brand-deep"><span className="h-2 w-2 rounded-full bg-ochre" />BAOBAB · Studio</div>
+                    <p className="mt-3 font-display text-lg font-bold text-navy">{m.studio.types.PROJECT_PROGRESS}</p>
+                    <div className="mt-3 space-y-1.5">{[95, 80, 88, 60].map((w, i) => <span key={i} className="block h-1.5 rounded bg-slate-200" style={{ width: `${w}%` }} />)}</div>
+                    <div className="mt-4 grid grid-cols-3 gap-1">{Array.from({ length: 9 }).map((_, i) => <span key={i} className={`h-4 rounded ${i < 3 ? "bg-brand-50" : "bg-canvas"}`} />)}</div>
+                    <div className="mt-4 flex gap-2">{["PDF", "Word", "Excel"].map((f) => <span key={f} className="rounded-lg bg-brand px-2 py-1 text-[10px] font-bold text-white">{f}</span>)}<span className="ml-auto rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-700">✓ {m.studio.status.FINAL}</span></div>
+                  </>}
+                </div>
+              ))}
+            </div>
+            <p className="mt-10 text-right text-[10px] text-slate-400">{L.illustration}</p>
+          </div>
+          <div className="reveal order-1 lg:order-2">
+            <h2 className="font-display text-3xl font-bold tracking-tight">{L.spotStudioTitle}</h2>
+            <p className="mt-4 text-slate-600">{L.spotStudioText}</p>
+            <ul className="mt-6 space-y-3">{L.spotStudioPoints.map((p) => <li key={p} className="flex items-center gap-3 font-medium"><CheckCircle2 className="h-5 w-5 text-brand" aria-hidden />{p}</li>)}</ul>
           </div>
         </section>
 

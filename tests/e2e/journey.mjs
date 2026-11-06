@@ -319,6 +319,42 @@ try {
   check("Analyse : comparaison de moyennes (ANOVA)", await vis(page.getByText(/F = /)));
   await shot("05c-analyse");
 
+  // Documents : dépôt d'un fichier, recherche dans son contenu
+  await go(BASE + "/documents");
+  const upForm = page.locator("form:has([name=file])").first();
+  await upForm.locator("[name=file]").setInputFiles({ name: "tdr.txt", mimeType: "text/plain", buffer: Buffer.from("Termes de référence : évaluation finale à Kédougou") });
+  await upForm.locator("[name=title]").fill("TDR E2E");
+  await upForm.locator("button[type=submit]").click();
+  await waitUrl("**/documents/c*");
+  check("Documents : dépôt et page du document", await vis(page.getByRole("heading", { name: "TDR E2E" })));
+  await go(BASE + "/documents?q=K%C3%A9dougou");
+  check("Documents : recherche dans le contenu du fichier", await vis(page.getByText("TDR E2E")));
+
+  // Studio : rapport → validation (chiffres figés) → export Word
+  await go(BASE + "/studio");
+  const repForm = page.locator("form:has([name=type])");
+  await repForm.locator("[name=type]").selectOption("PROJECT_FINANCIAL");
+  await repForm.locator("[name=projectId]").selectOption({ index: 1 });
+  await repForm.locator("[name=title]").fill("Rapport financier E2E");
+  await repForm.locator("button[type=submit]").click();
+  await waitUrl("**/studio/c*");
+  check("Studio : rapport généré depuis les données", await vis(page.getByText("Exécution financière").first()));
+  page.once("dialog", (d) => d.accept());
+  await page.click("button:has-text('Valider et figer le rapport')");
+  check("Studio : rapport validé et figé", await vis(page.getByText(/données figées/)));
+  const [dl] = await Promise.all([page.waitForEvent("download"), page.click("a:has-text('Word')")]);
+  check("Studio : export Word téléchargé", (await dl.suggestedFilename()).endsWith(".docx"));
+
+  // Administration : utilisation et export complet
+  await go(BASE + "/administration");
+  check("Administration : utilisation de l'offre et sécurité", await vis(page.getByText("Utilisation de l'offre")) && await vis(page.getByText("Appareils connectés")));
+  const [zip] = await Promise.all([page.waitForEvent("download"), page.click("a:has-text('Télécharger l')")]);
+  check("Administration : export complet (ZIP)", (await zip.suggestedFilename()).endsWith(".zip"));
+
+  // BAOBAB AI : page accessible (non activé sans clé : message clair)
+  await go(BASE + "/ai");
+  check("BAOBAB AI : page et état d'activation affichés", await vis(page.getByRole("heading", { name: "BAOBAB AI" }).first()));
+
   // Tableau de bord alimenté
   await go(BASE + "/dashboard");
   const dashText = await page.textContent("main");

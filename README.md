@@ -5,8 +5,8 @@ _Planifier. Exécuter. Impacter._
 
 BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, agences de développement, bailleurs et cabinets : stratégie, projets, suivi-évaluation (MEAL), finances, risques, données, IA et reporting dans un même modèle de données.
 
-> **État actuel : Phase 0 (fondations) + Phase 1 (fondation organisationnelle) + phases 2 à 5 et 7 (stratégie, projets, planification, suivi-évaluation, finances, risques, analyse de données) + abonnement et multilingue.**
-> Les autres modules (Documents, IA, Studio…) sont **affichés comme « Bientôt » et non cliquables** : aucune fonctionnalité n'est présentée comme opérationnelle si elle ne l'est pas.
+> **État actuel : tous les modules du menu sont opérationnels** (organisation, stratégie, projets, planification, suivi-évaluation, finances, risques, analyse de données, documents, Studio, BAOBAB AI, administration).
+> Les extensions encore en préparation sont signalées comme telles : aucune fonctionnalité n'est présentée comme opérationnelle si elle ne l'est pas.
 
 ## Ce qui fonctionne aujourd'hui
 
@@ -25,6 +25,10 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 | Analyse de données | Import CSV (Excel compris), dictionnaire des variables, contrôle qualité (manquants, doublons, valeurs non conformes), statistiques descriptives, histogrammes, fréquences, tableaux croisés avec test du khi² et conditions d'application, comparaison de moyennes (ANOVA) |
 | Équipe & parties prenantes | Affectation des membres aux projets (rôle, %, période), registre des parties prenantes avec grille influence × intérêt (coordonnées réservées aux éditeurs) |
 | Mes actions | Ce que chacun doit faire maintenant selon ses droits : validations, échéances, retards, revues, indicateurs à actualiser ; compteur dans le menu et synthèse au tableau de bord |
+| Documents & connaissances | Dépôt de fichiers vérifiés (type réel, 4 Mo, quota), versions, recherche dans le contenu (Word, Excel, PowerPoint, PDF…), fiches de connaissances, onglet Documents des projets |
+| BAOBAB Studio | Rapports d'avancement, financiers et de synthèse générés depuis les données, analyse rédigée, validation qui fige les chiffres, exports PDF / Word / Excel |
+| BAOBAB AI | Assistant qui répond à partir de vos données via des outils en lecture seule respectant les droits, sources citées, conversations privées, quotas par plan (activé avec `ANTHROPIC_API_KEY`) |
+| Administration | Utilisation de l'offre, appareils connectés, comptes liés, export complet des données (ZIP de CSV) |
 | Démo | Espace de démonstration fictif complet en un clic (stratégie, projets, planning, suivi-évaluation, enquête fictive) |
 | Stratégie | Plans stratégiques (un seul actif), axes, objectifs, contributions pondérées des projets (≤ 100 %), couverture des objectifs, budget aligné sans double comptage, projets non alignés |
 | Portefeuilles / Programmes | Création, fiche, modification, suppression logique, rattachements contrôlés |
@@ -76,6 +80,7 @@ Préparer la base de test : `createdb baobab_test` puis `DATABASE_URL=postgresql
 | `CINETPAY_API_KEY`, `CINETPAY_SITE_ID`, `CINETPAY_SECRET_KEY` | Paiement en ligne (optionnel) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Connexion avec Google (optionnel) |
 | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` | Connexion avec Microsoft (optionnel) |
+| `ANTHROPIC_API_KEY`, `BAOBAB_AI_MODEL` | BAOBAB AI (optionnel ; modèle par défaut `claude-opus-5-5`) |
 | `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | Connexion avec Apple (optionnel) |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | Envoi d'emails (optionnel) |
 | `TEST_DATABASE_URL` | Base utilisée par les tests (optionnel) |

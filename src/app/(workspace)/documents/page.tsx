@@ -45,12 +45,12 @@ export default async function DocumentsPage({ searchParams }: { searchParams: Pr
             </Link>
           ))}
         </nav>
-        <form method="get" className="flex min-w-0 flex-1 gap-2 sm:max-w-lg" role="search">
+        <form method="get" className="flex w-full min-w-0 gap-2 sm:w-auto sm:max-w-lg sm:flex-1" role="search">
           <input type="hidden" name="tab" value={tab} />
-          <label className="relative min-w-0 flex-1">
+          <label className="relative block min-w-0 flex-1">
             <span className="sr-only">{D.search}</span>
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
-            <input name="q" defaultValue={q} placeholder={D.search} className="w-full rounded-xl border border-line bg-white py-2 pl-9 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+            <input name="q" defaultValue={q} placeholder={D.search} size={8} className="w-full min-w-0 rounded-xl border border-line bg-white py-2 pl-9 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
           </label>
           {tab === "docs" && (
             <select name="category" defaultValue={sp.category ?? ""} aria-label={D.fields.category} className="hidden rounded-xl border border-line bg-white px-2 text-sm sm:block">
