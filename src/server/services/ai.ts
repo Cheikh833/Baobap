@@ -180,20 +180,24 @@ export async function ask(ctx: TenantContext, conversationId: string | null, que
   const api = client ?? new Anthropic();
   const sources = new Map<string, Source>();
   let inputTokens = 0, outputTokens = 0, answer = "";
+  let simple = false;
   // Repli automatique côté serveur en cas de refus (Claude API) ; non proposé pour la gamme Haiku.
   const fallback = /haiku/.test(AI_MODEL) ? {} : { betas: ["server-side-fallback-2026-07-01"] as Anthropic.Beta.AnthropicBeta[], fallbacks: "default" as const };
   try {
     for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-      const response = await api.beta.messages.create({
-        model: AI_MODEL,
-        max_tokens: 16000,
-        output_config: { effort: "medium" },
-        cache_control: { type: "ephemeral" },
-        system: systemPrompt(ctx, locale),
-        tools: TOOLS,
-        messages,
-        ...fallback,
-      });
+      const base = { model: AI_MODEL, max_tokens: 16000, system: systemPrompt(ctx, locale), tools: TOOLS, messages };
+      let response: Anthropic.Beta.BetaMessage;
+      try {
+        response = simple
+          ? await api.beta.messages.create(base)
+          : await api.beta.messages.create({ ...base, output_config: { effort: "medium" }, cache_control: { type: "ephemeral" }, ...fallback });
+      } catch (e) {
+        // Requête refusée pour une option (repli, cache, effort…) non disponible sur ce compte : on réessaie en version simple.
+        if (simple || !(e instanceof Anthropic.BadRequestError) || /credit balance/i.test(e.message)) throw e;
+        console.warn("BAOBAB AI : options avancées refusées, nouvelle tentative simplifiée —", e.message);
+        simple = true;
+        response = await api.beta.messages.create(base);
+      }
       inputTokens += response.usage.input_tokens ?? 0;
       outputTokens += response.usage.output_tokens ?? 0;
       if (response.stop_reason === "refusal") { answer = locale === "en" ? "I can't help with this request." : "Je ne peux pas répondre à cette demande."; break; }
@@ -219,7 +223,15 @@ export async function ask(ctx: TenantContext, conversationId: string | null, que
     // La question est conservée ; aucune réponse n'est comptée dans le quota.
     if (e instanceof Anthropic.RateLimitError) throw new AppError("RATE_LIMITED", "BAOBAB AI est très sollicité : réessayez dans un instant.");
     if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) throw new AppError("CONFLICT", "BAOBAB AI est mal configuré (clé d'API refusée). Prévenez l'administrateur de la plateforme.");
-    if (e instanceof Anthropic.APIError) { console.error("BAOBAB AI", e.status, e.message); throw new AppError("CONFLICT", "BAOBAB AI n'a pas pu répondre (service indisponible). Réessayez plus tard."); }
+    if (e instanceof Anthropic.APIError) {
+      console.error("BAOBAB AI", e.status, e.message);
+      // Messages précis pour que l'administrateur sache quoi corriger (sans jamais afficher la clé).
+      if (/credit balance/i.test(e.message)) throw new AppError("CONFLICT", "Le compte Anthropic n'a pas de crédit disponible : ajoutez du crédit sur console.anthropic.com (Billing), puis réessayez.");
+      if (e instanceof Anthropic.NotFoundError) throw new AppError("CONFLICT", `Le modèle « ${AI_MODEL} » n'est pas accessible avec cette clé : vérifiez la variable BAOBAB_AI_MODEL ou l'accès du compte Anthropic.`);
+      if (e instanceof Anthropic.APIConnectionError) throw new AppError("CONFLICT", "Impossible de joindre le service d'IA (réseau ou délai dépassé). Réessayez dans un instant.");
+      if (e.status === 529 || e instanceof Anthropic.InternalServerError) throw new AppError("CONFLICT", "Le service d'IA est momentanément surchargé. Réessayez dans un instant.");
+      throw new AppError("CONFLICT", `BAOBAB AI n'a pas pu répondre (erreur ${e.status ?? "réseau"} du service d'IA). Détail dans les journaux du serveur.`);
+    }
     throw e;
   }
   if (!answer) answer = locale === "en" ? "I couldn't find an answer in the available data." : "Je n'ai pas trouvé de réponse dans les données disponibles.";

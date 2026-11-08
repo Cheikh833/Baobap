@@ -272,6 +272,9 @@ const EXACT_EN: Record<string, string> = {
   "BAOBAB AI est mal configuré (clé d'API refusée). Prévenez l'administrateur de la plateforme.": "BAOBAB AI is misconfigured (API key refused). Notify the platform administrator.",
   "BAOBAB AI n'a pas pu répondre (service indisponible). Réessayez plus tard.": "BAOBAB AI could not answer (service unavailable). Please try again later.",
   "Conversation introuvable.": "Conversation not found.",
+  "Le compte Anthropic n'a pas de crédit disponible : ajoutez du crédit sur console.anthropic.com (Billing), puis réessayez.": "The Anthropic account has no available credit: add credit on console.anthropic.com (Billing), then try again.",
+  "Impossible de joindre le service d'IA (réseau ou délai dépassé). Réessayez dans un instant.": "The AI service could not be reached (network or timeout). Please try again in a moment.",
+  "Le service d'IA est momentanément surchargé. Réessayez dans un instant.": "The AI service is temporarily overloaded. Please try again in a moment.",
 };
 
 const LABELS_EN: Record<string, string> = {
@@ -302,6 +305,8 @@ const RULES_EN: [RegExp, (...g: string[]) => string][] = [
   [/^Espace de stockage du plan atteint \((\d+) Go\)\..*$/, (n) => `Plan storage limit reached (${n} GB). Delete files or change plan.`],
   [/^Déconnexion de (\d+) autre\(s\) appareil\(s\)\.$/, (n) => `${n} other device(s) signed out.`],
   [/^Quota mensuel de BAOBAB AI atteint \((\d+) requêtes\)\..*$/, (n) => `Monthly BAOBAB AI quota reached (${n} requests). It renews on the 1st of the month; you can also change plan.`],
+  [/^Le modèle « (.+) » n'est pas accessible.*$/, (m) => `The model “${m}” is not accessible with this key: check the BAOBAB_AI_MODEL variable or the Anthropic account access.`],
+  [/^BAOBAB AI n'a pas pu répondre \(erreur (.+) du service d'IA\)\..*$/, (c) => `BAOBAB AI could not answer (AI service error ${c}). Details in the server logs.`],
   [/^Permission inconnue : (.+)$/, (p) => `Unknown permission: ${p}`],
 ];
 

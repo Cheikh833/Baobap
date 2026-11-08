@@ -67,3 +67,26 @@ describe("BAOBAB AI", () => {
     await expectCode(ask({ ...a.ctx, plan: "ESSENTIEL" }, null, "Q", "fr", fakeClient([final("x")]).client), "CONFLICT"); // 100 / mois
   });
 });
+
+import Anthropic from "@anthropic-ai/sdk";
+describe("BAOBAB AI : erreurs du service", () => {
+  const failing = (err: Error, then?: Record<string, unknown>) => {
+    let n = 0;
+    const calls: Record<string, unknown>[] = [];
+    return { calls, client: { beta: { messages: { create: async (req: Record<string, unknown>) => { calls.push(req); if (n++ === 0 || !then) throw err; return { usage: { input_tokens: 1, output_tokens: 1 }, ...then }; } } } } as never };
+  };
+  const bad = (msg: string) => new Anthropic.BadRequestError(400, { type: "error", error: { type: "invalid_request_error", message: msg } }, msg, new Headers());
+  it("crédit insuffisant : message clair ; option refusée : nouvelle tentative simplifiée", async () => {
+    const a = await ownerWithOrg("A");
+    const noCredit = failing(bad("Your credit balance is too low to access the Anthropic API."));
+    await expect(ask(a.ctx, null, "Q", "fr", noCredit.client)).rejects.toThrow(/crédit/);
+    expect(noCredit.calls).toHaveLength(1);
+    const opt = failing(bad("fallbacks: not available for this organization"), { stop_reason: "end_turn", content: [{ type: "text", text: "Réponse." }] });
+    const r = await ask(a.ctx, null, "Q", "fr", opt.client);
+    expect(r.answer).toBe("Réponse.");
+    expect(opt.calls[1]).not.toHaveProperty("fallbacks");
+    expect(opt.calls[1]).not.toHaveProperty("betas");
+    const notFound = failing(new Anthropic.NotFoundError(404, { type: "error", error: { type: "not_found_error", message: "model" } }, "model: claude-x", new Headers()));
+    await expect(ask(a.ctx, null, "Q", "fr", notFound.client)).rejects.toThrow(/BAOBAB_AI_MODEL/);
+  });
+});
