@@ -18,14 +18,15 @@ const cookieBase = () => ({
   path: "/",
 });
 
-export async function createSession(userId: string) {
+/** `guest` : session de démo visiteur (24 h), sans marquer l'appareil comme « déjà inscrit ». */
+export async function createSession(userId: string, opts: { guest?: boolean } = {}) {
   const token = generateToken();
-  const expiresAt = new Date(Date.now() + SESSION_DAYS * 86_400_000);
+  const expiresAt = new Date(Date.now() + (opts.guest ? 1 : SESSION_DAYS) * 86_400_000);
   const ua = (await headers()).get("user-agent")?.slice(0, 255);
   await db.session.create({ data: { id: hashToken(token), userId, expiresAt, userAgent: ua } });
   const jar = await cookies();
   jar.set(SESSION_COOKIE, token, { ...cookieBase(), expires: expiresAt });
-  jar.set(KNOWN_COOKIE, "1", { ...cookieBase(), maxAge: 60 * 60 * 24 * 400 });
+  if (!opts.guest) jar.set(KNOWN_COOKIE, "1", { ...cookieBase(), maxAge: 60 * 60 * 24 * 400 });
 }
 
 export async function rememberMethod(method: "password" | "google" | "microsoft" | "apple") {

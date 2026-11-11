@@ -55,6 +55,11 @@ Mise au point complète : ce qui est livré et vérifié, ce qui a été corrig�
 - **Documents & connaissances**, **BAOBAB Studio**, **Administration**, **BAOBAB AI** : plus aucun module « Bientôt » dans le menu ni dans les onglets de projet.
 - Parcours navigateur porté à 97 vérifications ; 165 tests automatiques.
 
+## 4 ter. Préparation de la foire (11 novembre 2026)
+- Vérification complète : 168 tests, parcours navigateur 100/100, robot d'audit relancé ; dépendance d'envoi d'emails (nodemailer) mise à jour pour corriger des failles connues.
+- Ajouts : démo instantanée sans inscription (`/demo`), affiche de stand avec QR code (`/salon`), visite guidée, recherche globale Ctrl+K, application installable. Guide : [`docs/foire.md`](../foire.md).
+- Points connus, sans risque pour la foire : alertes sur des outils de compilation (postcss, deepmerge-ts) non exposés aux visiteurs ; migration de zod vers sa version 4 planifiée après la foire (risque limité : taille des envois plafonnée).
+
 ## 5. Actions à faire de votre côté (hors code)
 
 | Action | Où | Effet |

@@ -6,6 +6,7 @@ import {
 import { ButtonLink } from "@/components/ui/button";
 import { PublicFooter, PublicHeader } from "@/components/public-chrome";
 import { HeroMockup } from "@/components/landing/hero-mockup";
+import { GuestDemoButton } from "@/components/guest-demo-button";
 import { CeremonyTree, Fireflies } from "@/components/landing/ceremony-tree";
 import { CountUp } from "@/components/charts/count-up";
 import { ALL_PERMISSIONS, SYSTEM_ROLES } from "@/server/permissions/catalog";
@@ -56,9 +57,10 @@ export default async function LandingPage() {
               </h1>
               <p className="mt-6 animate-fade-up font-display text-xl font-semibold text-white sm:text-2xl" style={{ animationDelay: "1.6s" }}>{L.ceremony.lead}</p>
               <p className="mx-auto mt-3 max-w-xl animate-fade-up text-base leading-relaxed text-white/75 sm:text-lg lg:mx-0" style={{ animationDelay: "1.8s" }}>{L.heroText}</p>
-              <div className="mt-8 flex animate-fade-up flex-wrap justify-center gap-3 lg:justify-start" style={{ animationDelay: "2.1s" }}>
+              <div className="mt-8 flex animate-fade-up flex-wrap items-start justify-center gap-3 lg:justify-start" style={{ animationDelay: "2.1s" }}>
+                <GuestDemoButton label={m.guest.cta} hint={m.guest.ctaHint} dark />
                 <ButtonLink href="/signup" size="lg" className="relative !bg-none bg-white !text-brand-deep shadow-[0_0_0_0_rgba(246,198,107,.6)] hover:!bg-brand-50 hover:shadow-[0_0_40px_4px_rgba(246,198,107,.45)]">{L.ctaStart}<ArrowRight className="h-4 w-4" /></ButtonLink>
-                <ButtonLink href="#cockpit" size="lg" variant="ghost" className="!text-white ring-1 ring-white/30 hover:!bg-white/10">{L.ctaDiscover}</ButtonLink>
+                
               </div>
               <ul className="mt-8 flex animate-fade-up flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-white/80 lg:justify-start" style={{ animationDelay: "2.4s" }}>
                 {[L.trustTrial, L.trustNoCard, L.trustSecure].map((t) => <li key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-brand-300" aria-hidden />{t}</li>)}
@@ -408,7 +410,7 @@ export default async function LandingPage() {
               <p className="mx-auto mt-3 max-w-xl text-white/80">{L.trustTrial} · {L.trustNoCard}</p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <ButtonLink href="/signup" size="lg" className="!bg-none bg-white !text-brand-deep hover:!bg-brand-50">{L.finalCta}<ArrowRight className="h-4 w-4" /></ButtonLink>
-                <ButtonLink href="/pricing" size="lg" variant="ghost" className="!text-white ring-1 ring-white/30 hover:!bg-white/10">{m.common.pricing}</ButtonLink>
+                <GuestDemoButton label={m.guest.cta} dark />
               </div>
             </div>
           </div>

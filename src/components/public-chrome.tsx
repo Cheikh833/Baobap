@@ -12,6 +12,7 @@ export async function PublicHeader() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">
         <Link href="/" aria-label="BAOBAB"><Logo /></Link>
         <nav className="flex items-center gap-1 sm:gap-2">
+          <Link href="/demo" className="hidden px-2 text-sm font-semibold text-brand hover:text-brand-deep md:block">▶ {m.guest.cta}</Link>
           <Link href="/pricing" className="hidden px-2 text-sm font-medium text-navy hover:text-brand sm:block">{m.common.pricing}</Link>
           <LanguageSwitcher className="hidden sm:flex" />
           {user ? (

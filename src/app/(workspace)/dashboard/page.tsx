@@ -80,7 +80,24 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
       </section>
 
-      {(welcome || empty) && (
+      {welcome === "demo" && (
+        <section className="animate-fade-up rounded-3xl border border-ochre/30 bg-gradient-to-br from-amber-50 via-white to-brand-50/50 p-5 shadow-soft sm:p-6">
+          <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><Sparkles className="h-5 w-5 text-ochre" aria-hidden />{m.guest.tourTitle}</h2>
+          <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {m.guest.tour.map(([title, text, href], i) => (
+              <li key={href}>
+                <Link href={href} className="group flex h-full gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-line transition hover:-translate-y-0.5 hover:shadow-lift hover:ring-brand/30">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand font-display text-sm font-bold text-white">{i + 1}</span>
+                  <span className="min-w-0"><span className="block font-semibold">{title}</span><span className="block text-xs text-slate-500">{text}</span></span>
+                  <ArrowRight className="ml-auto h-4 w-4 shrink-0 self-center text-brand opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {((welcome && welcome !== "demo") || empty) && (
         <div className="grid gap-4 lg:grid-cols-2">
           <Card className="border-brand/20 bg-gradient-to-br from-white to-brand-50/60">
             <h2 className="flex items-center gap-2 font-display font-semibold"><Sparkles className="h-4 w-4 text-ochre" aria-hidden />{D.firstSteps}</h2>

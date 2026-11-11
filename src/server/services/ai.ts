@@ -13,6 +13,7 @@ import { getPlanning } from "./planning";
 import { getProjectTeam } from "./team";
 import { listArticles, listDocuments } from "./documents";
 import { myActions } from "./inbox";
+import { GUEST_DOMAIN, isGuestEmail } from "./guest-demo";
 import { isActivityLate, planningProgress } from "@/lib/planning";
 import { timeProgress } from "@/lib/metrics";
 
@@ -24,6 +25,8 @@ export const AI_MODEL = process.env.BAOBAB_AI_MODEL?.trim() || "claude-opus-5-5"
 export const aiEnabled = () => !!process.env.ANTHROPIC_API_KEY?.trim();
 const MAX_TOOL_ROUNDS = 6;
 const HISTORY_TURNS = 10;
+const GUEST_AI_PER_VISITOR = 5;
+const GUEST_AI_DAILY = Number(process.env.GUEST_AI_DAILY_LIMIT ?? 100);
 
 export type Source = { label: string; href: string };
 
@@ -166,6 +169,14 @@ export async function ask(ctx: TenantContext, conversationId: string | null, que
   if (!q) throw new AppError("VALIDATION", "Écrivez votre question.");
   if (!client && !aiEnabled()) throw new AppError("CONFLICT", "BAOBAB AI n'est pas encore activé sur cette plateforme (clé d'API manquante).");
   if (ctx.readOnly) throw new AppError("FORBIDDEN", "L'espace est en lecture seule : BAOBAB AI est disponible avec un abonnement actif.");
+  // Démo visiteur : quelques questions par visiteur et un plafond global par jour (maîtrise des coûts en salon).
+  const me = await db.user.findUnique({ where: { id: ctx.userId }, select: { email: true } });
+  if (me && isGuestEmail(me.email)) {
+    const mine = await db.aiMessage.count({ where: { organizationId: ctx.organizationId, role: "assistant" } });
+    if (mine >= GUEST_AI_PER_VISITOR) throw new AppError("CONFLICT", `Démo visiteur : ${GUEST_AI_PER_VISITOR} questions maximum. Créez votre compte gratuit pour continuer avec BAOBAB AI.`);
+    const today = await db.aiMessage.count({ where: { role: "assistant", createdAt: { gte: new Date(Date.now() - 86_400_000) }, conversation: { userId: { in: (await db.user.findMany({ where: { email: { endsWith: `@${GUEST_DOMAIN}` } }, select: { id: true } })).map((u) => u.id) } } } });
+    if (today >= GUEST_AI_DAILY) throw new AppError("CONFLICT", "La démo de BAOBAB AI a atteint sa limite pour aujourd'hui. Créez votre compte gratuit pour l'essayer.");
+  }
   const quota = await aiQuota(ctx);
   if (quota.remaining === 0) throw new AppError("CONFLICT", `Quota mensuel de BAOBAB AI atteint (${quota.limit} requêtes). Il se renouvelle le 1er du mois ; vous pouvez aussi changer de plan.`);
 

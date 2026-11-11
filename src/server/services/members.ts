@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import { db } from "@/server/db";
+import { isGuestEmail } from "./guest-demo";
 import { AppError, forbidden, notFound } from "@/server/errors";
 import { audit } from "@/server/audit";
 import { generateToken, hashToken } from "@/server/auth/tokens";
@@ -52,6 +53,9 @@ export async function listInvitations(ctx: TenantContext) {
  */
 export async function inviteMember(ctx: TenantContext, input: z.input<typeof invitationSchema>) {
   assertCan(ctx, "members:manage");
+  // Démo visiteur : pas d'invitations (évite tout envoi d'emails non sollicités depuis la démo publique).
+  const inviter = await db.user.findUnique({ where: { id: ctx.userId }, select: { email: true } });
+  if (inviter && isGuestEmail(inviter.email)) throw new AppError("FORBIDDEN", "Les invitations sont désactivées dans la démo visiteur : créez votre compte gratuit pour inviter votre équipe.");
   const data = invitationSchema.parse(input);
   const role = await db.role.findFirst({ where: { id: data.roleId, organizationId: ctx.organizationId } });
   if (!role) throw new AppError("VALIDATION", "Rôle introuvable.");

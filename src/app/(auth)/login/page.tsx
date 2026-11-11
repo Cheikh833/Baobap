@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { deviceHints, getSessionUser } from "@/server/auth/session";
 import { safeNext } from "@/lib/safe-next";
@@ -24,6 +25,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       {error && <p role="alert" className="mb-4 rounded-lg border border-danger/30 bg-red-50 px-3 py-2 text-sm text-red-800">{m.auth.oauth.errors[error]}</p>}
       <SocialButtons m={m} next={next} lastMethod={hints.method} />
       <LoginForm next={next} />
+      <p className="mt-6 border-t border-line pt-4 text-center text-sm"><Link href="/demo" className="font-semibold text-brand hover:underline">▶ {m.guest.cta}</Link> <span className="text-xs text-slate-500">· {m.guest.ctaHint}</span></p>
     </>
   );
 }

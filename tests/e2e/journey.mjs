@@ -355,6 +355,14 @@ try {
   await go(BASE + "/ai");
   check("BAOBAB AI : page et état d'activation affichés", await vis(page.getByRole("heading", { name: "BAOBAB AI" }).first()));
 
+  // Recherche globale (Ctrl+K)
+  await go(BASE + "/dashboard");
+  await page.keyboard.press("Control+k");
+  await page.waitForTimeout(300);
+  await page.keyboard.type("Projet E2E");
+  check("Recherche globale (Ctrl+K) : trouve le projet", await vis(page.locator("[role=dialog]").getByText(/Projet E2E/).first()));
+  await page.keyboard.press("Escape");
+
   // Tableau de bord alimenté
   await go(BASE + "/dashboard");
   const dashText = await page.textContent("main");
@@ -440,6 +448,21 @@ try {
   const pr = await go(BASE + "/projects/cdoesnotexist000000000000");
   consoleErrors.splice(before404); // le 404 attendu est journalisé par le navigateur
   check("Projet inexistant → 404", pr.status() === 404);
+
+  // Démo visiteur (foire) : sans inscription, depuis un navigateur neuf
+  {
+    const gctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "fr-FR" });
+    const g = await gctx.newPage();
+    g.on("pageerror", (e) => consoleErrors.push(`${e.message} @ ${g.url()}`));
+    await g.goto(BASE + "/demo");
+    await g.click("button:has-text('Lancer la démo')");
+    await g.waitForURL("**/dashboard?welcome=demo");
+    check("Démo visiteur : espace fictif ouvert sans inscription", await vis(g.getByText("Démo visiteur")) && await vis(g.getByText("Par où commencer")));
+    await g.click("button:has-text('Créer mon compte gratuit')");
+    await g.waitForURL("**/signup?new=1");
+    check("Démo visiteur : sortie vers la création de compte", g.url().includes("/signup"));
+    await gctx.close();
+  }
 
   // Responsive
   for (const [w, h] of [[320, 568], [375, 812], [390, 844], [430, 932], [768, 1024], [1024, 768], [1280, 800], [1440, 900]]) {

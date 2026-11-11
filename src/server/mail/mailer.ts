@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import nodemailer, { type Transporter } from "nodemailer";
 
 /**
  * Envoi d'emails par SMTP (Brevo, Mailjet, Gmail, OVH, serveur de l'organisation…).
@@ -9,7 +9,7 @@ export type Mail = { to: string; subject: string; text: string; html: string };
 
 export const mailEnabled = () => Boolean(process.env.SMTP_HOST && process.env.MAIL_FROM);
 
-let transport: nodemailer.Transporter | null = null;
+let transport: Transporter | null = null;
 function getTransport() {
   transport ??= nodemailer.createTransport({
     host: process.env.SMTP_HOST,

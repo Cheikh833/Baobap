@@ -8,6 +8,7 @@ import { getMessages } from "@/i18n/server";
 import { roleLabel } from "@/i18n/roles";
 import { isPlatformAdmin } from "@/server/services/mobile-payments";
 import { myActionsCount } from "@/server/services/inbox";
+import { isGuestEmail } from "@/server/services/guest-demo";
 
 export default async function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
@@ -25,6 +26,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
       platformAdmin={isPlatformAdmin(user.email)}
       isDemo={isDemo}
       actionsCount={actionsCount}
+      guest={isGuestEmail(user.email)}
       subscription={{ ...ctx.subscription, canManage: can({ ...ctx, readOnly: false }, "billing:manage") }}
     >
       {children}

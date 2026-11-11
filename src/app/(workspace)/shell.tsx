@@ -2,10 +2,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, Menu, Plus, X } from "lucide-react";
+import { LogOut, Menu, Plus, Search, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { cn } from "@/components/ui/cn";
 import { NAV } from "./nav";
+import { CommandPalette } from "./command-palette";
 import { useI18n } from "@/i18n/client";
 import { fill } from "@/i18n/translate";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -19,11 +20,13 @@ type Props = {
   isDemo?: boolean;
   /** Nombre d'actions en attente (page « Mes actions »). */
   actionsCount?: number;
+  /** Démo visiteur (foire) : bandeau d'invitation à créer un compte. */
+  guest?: boolean;
   subscription: { phase: "trial" | "active" | "grace" | "expired"; daysLeft: number | null; canManage: boolean };
   children: React.ReactNode;
 };
 
-export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, isDemo, actionsCount = 0, children }: Props) {
+export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, isDemo, actionsCount = 0, guest = false, children }: Props) {
   const { m } = useI18n();
   const N = m.nav;
   const [open, setOpen] = useState(false);
@@ -53,6 +56,11 @@ export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, i
         <p className="mt-1.5 text-xs text-white/60">{fill(N.role, { role: org.roleName })}</p>
         {isDemo && <p className="mt-2 inline-flex rounded-full bg-ochre/90 px-2 py-0.5 text-[11px] font-semibold text-navy">{m.demo.badge}</p>}
         <Link href="/onboarding" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand-300 hover:text-white"><Plus className="h-3 w-3" />{N.newOrg}</Link>
+      </div>
+      <div className="px-3 pt-3">
+        <button type="button" onClick={() => window.dispatchEvent(new Event("baobab:search"))} className="flex w-full items-center gap-2 rounded-xl bg-white/[.07] px-3 py-2 text-sm text-white/70 ring-1 ring-white/10 transition hover:bg-white/[.12] hover:text-white">
+          <Search className="h-4 w-4" aria-hidden /><span className="flex-1 text-left">{m.search.open}</span><kbd className="rounded bg-white/10 px-1.5 py-0.5 font-sans text-[10px] text-white/60">Ctrl K</kbd>
+        </button>
       </div>
       <nav className="flex-1 overflow-y-auto px-3 pb-4 [scrollbar-color:rgba(255,255,255,.2)_transparent]" aria-label={N.pilotage}>
         {NAV.map((group) => {
@@ -130,12 +138,18 @@ export function Shell({ user, org, orgs, allowed, subscription, platformAdmin, i
           <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] animate-[fade-in_.25s_ease-out] bg-gradient-to-b from-brand-deep via-[#0A3141] to-navy-900 shadow-2xl">{sidebar}</aside>
         </div>
       )}
+      <CommandPalette allowed={allowed} />
       <div className="lg:pl-64">
         <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-white/10 bg-brand-deep/95 px-4 text-white backdrop-blur lg:hidden">
           <button className="rounded-md p-2" onClick={() => setOpen(true)} aria-label={N.openMenu}><Menu className="h-5 w-5" /></button>
           <span className="truncate text-sm font-semibold">{org.name}</span>
         </header>
-        <SubscriptionBanner s={subscription} />
+        {guest ? (
+          <div role="status" className="flex flex-wrap items-center justify-between gap-2 border-b border-ochre/30 bg-gradient-to-r from-amber-50 to-white px-4 py-2 text-sm text-amber-900 sm:px-6 lg:px-8">
+            <span>{m.guest.banner}</span>
+            <form method="post" action="/api/demo/leave"><button className="rounded-lg bg-navy px-3 py-1 text-xs font-semibold text-white shadow hover:bg-navy/90">{m.guest.bannerCta}</button></form>
+          </div>
+        ) : <SubscriptionBanner s={subscription} />}
         <main id="main" key={pathname} className="mx-auto max-w-7xl animate-fade-in px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
       </div>
     </div>

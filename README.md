@@ -29,6 +29,9 @@ BAOBAB vise à devenir un « Work OS » pour les ONG, institutions publiques, ag
 | BAOBAB Studio | Rapports d'avancement, financiers et de synthèse générés depuis les données, analyse rédigée, validation qui fige les chiffres, exports PDF / Word / Excel |
 | BAOBAB AI | Assistant qui répond à partir de vos données via des outils en lecture seule respectant les droits, sources citées, conversations privées, quotas par plan (activé avec `ANTHROPIC_API_KEY`) |
 | Administration | Utilisation de l'offre, appareils connectés, comptes liés, export complet des données (ZIP de CSV) |
+| Foires et salons | Démo instantanée sans inscription (`/demo`, espace fictif par visiteur, effacé sous 24 h, IA plafonnée), affiche de stand A4 avec QR code (`/salon`), visite guidée |
+| Recherche globale | Ctrl+K : projets, indicateurs, risques, documents (contenu compris), rapports, membres, pages — selon les droits |
+| Application installable | Icône sur l'écran d'accueil du téléphone (manifeste PWA) |
 | Démo | Espace de démonstration fictif complet en un clic (stratégie, projets, planning, suivi-évaluation, enquête fictive) |
 | Stratégie | Plans stratégiques (un seul actif), axes, objectifs, contributions pondérées des projets (≤ 100 %), couverture des objectifs, budget aligné sans double comptage, projets non alignés |
 | Portefeuilles / Programmes | Création, fiche, modification, suppression logique, rattachements contrôlés |

@@ -275,6 +275,8 @@ const EXACT_EN: Record<string, string> = {
   "Le compte Anthropic n'a pas de crédit disponible : ajoutez du crédit sur console.anthropic.com (Billing), puis réessayez.": "The Anthropic account has no available credit: add credit on console.anthropic.com (Billing), then try again.",
   "Impossible de joindre le service d'IA (réseau ou délai dépassé). Réessayez dans un instant.": "The AI service could not be reached (network or timeout). Please try again in a moment.",
   "Le service d'IA est momentanément surchargé. Réessayez dans un instant.": "The AI service is temporarily overloaded. Please try again in a moment.",
+  "Les invitations sont désactivées dans la démo visiteur : créez votre compte gratuit pour inviter votre équipe.": "Invitations are disabled in the visitor demo: create your free account to invite your team.",
+  "La démo de BAOBAB AI a atteint sa limite pour aujourd'hui. Créez votre compte gratuit pour l'essayer.": "The BAOBAB AI demo has reached its limit for today. Create your free account to try it.",
 };
 
 const LABELS_EN: Record<string, string> = {
@@ -307,6 +309,7 @@ const RULES_EN: [RegExp, (...g: string[]) => string][] = [
   [/^Quota mensuel de BAOBAB AI atteint \((\d+) requêtes\)\..*$/, (n) => `Monthly BAOBAB AI quota reached (${n} requests). It renews on the 1st of the month; you can also change plan.`],
   [/^Le modèle « (.+) » n'est pas accessible.*$/, (m) => `The model “${m}” is not accessible with this key: check the BAOBAB_AI_MODEL variable or the Anthropic account access.`],
   [/^BAOBAB AI n'a pas pu répondre \(erreur (.+) du service d'IA\)\..*$/, (c) => `BAOBAB AI could not answer (AI service error ${c}). Details in the server logs.`],
+  [/^Démo visiteur : (\d+) questions maximum\..*$/, (n) => `Visitor demo: ${n} questions maximum. Create your free account to keep using BAOBAB AI.`],
   [/^Permission inconnue : (.+)$/, (p) => `Unknown permission: ${p}`],
 ];
 
