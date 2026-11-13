@@ -30,9 +30,9 @@ export default async function PortfolioPage({ params }: { params: Promise<{ id: 
     <>
       <PageHeader title={p.name} breadcrumb={<><Link href="/portfolios" className="hover:underline">{P.title}</Link> › {p.code}</>} actions={<StatusBadge status={p.status} />} />
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label={m.program.title} value={p.programs.length} />
-        <Stat label={P.linkedProjects} value={p.projects.length} />
-        <Stat label={P.projectsBudget} value={Object.entries(projBudget.totals).map(([c, v]) => formatMoney(v, c, locale)).join(" · ") || "—"} hint={projBudget.missing ? fill(P.missingBudget, { n: projBudget.missing }) : P.projectsBudgetHint} />
+        <Stat tone="navy" label={m.program.title} value={p.programs.length} />
+        <Stat tone="teal" label={P.linkedProjects} value={p.projects.length} />
+        <Stat tone="brand" label={P.projectsBudget} value={Object.entries(projBudget.totals).map(([c, v]) => formatMoney(v, c, locale)).join(" · ") || "—"} hint={projBudget.missing ? fill(P.missingBudget, { n: projBudget.missing }) : P.projectsBudgetHint} />
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Card><h2 className="mb-3 font-semibold">{m.program.title}</h2>{list(p.programs, "/programs", P.noPrograms)}</Card>

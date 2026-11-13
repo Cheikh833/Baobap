@@ -31,9 +31,9 @@ export default async function ProgramPage({ params }: { params: Promise<{ id: st
         actions={<StatusBadge status={p.status} />}
       />
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label={m.project.title} value={p.projects.length} />
-        <Stat label={G.budget} value={p.plannedBudget ? formatMoney(Number(p.plannedBudget), p.currency, locale) : "—"} />
-        <Stat label={G.sumProjects} value={Object.entries(budget.totals).map(([c, v]) => formatMoney(v, c, locale)).join(" · ") || "—"} hint={budget.missing ? fill(m.portfolio.missingBudget, { n: budget.missing }) : undefined} />
+        <Stat tone="navy" label={m.project.title} value={p.projects.length} />
+        <Stat tone="teal" label={G.budget} value={p.plannedBudget ? formatMoney(Number(p.plannedBudget), p.currency, locale) : "—"} />
+        <Stat tone="brand" label={G.sumProjects} value={Object.entries(budget.totals).map(([c, v]) => formatMoney(v, c, locale)).join(" · ") || "—"} hint={budget.missing ? fill(m.portfolio.missingBudget, { n: budget.missing }) : undefined} />
       </div>
       <Card className="mt-6">
         <div className="mb-3 flex items-center justify-between">

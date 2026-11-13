@@ -1,14 +1,15 @@
 import { ImageResponse } from "next/og";
+import { LOGO_TREE } from "@/components/logo";
 
 // Icônes PNG de l'application installable (192 et 512 px), dessinées à partir du logo.
 export async function GET(_req: Request, { params }: { params: Promise<{ size: string }> }) {
   const s = (await params).size === "512" ? 512 : 192;
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #087F68 0%, #073B3A 100%)" }}>
-        <svg width={s * 0.62} height={s * 0.62} viewBox="0 0 32 32">
-          <path d="M7 12c0-3 3.5-5 9-5s9 2 9 5c0 2-2 3-4 3h-1.5l-.5 10h-6l-.5-10H11c-2 0-4-1-4-3Z" fill="#fff" />
-          <path d="M13 15l3 3 3-3" stroke="#087F68" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #16BC95 0%, #087F68 55%, #05333A 100%)" }}>
+        <svg width={s * 0.78} height={s * 0.78} viewBox="0 0 64 64">
+          <circle cx="32" cy="30" r="17" fill="#F6C66B" />
+          <path d={LOGO_TREE} fill="#052A30" />
         </svg>
       </div>
     ),

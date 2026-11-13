@@ -34,3 +34,9 @@ Labels sur tous les champs, focus visibles, `aria-current`, `aria-invalid`, rôl
 
 ## Responsive
 Testé sans défilement horizontal en 320×568, 375×812, 390×844, 430×932, 768×1024, 1024×768, 1280×800, 1440×900.
+
+## Refonte de novembre 2026
+- **Logo** : silhouette d'un baobab devant le soleil levant (doré) sur fond émeraude en dégradé ; mêmes tracés pour le favicon et l'icône de l'application (`src/components/logo.tsx`).
+- **Espace de travail** : barre supérieure en verre dépoli (recherche Ctrl+K, « Page d'accueil », BAOBAB AI, actions, profil) ; menu latéral sombre avec élément actif en dégradé ; fond à halos doux (`.app-bg`).
+- **Retour à l'accueil** : logo du menu, entrée « Page d'accueil » du menu, bouton de la barre supérieure et icône maison sur mobile.
+- **Composants** : cartes à grands rayons (`rounded-3xl`), chiffres clés en cartes colorées (émeraude, bleu nuit, turquoise, or) avec icône en filigrane, titres de page avec barre d'accent, boutons arrondis.

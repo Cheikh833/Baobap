@@ -21,6 +21,7 @@ const fr = {
     onQuote: "Sur devis",
   },
   nav: {
+    home: "Page d'accueil",
     actionsBadge: "{n} action(s) en attente",
     pilotage: "Pilotage",
     dashboard: "Tableau de bord",

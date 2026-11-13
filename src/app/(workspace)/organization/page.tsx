@@ -25,11 +25,11 @@ export default async function OrganizationOverview() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        <Stat label={S.units} value={units} />
-        <Stat label={S.members} value={members} />
-        <Stat label={S.portfolios} value={portfolios} />
-        <Stat label={S.programs} value={programs} />
-        <Stat label={S.projects} value={projects} />
+        <Stat tone="navy" label={S.units} value={units} />
+        <Stat tone="teal" label={S.members} value={members} />
+        <Stat tone="brand" label={S.portfolios} value={portfolios} />
+        <Stat tone="ochre" label={S.programs} value={programs} />
+        <Stat tone="navy" label={S.projects} value={projects} />
       </div>
       <Card>
         <h2 className="mb-4 font-semibold">{m.org.identity}</h2>

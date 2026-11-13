@@ -40,9 +40,9 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label={S.axes} value={plan.axes.length} hint={`${objectives.length} ${S.objectives.toLowerCase()}`} />
-        <Stat label={S.coverage} value={cov.rate === null ? "—" : `${cov.rate} %`} hint={fill(S.coverageValue, { covered: cov.covered, total: cov.objectives })} />
-        <Stat label={S.alignedBudget} value={money(cov.budget)} hint={S.alignedHint} />
+        <Stat tone="navy" label={S.axes} value={plan.axes.length} hint={`${objectives.length} ${S.objectives.toLowerCase()}`} />
+        <Stat tone="teal" label={S.coverage} value={cov.rate === null ? "—" : `${cov.rate} %`} hint={fill(S.coverageValue, { covered: cov.covered, total: cov.objectives })} />
+        <Stat tone="brand" label={S.alignedBudget} value={money(cov.budget)} hint={S.alignedHint} />
       </div>
       {cov.rate !== null && <div className="mt-3"><ProgressBar value={cov.rate} label={S.coverage} /></div>}
 

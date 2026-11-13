@@ -21,6 +21,7 @@ const en: DeepPartial<Messages> = {
     onQuote: "Custom quote",
   },
   nav: {
+    home: "Home page",
     actionsBadge: "{n} pending action(s)",
     pilotage: "Steering",
     dashboard: "Dashboard",

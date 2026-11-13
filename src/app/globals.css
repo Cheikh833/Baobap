@@ -18,6 +18,14 @@ h1, h2 { text-wrap: balance; }
 /* Délais en cascade pour les éléments d'une même rangée */
 .stagger > * { animation-delay: calc(var(--i, 0) * 70ms); }
 
+/* Fond de l'espace de travail : halos très doux, fixes au défilement */
+.app-bg { background:
+  radial-gradient(60rem 30rem at 85% -10%, rgba(18,184,146,.10), transparent 60%),
+  radial-gradient(40rem 26rem at 105% 60%, rgba(227,161,59,.08), transparent 60%),
+  radial-gradient(50rem 30rem at 20% 110%, rgba(30,111,160,.07), transparent 60%),
+  #F4F7F6; background-attachment: fixed; }
+::selection { background: rgba(18,184,146,.25); }
+
 /* Texte en dégradé de marque */
 .text-gradient { background: linear-gradient(100deg, #5FC4A8 0%, #E3A13B 55%, #ffffff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 

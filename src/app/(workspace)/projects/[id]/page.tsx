@@ -94,10 +94,10 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
       {tab === "overview" && (
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Stat label={P.stats.time} value={t === null ? "—" : `${t} %`} hint={t === null ? P.stats.noDates : `${formatDate(p.startDate, locale)} → ${formatDate(p.endDate, locale)}`} />
-            <Stat label={P.stats.duration} value={days ? fill(P.stats.days, { n: days }) : "—"} />
-            <Stat label={P.stats.budget} value={p.plannedBudget ? formatMoney(Number(p.plannedBudget), p.currency, locale) : "—"} hint={P.stats.budgetHint} />
-            <Stat label={P.stats.beneficiaries} value={p.directBeneficiaries ?? "—"} />
+            <Stat tone="navy" label={P.stats.time} value={t === null ? "—" : `${t} %`} hint={t === null ? P.stats.noDates : `${formatDate(p.startDate, locale)} → ${formatDate(p.endDate, locale)}`} />
+            <Stat tone="teal" label={P.stats.duration} value={days ? fill(P.stats.days, { n: days }) : "—"} />
+            <Stat tone="brand" label={P.stats.budget} value={p.plannedBudget ? formatMoney(Number(p.plannedBudget), p.currency, locale) : "—"} hint={P.stats.budgetHint} />
+            <Stat tone="ochre" label={P.stats.beneficiaries} value={p.directBeneficiaries ?? "—"} />
           </div>
           {t !== null && <ProgressBar value={t} label={P.timeLabel} />}
           <Card>

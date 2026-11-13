@@ -355,6 +355,11 @@ try {
   await go(BASE + "/ai");
   check("BAOBAB AI : page et état d'activation affichés", await vis(page.getByRole("heading", { name: "BAOBAB AI" }).first()));
 
+  // Retour à la page d'accueil depuis l'espace de travail
+  await go(BASE + "/dashboard");
+  await clickNav("header a:has-text(\"Page d'accueil\")", /localhost:\d+\/$/);
+  check("Retour à la page d'accueil depuis le tableau de bord", await vis(page.getByRole("link", { name: "Ouvrir mon espace" }).first()));
+
   // Recherche globale (Ctrl+K)
   await go(BASE + "/dashboard");
   await page.keyboard.press("Control+k");
