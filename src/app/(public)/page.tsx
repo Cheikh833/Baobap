@@ -82,25 +82,24 @@ export default async function LandingPage() {
         <section id="video" className="relative isolate scroll-mt-16 overflow-hidden bg-[#0B2233] pb-8 pt-16 text-white sm:pt-20">
           <div className="pointer-events-none absolute right-[10%] top-10 -z-10 h-80 w-80 rounded-full bg-ochre/20 blur-3xl" aria-hidden />
           <div className="pointer-events-none absolute bottom-0 left-[5%] -z-10 h-72 w-72 rounded-full bg-brand/25 blur-3xl" aria-hidden />
-          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 md:grid-cols-[1fr_auto] md:gap-12 lg:gap-20">
-            <div className="reveal text-center md:text-left">
+          <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 lg:grid-cols-2 lg:gap-16">
+            <div className="reveal text-center lg:text-left">
               <p className="text-xs font-semibold uppercase tracking-[.2em] text-ochre">{L.video.kicker}</p>
               <h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-5xl">{L.video.title}</h2>
-              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg md:mx-0">{L.video.text}</p>
-              <ul className="mx-auto mt-6 max-w-xl space-y-3 text-left md:mx-0">
+              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg lg:mx-0">{L.video.text}</p>
+              <ul className="mx-auto mt-6 max-w-xl space-y-3 text-left lg:mx-0">
                 {L.video.points.map((p) => (
                   <li key={p} className="flex items-start gap-3 text-sm text-white/85 sm:text-base"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-300" aria-hidden />{p}</li>
                 ))}
               </ul>
-              <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
+              <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
                 <GuestDemoButton label={m.guest.cta} hint={m.guest.ctaHint} dark />
               </div>
             </div>
-            <div className="reveal order-first mx-auto w-full max-w-[280px] sm:max-w-[340px] md:order-none lg:max-w-[360px]">
+            <div className="reveal order-first mx-auto w-full max-w-[440px] lg:order-none lg:max-w-[min(520px,calc((100svh_-_48px)*0.5625))]">
               {/* cadre de téléphone */}
-              <div className="relative rounded-[2.6rem] bg-gradient-to-b from-[#1d3a48] to-[#0a1820] p-2.5 shadow-[0_30px_80px_-20px_rgba(0,0,0,.7),0_0_0_1px_rgba(255,255,255,.08)] ring-1 ring-white/10">
-                <div className="pointer-events-none absolute left-1/2 top-4 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black/80" aria-hidden />
-                <div className="relative aspect-[9/16] overflow-hidden rounded-[2.1rem] bg-gradient-to-b from-[#0F5A50] to-[#081B28]">
+              <div className="relative rounded-[2rem] bg-gradient-to-b from-[#1d3a48] to-[#0a1820] p-2 sm:rounded-[2.6rem] sm:p-2.5 shadow-[0_30px_80px_-20px_rgba(0,0,0,.7),0_0_0_1px_rgba(255,255,255,.08)] ring-1 ring-white/10">
+                <div className="relative aspect-[9/16] overflow-hidden rounded-[1.6rem] sm:rounded-[2.1rem] bg-gradient-to-b from-[#0F5A50] to-[#081B28]">
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/70" aria-hidden>
                     <PlayCircle className="h-14 w-14 animate-pulse2 text-ochre" />
                     <span className="font-display text-sm font-bold tracking-[0.2em]">BAOBAB</span>
