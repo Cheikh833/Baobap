@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import {
-  ArrowRight, BarChart3, Check, ChevronDown, CheckCircle2, ClipboardCheck, FileText, FolderTree, Gauge, Languages, Layers, LineChart, Lock, Rocket, ShieldCheck, Sparkles, Target, Wallet, X,
+  ArrowRight, BarChart3, Check, ChevronDown, CheckCircle2, ClipboardCheck, FileText, FolderTree, Gauge, Languages, Layers, LineChart, Lock, PlayCircle, Rocket, ShieldCheck, Sparkles, Target, Wallet, X,
 } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { PublicFooter, PublicHeader } from "@/components/public-chrome";
@@ -22,6 +22,8 @@ const READY = [true, true, true, true, true, true, true, true];
 // Modules utilisables aujourd'hui : organisation, stratégie, portefeuilles-programmes-projets, planification,
 // suivi-évaluation, finances, risques, analyse de données, documents, Studio, BAOBAB AI, administration.
 const OPERATIONAL_MODULES = 12;
+// Vidéo de présentation hébergée sur Google Drive (partage « tous les utilisateurs disposant du lien »).
+const VIDEO_ID = "1O97cZ5eld8EXRMNFR03zg95QMFT4jPrJ";
 const CYCLE_ICONS = [Target, Layers, FolderTree, Rocket, ClipboardCheck, Gauge, LineChart, CheckCircle2, Sparkles];
 
 export default async function LandingPage() {
@@ -60,7 +62,7 @@ export default async function LandingPage() {
               <div className="mt-8 flex animate-fade-up flex-wrap items-start justify-center gap-3 lg:justify-start" style={{ animationDelay: "2.1s" }}>
                 <GuestDemoButton label={m.guest.cta} hint={m.guest.ctaHint} dark />
                 <ButtonLink href="/signup" size="lg" className="relative !bg-none bg-white !text-brand-deep shadow-[0_0_0_0_rgba(246,198,107,.6)] hover:!bg-brand-50 hover:shadow-[0_0_40px_4px_rgba(246,198,107,.45)]">{L.ctaStart}<ArrowRight className="h-4 w-4" /></ButtonLink>
-                
+                <a href="#video" className="inline-flex h-12 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"><PlayCircle className="h-5 w-5 text-ochre" aria-hidden />{L.video.watch}</a>
               </div>
               <ul className="mt-8 flex animate-fade-up flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-white/80 lg:justify-start" style={{ animationDelay: "2.4s" }}>
                 {[L.trustTrial, L.trustNoCard, L.trustSecure].map((t) => <li key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-brand-300" aria-hidden />{t}</li>)}
@@ -74,6 +76,50 @@ export default async function LandingPage() {
             {L.ceremony.scroll}<ChevronDown className="h-4 w-4 animate-bounce-soft" aria-hidden />
           </a>
           <svg className="absolute -bottom-px left-0 w-full text-[#0B2233]" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden><path fill="currentColor" d="M0 80V40c240 30 480 40 720 20S1200 0 1440 30v50Z" /></svg>
+        </section>
+
+        {/* ───── Vidéo de présentation (format vertical 9/16) ───── */}
+        <section id="video" className="relative isolate scroll-mt-16 overflow-hidden bg-[#0B2233] pb-8 pt-16 text-white sm:pt-20">
+          <div className="pointer-events-none absolute right-[10%] top-10 -z-10 h-80 w-80 rounded-full bg-ochre/20 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute bottom-0 left-[5%] -z-10 h-72 w-72 rounded-full bg-brand/25 blur-3xl" aria-hidden />
+          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 md:grid-cols-[1fr_auto] md:gap-12 lg:gap-20">
+            <div className="reveal text-center md:text-left">
+              <p className="text-xs font-semibold uppercase tracking-[.2em] text-ochre">{L.video.kicker}</p>
+              <h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-5xl">{L.video.title}</h2>
+              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg md:mx-0">{L.video.text}</p>
+              <ul className="mx-auto mt-6 max-w-xl space-y-3 text-left md:mx-0">
+                {L.video.points.map((p) => (
+                  <li key={p} className="flex items-start gap-3 text-sm text-white/85 sm:text-base"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-300" aria-hidden />{p}</li>
+                ))}
+              </ul>
+              <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
+                <GuestDemoButton label={m.guest.cta} hint={m.guest.ctaHint} dark />
+              </div>
+            </div>
+            <div className="reveal order-first mx-auto w-full max-w-[280px] sm:max-w-[340px] md:order-none lg:max-w-[360px]">
+              {/* cadre de téléphone */}
+              <div className="relative rounded-[2.6rem] bg-gradient-to-b from-[#1d3a48] to-[#0a1820] p-2.5 shadow-[0_30px_80px_-20px_rgba(0,0,0,.7),0_0_0_1px_rgba(255,255,255,.08)] ring-1 ring-white/10">
+                <div className="pointer-events-none absolute left-1/2 top-4 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black/80" aria-hidden />
+                <div className="relative aspect-[9/16] overflow-hidden rounded-[2.1rem] bg-gradient-to-b from-[#0F5A50] to-[#081B28]">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/70" aria-hidden>
+                    <PlayCircle className="h-14 w-14 animate-pulse2 text-ochre" />
+                    <span className="font-display text-sm font-bold tracking-[0.2em]">BAOBAB</span>
+                  </div>
+                  <iframe
+                    src={`https://drive.google.com/file/d/${VIDEO_ID}/preview`}
+                    title={L.video.frameTitle}
+                    loading="lazy"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 h-full w-full border-0"
+                  />
+                </div>
+              </div>
+              <p className="mt-4 text-center text-xs text-white/55">
+                <a href={`https://drive.google.com/file/d/${VIDEO_ID}/view`} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:text-white hover:underline">{L.video.open}</a>
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* ───── Le cockpit ───── */}
